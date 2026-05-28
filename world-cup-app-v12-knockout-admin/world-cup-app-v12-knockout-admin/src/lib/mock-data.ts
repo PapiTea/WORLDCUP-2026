@@ -1,0 +1,261 @@
+
+export interface Team {
+  id: string;
+  name: string;
+  code: string;
+  imageId: string;
+  flag: string;
+  flagImage?: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  teams: Team[];
+}
+
+export interface Match {
+  id: string;
+  homeTeam: Team;
+  awayTeam: Team;
+  kickoff: string;
+  ukKickoff: string;
+  group: string;
+  status: 'PENDING' | 'LIVE' | 'FINISHED';
+  venue: string;
+  location: string;
+  hostEmoji: string;
+  actualScore?: { home: number; away: number };
+}
+
+const FLAG_IMAGES: Record<string, string> = {
+  MEX: 'https://flagcdn.com/w80/mx.png', RSA: 'https://flagcdn.com/w80/za.png', KOR: 'https://flagcdn.com/w80/kr.png', CZE: 'https://flagcdn.com/w80/cz.png',
+  CAN: 'https://flagcdn.com/w80/ca.png', SUI: 'https://flagcdn.com/w80/ch.png', QAT: 'https://flagcdn.com/w80/qa.png', BIH: 'https://flagcdn.com/w80/ba.png',
+  BRA: 'https://flagcdn.com/w80/br.png', MAR: 'https://flagcdn.com/w80/ma.png', HAI: 'https://flagcdn.com/w80/ht.png', SCO: 'https://flagcdn.com/w80/gb-sct.png',
+  USA: 'https://flagcdn.com/w80/us.png', PAR: 'https://flagcdn.com/w80/py.png', AUS: 'https://flagcdn.com/w80/au.png', TUR: 'https://flagcdn.com/w80/tr.png',
+  GER: 'https://flagcdn.com/w80/de.png', CUR: 'https://flagcdn.com/w80/cw.png', ECU: 'https://flagcdn.com/w80/ec.png', CIV: 'https://flagcdn.com/w80/ci.png',
+  NED: 'https://flagcdn.com/w80/nl.png', JPN: 'https://flagcdn.com/w80/jp.png', SWE: 'https://flagcdn.com/w80/se.png', TUN: 'https://flagcdn.com/w80/tn.png',
+  BEL: 'https://flagcdn.com/w80/be.png', EGY: 'https://flagcdn.com/w80/eg.png', IRN: '/flags/iran.png', NZL: 'https://flagcdn.com/w80/nz.png',
+  CPV: 'https://flagcdn.com/w80/cv.png', KSA: 'https://flagcdn.com/w80/sa.png', ESP: 'https://flagcdn.com/w80/es.png', URU: 'https://flagcdn.com/w80/uy.png',
+  FRA: 'https://flagcdn.com/w80/fr.png', IRQ: 'https://flagcdn.com/w80/iq.png', NOR: 'https://flagcdn.com/w80/no.png', SEN: 'https://flagcdn.com/w80/sn.png',
+  ALG: 'https://flagcdn.com/w80/dz.png', ARG: 'https://flagcdn.com/w80/ar.png', AUT: 'https://flagcdn.com/w80/at.png', JOR: 'https://flagcdn.com/w80/jo.png',
+  COL: 'https://flagcdn.com/w80/co.png', COD: 'https://flagcdn.com/w80/cd.png', POR: 'https://flagcdn.com/w80/pt.png', UZB: 'https://flagcdn.com/w80/uz.png',
+  CRO: 'https://flagcdn.com/w80/hr.png', ENG: 'https://flagcdn.com/w80/gb-eng.png', GHA: 'https://flagcdn.com/w80/gh.png', PAN: 'https://flagcdn.com/w80/pa.png',
+};
+
+const team = (code: string, name: string, emoji: string, flagImage?: string): Team => ({
+  id: code.toLowerCase(),
+  name,
+  code,
+  imageId: `flag-${code.toLowerCase()}`,
+  flag: emoji,
+  flagImage: flagImage || FLAG_IMAGES[code]
+});
+
+export const TEAMS: Record<string, Team> = {
+  MEX: team('MEX', 'Mexico', '🇲🇽'), RSA: team('RSA', 'South Africa', '🇿🇦'), KOR: team('KOR', 'South Korea', '🇰🇷'), CZE: team('CZE', 'Czechia', '🇨🇿'),
+  CAN: team('CAN', 'Canada', '🇨🇦'), SUI: team('SUI', 'Switzerland', '🇨🇭'), QAT: team('QAT', 'Qatar', '🇶🇦'), BIH: team('BIH', 'Bosnia and Herzegovina', '🇧🇦'),
+  BRA: team('BRA', 'Brazil', '🇧🇷'), MAR: team('MAR', 'Morocco', '🇲🇦'), HAI: team('HAI', 'Haiti', '🇭🇹'), SCO: team('SCO', 'Scotland', '🏴'),
+  USA: team('USA', 'USA', '🇺🇸'), PAR: team('PAR', 'Paraguay', '🇵🇾'), AUS: team('AUS', 'Australia', '🇦🇺'), TUR: team('TUR', 'Türkiye', '🇹🇷'),
+  GER: team('GER', 'Germany', '🇩🇪'), CUR: team('CUR', 'Curaçao', '🇨🇼'), ECU: team('ECU', 'Ecuador', '🇪🇨'), CIV: team('CIV', "Côte d'Ivoire", '🇨🇮'),
+  NED: team('NED', 'Netherlands', '🇳🇱'), JPN: team('JPN', 'Japan', '🇯🇵'), SWE: team('SWE', 'Sweden', '🇸🇪'), TUN: team('TUN', 'Tunisia', '🇹🇳'),
+  BEL: team('BEL', 'Belgium', '🇧🇪'), EGY: team('EGY', 'Egypt', '🇪🇬'), IRN: team('IRN', 'Iran', '🇮🇷', '/flags/iran.png'), NZL: team('NZL', 'New Zealand', '🇳🇿'),
+  CPV: team('CPV', 'Cape Verde', '🇨🇻'), KSA: team('KSA', 'Saudi Arabia', '🇸🇦'), ESP: team('ESP', 'Spain', '🇪🇸'), URU: team('URU', 'Uruguay', '🇺🇾'),
+  FRA: team('FRA', 'France', '🇫🇷'), IRQ: team('IRQ', 'Iraq', '🇮🇶'), NOR: team('NOR', 'Norway', '🇳🇴'), SEN: team('SEN', 'Senegal', '🇸🇳'),
+  ALG: team('ALG', 'Algeria', '🇩🇿'), ARG: team('ARG', 'Argentina', '🇦🇷'), AUT: team('AUT', 'Austria', '🇦🇹'), JOR: team('JOR', 'Jordan', '🇯🇴'),
+  COL: team('COL', 'Colombia', '🇨🇴'), COD: team('COD', 'DR Congo', '🇨🇩'), POR: team('POR', 'Portugal', '🇵🇹'), UZB: team('UZB', 'Uzbekistan', '🇺🇿'),
+  CRO: team('CRO', 'Croatia', '🇭🇷'), ENG: team('ENG', 'England', '🏴'), GHA: team('GHA', 'Ghana', '🇬🇭'), PAN: team('PAN', 'Panama', '🇵🇦'),
+};
+
+export const GROUPS: Group[] = [
+  { id: 'A', name: 'Group A', teams: [TEAMS.MEX, TEAMS.RSA, TEAMS.KOR, TEAMS.CZE] },
+  { id: 'B', name: 'Group B', teams: [TEAMS.CAN, TEAMS.SUI, TEAMS.QAT, TEAMS.BIH] },
+  { id: 'C', name: 'Group C', teams: [TEAMS.BRA, TEAMS.MAR, TEAMS.HAI, TEAMS.SCO] },
+  { id: 'D', name: 'Group D', teams: [TEAMS.USA, TEAMS.PAR, TEAMS.AUS, TEAMS.TUR] },
+  { id: 'E', name: 'Group E', teams: [TEAMS.GER, TEAMS.CUR, TEAMS.ECU, TEAMS.CIV] },
+  { id: 'F', name: 'Group F', teams: [TEAMS.NED, TEAMS.JPN, TEAMS.SWE, TEAMS.TUN] },
+  { id: 'G', name: 'Group G', teams: [TEAMS.BEL, TEAMS.EGY, TEAMS.IRN, TEAMS.NZL] },
+  { id: 'H', name: 'Group H', teams: [TEAMS.CPV, TEAMS.KSA, TEAMS.ESP, TEAMS.URU] },
+  { id: 'I', name: 'Group I', teams: [TEAMS.FRA, TEAMS.IRQ, TEAMS.NOR, TEAMS.SEN] },
+  { id: 'J', name: 'Group J', teams: [TEAMS.ALG, TEAMS.ARG, TEAMS.AUT, TEAMS.JOR] },
+  { id: 'K', name: 'Group K', teams: [TEAMS.COL, TEAMS.COD, TEAMS.POR, TEAMS.UZB] },
+  { id: 'L', name: 'Group L', teams: [TEAMS.CRO, TEAMS.ENG, TEAMS.GHA, TEAMS.PAN] },
+];
+
+const fixtures = [
+  ['m1', 'MEX', 'RSA', '2026-06-11T19:00:00Z', 'A', '20:00', 'Estadio Azteca', 'Mexico City, Mexico', '🇲🇽'],
+  ['m2', 'KOR', 'CZE', '2026-06-12T02:00:00Z', 'A', '03:00', 'Estadio Akron', 'Zapopan, Mexico', '🇲🇽'],
+  ['m3', 'CAN', 'BIH', '2026-06-12T19:00:00Z', 'B', '20:00', 'BMO Field', 'Toronto, Canada', '🇨🇦'],
+  ['m4', 'USA', 'PAR', '2026-06-13T01:00:00Z', 'D', '02:00', 'SoFi Stadium', 'Los Angeles, USA', '🇺🇸'],
+  ['m5', 'QAT', 'SUI', '2026-06-13T19:00:00Z', 'B', '20:00', 'Levi’s Stadium', 'Santa Clara, USA', '🇺🇸'],
+  ['m6', 'BRA', 'MAR', '2026-06-13T22:00:00Z', 'C', '23:00', 'MetLife Stadium', 'New Jersey, USA', '🇺🇸'],
+  ['m7', 'HAI', 'SCO', '2026-06-14T01:00:00Z', 'C', '02:00', 'Gillette Stadium', 'Foxborough, USA', '🇺🇸'],
+  ['m8', 'AUS', 'TUR', '2026-06-14T04:00:00Z', 'D', '05:00', 'BC Place', 'Vancouver, Canada', '🇨🇦'],
+  ['m9', 'GER', 'CUR', '2026-06-14T17:00:00Z', 'E', '18:00', 'NRG Stadium', 'Houston, USA', '🇺🇸'],
+  ['m10', 'NED', 'JPN', '2026-06-14T20:00:00Z', 'F', '21:00', 'AT&T Stadium', 'Arlington, USA', '🇺🇸'],
+  ['m11', 'CIV', 'ECU', '2026-06-14T23:00:00Z', 'E', '00:00', 'Lincoln Financial Field', 'Philadelphia, USA', '🇺🇸'],
+  ['m12', 'SWE', 'TUN', '2026-06-15T02:00:00Z', 'F', '03:00', 'Estadio BBVA', 'Guadalupe, Mexico', '🇲🇽'],
+  ['m13', 'ESP', 'CPV', '2026-06-15T16:00:00Z', 'H', '17:00', 'Mercedes-Benz Stadium', 'Atlanta, USA', '🇺🇸'],
+  ['m14', 'BEL', 'EGY', '2026-06-15T19:00:00Z', 'G', '20:00', 'Lumen Field', 'Seattle, USA', '🇺🇸'],
+  ['m15', 'KSA', 'URU', '2026-06-15T22:00:00Z', 'H', '23:00', 'Hard Rock Stadium', 'Miami, USA', '🇺🇸'],
+  ['m16', 'IRN', 'NZL', '2026-06-16T01:00:00Z', 'G', '02:00', 'SoFi Stadium', 'Los Angeles, USA', '🇺🇸'],
+  ['m17', 'FRA', 'SEN', '2026-06-16T19:00:00Z', 'I', '20:00', 'MetLife Stadium', 'New Jersey, USA', '🇺🇸'],
+  ['m18', 'IRQ', 'NOR', '2026-06-16T22:00:00Z', 'I', '23:00', 'Gillette Stadium', 'Foxborough, USA', '🇺🇸'],
+  ['m19', 'ARG', 'ALG', '2026-06-17T01:00:00Z', 'J', '02:00', 'GEHA Field at Arrowhead Stadium', 'Kansas City, USA', '🇺🇸'],
+  ['m20', 'AUT', 'JOR', '2026-06-17T04:00:00Z', 'J', '05:00', 'Levi’s Stadium', 'Santa Clara, USA', '🇺🇸'],
+  ['m21', 'POR', 'COD', '2026-06-17T17:00:00Z', 'K', '18:00', 'NRG Stadium', 'Houston, USA', '🇺🇸'],
+  ['m22', 'ENG', 'CRO', '2026-06-17T20:00:00Z', 'L', '21:00', 'AT&T Stadium', 'Arlington, USA', '🇺🇸'],
+  ['m23', 'GHA', 'PAN', '2026-06-17T23:00:00Z', 'L', '00:00', 'BMO Field', 'Toronto, Canada', '🇨🇦'],
+  ['m24', 'UZB', 'COL', '2026-06-18T02:00:00Z', 'K', '03:00', 'Estadio Azteca', 'Mexico City, Mexico', '🇲🇽'],
+  ['m25', 'CZE', 'RSA', '2026-06-18T16:00:00Z', 'A', '17:00', 'Mercedes-Benz Stadium', 'Atlanta, USA', '🇺🇸'],
+  ['m26', 'SUI', 'BIH', '2026-06-18T19:00:00Z', 'B', '20:00', 'SoFi Stadium', 'Los Angeles, USA', '🇺🇸'],
+  ['m27', 'CAN', 'QAT', '2026-06-18T22:00:00Z', 'B', '23:00', 'BC Place', 'Vancouver, Canada', '🇨🇦'],
+  ['m28', 'MEX', 'KOR', '2026-06-19T01:00:00Z', 'A', '02:00', 'Estadio Akron', 'Zapopan, Mexico', '🇲🇽'],
+  ['m29', 'USA', 'AUS', '2026-06-19T19:00:00Z', 'D', '20:00', 'Lumen Field', 'Seattle, USA', '🇺🇸'],
+  ['m30', 'SCO', 'MAR', '2026-06-19T22:00:00Z', 'C', '23:00', 'Gillette Stadium', 'Foxborough, USA', '🇺🇸'],
+  ['m31', 'BRA', 'HAI', '2026-06-20T00:30:00Z', 'C', '01:30', 'Lincoln Financial Field', 'Philadelphia, USA', '🇺🇸'],
+  ['m32', 'TUR', 'PAR', '2026-06-20T03:00:00Z', 'D', '04:00', 'Levi’s Stadium', 'Santa Clara, USA', '🇺🇸'],
+  ['m33', 'NED', 'SWE', '2026-06-20T17:00:00Z', 'F', '18:00', 'NRG Stadium', 'Houston, USA', '🇺🇸'],
+  ['m34', 'GER', 'CIV', '2026-06-20T20:00:00Z', 'E', '21:00', 'BMO Field', 'Toronto, Canada', '🇨🇦'],
+  ['m35', 'ECU', 'CUR', '2026-06-21T00:00:00Z', 'E', '01:00', 'GEHA Field at Arrowhead Stadium', 'Kansas City, USA', '🇺🇸'],
+  ['m36', 'TUN', 'JPN', '2026-06-21T04:00:00Z', 'F', '05:00', 'Estadio BBVA', 'Guadalupe, Mexico', '🇲🇽'],
+  ['m37', 'ESP', 'KSA', '2026-06-21T16:00:00Z', 'H', '17:00', 'Mercedes-Benz Stadium', 'Atlanta, USA', '🇺🇸'],
+  ['m38', 'BEL', 'IRN', '2026-06-21T19:00:00Z', 'G', '20:00', 'SoFi Stadium', 'Los Angeles, USA', '🇺🇸'],
+  ['m39', 'URU', 'CPV', '2026-06-21T22:00:00Z', 'H', '23:00', 'Hard Rock Stadium', 'Miami, USA', '🇺🇸'],
+  ['m40', 'NZL', 'EGY', '2026-06-22T01:00:00Z', 'G', '02:00', 'BC Place', 'Vancouver, Canada', '🇨🇦'],
+  ['m41', 'ARG', 'AUT', '2026-06-22T17:00:00Z', 'J', '18:00', 'AT&T Stadium', 'Arlington, USA', '🇺🇸'],
+  ['m42', 'FRA', 'IRQ', '2026-06-22T21:00:00Z', 'I', '22:00', 'Lincoln Financial Field', 'Philadelphia, USA', '🇺🇸'],
+  ['m43', 'NOR', 'SEN', '2026-06-23T00:00:00Z', 'I', '01:00', 'BMO Field', 'Toronto, Canada', '🇨🇦'],
+  ['m44', 'JOR', 'ALG', '2026-06-23T03:00:00Z', 'J', '04:00', 'Levi’s Stadium', 'Santa Clara, USA', '🇺🇸'],
+  ['m45', 'POR', 'UZB', '2026-06-23T17:00:00Z', 'K', '18:00', 'NRG Stadium', 'Houston, USA', '🇺🇸'],
+  ['m46', 'ENG', 'GHA', '2026-06-23T20:00:00Z', 'L', '21:00', 'Gillette Stadium', 'Foxborough, USA', '🇺🇸'],
+  ['m47', 'PAN', 'CRO', '2026-06-23T23:00:00Z', 'L', '00:00', 'Gillette Stadium', 'Foxborough, USA', '🇺🇸'],
+  ['m48', 'COL', 'COD', '2026-06-24T02:00:00Z', 'K', '03:00', 'Estadio Akron', 'Zapopan, Mexico', '🇲🇽'],
+  ['m49', 'SUI', 'CAN', '2026-06-24T19:00:00Z', 'B', '20:00', 'BC Place', 'Vancouver, Canada', '🇨🇦'],
+  ['m50', 'BIH', 'QAT', '2026-06-24T19:00:00Z', 'B', '20:00', 'Lumen Field', 'Seattle, USA', '🇺🇸'],
+  ['m51', 'MAR', 'HAI', '2026-06-24T22:00:00Z', 'C', '23:00', 'Mercedes-Benz Stadium', 'Atlanta, USA', '🇺🇸'],
+  ['m52', 'SCO', 'BRA', '2026-06-24T22:00:00Z', 'C', '23:00', 'Hard Rock Stadium', 'Miami, USA', '🇺🇸'],
+  ['m53', 'RSA', 'KOR', '2026-06-25T01:00:00Z', 'A', '02:00', 'Estadio BBVA', 'Guadalupe, Mexico', '🇲🇽'],
+  ['m54', 'CZE', 'MEX', '2026-06-25T01:00:00Z', 'A', '02:00', 'Estadio Azteca', 'Mexico City, Mexico', '🇲🇽'],
+  ['m55', 'CUR', 'CIV', '2026-06-25T20:00:00Z', 'E', '21:00', 'Lincoln Financial Field', 'Philadelphia, USA', '🇺🇸'],
+  ['m56', 'ECU', 'GER', '2026-06-25T20:00:00Z', 'E', '21:00', 'MetLife Stadium', 'New Jersey, USA', '🇺🇸'],
+  ['m57', 'TUN', 'NED', '2026-06-25T23:00:00Z', 'F', '00:00', 'GEHA Field at Arrowhead Stadium', 'Kansas City, USA', '🇺🇸'],
+  ['m58', 'JPN', 'SWE', '2026-06-25T23:00:00Z', 'F', '00:00', 'AT&T Stadium', 'Arlington, USA', '🇺🇸'],
+  ['m59', 'TUR', 'USA', '2026-06-26T02:00:00Z', 'D', '03:00', 'SoFi Stadium', 'Los Angeles, USA', '🇺🇸'],
+  ['m60', 'PAR', 'AUS', '2026-06-26T02:00:00Z', 'D', '03:00', 'Levi’s Stadium', 'Santa Clara, USA', '🇺🇸'],
+  ['m61', 'NOR', 'FRA', '2026-06-26T19:00:00Z', 'I', '20:00', 'Gillette Stadium', 'Foxborough, USA', '🇺🇸'],
+  ['m62', 'SEN', 'IRQ', '2026-06-26T19:00:00Z', 'I', '20:00', 'BMO Field', 'Toronto, Canada', '🇨🇦'],
+  ['m63', 'CPV', 'KSA', '2026-06-27T00:00:00Z', 'H', '01:00', 'NRG Stadium', 'Houston, USA', '🇺🇸'],
+  ['m64', 'URU', 'ESP', '2026-06-27T00:00:00Z', 'H', '01:00', 'Estadio Akron', 'Zapopan, Mexico', '🇲🇽'],
+  ['m65', 'NZL', 'BEL', '2026-06-27T03:00:00Z', 'G', '04:00', 'BC Place', 'Vancouver, Canada', '🇨🇦'],
+  ['m66', 'EGY', 'IRN', '2026-06-27T03:00:00Z', 'G', '04:00', 'Lumen Field', 'Seattle, USA', '🇺🇸'],
+  ['m67', 'PAN', 'ENG', '2026-06-27T21:00:00Z', 'L', '22:00', 'MetLife Stadium', 'New Jersey, USA', '🇺🇸'],
+  ['m68', 'CRO', 'GHA', '2026-06-27T21:00:00Z', 'L', '22:00', 'Lincoln Financial Field', 'Philadelphia, USA', '🇺🇸'],
+  ['m69', 'COL', 'POR', '2026-06-27T23:30:00Z', 'K', '00:30', 'Hard Rock Stadium', 'Miami, USA', '🇺🇸'],
+  ['m70', 'COD', 'UZB', '2026-06-27T23:30:00Z', 'K', '00:30', 'Mercedes-Benz Stadium', 'Atlanta, USA', '🇺🇸'],
+  ['m71', 'ALG', 'AUT', '2026-06-28T02:00:00Z', 'J', '03:00', 'GEHA Field at Arrowhead Stadium', 'Kansas City, USA', '🇺🇸'],
+  ['m72', 'JOR', 'ARG', '2026-06-28T02:00:00Z', 'J', '03:00', 'AT&T Stadium', 'Arlington, USA', '🇺🇸']
+];
+
+export const MATCHES: Match[] = fixtures.map(([id, home, away, kickoff, group, ukKickoff, venue, location, hostEmoji]) => ({
+  id,
+  homeTeam: TEAMS[home],
+  awayTeam: TEAMS[away],
+  kickoff,
+  ukKickoff,
+  group,
+  status: 'PENDING',
+  venue,
+  location,
+  hostEmoji,
+}));
+
+
+export type KnockoutRoundId = 'R32' | 'R16' | 'QF' | 'SF' | 'FINAL'
+
+export interface KnockoutFixture {
+  id: string;
+  round: KnockoutRoundId;
+  roundName: string;
+  matchNumber: number;
+  homeSlot: string;
+  awaySlot: string;
+  ukKickoff: string;
+  dateLabel: string;
+  venue: string;
+  location: string;
+  hostEmoji: string;
+}
+
+export const KNOCKOUT_ROUNDS: { id: KnockoutRoundId; name: string; helper: string }[] = [
+  { id: 'R32', name: 'Round of 32', helper: 'First knockout round. Fill these from the admin page once groups are complete.' },
+  { id: 'R16', name: 'Round of 16', helper: 'Use admin to move winners into these slots after Round of 32 results.' },
+  { id: 'QF', name: 'Quarter-finals', helper: 'Use admin to move winners into these slots after Round of 16 results.' },
+  { id: 'SF', name: 'Semi-finals', helper: 'Use admin to move winners into these slots after quarter-final results.' },
+  { id: 'FINAL', name: 'Final', helper: 'Use admin to set the two finalists when known.' },
+]
+
+export const KNOCKOUT_SLOTS: { id: string; label: string; round: KnockoutRoundId; note: string }[] = [
+  ...Array.from({ length: 32 }, (_, i) => ({ id: `R32-${i + 1}`, label: `R32 slot ${i + 1}`, round: 'R32' as KnockoutRoundId, note: i % 2 === 0 ? 'Home side of a Round of 32 tie' : 'Away side of a Round of 32 tie' })),
+  ...Array.from({ length: 16 }, (_, i) => ({ id: `R16-${i + 1}`, label: `R16 slot ${i + 1}`, round: 'R16' as KnockoutRoundId, note: 'Winner slot for the Round of 16' })),
+  ...Array.from({ length: 8 }, (_, i) => ({ id: `QF-${i + 1}`, label: `QF slot ${i + 1}`, round: 'QF' as KnockoutRoundId, note: 'Quarter-final slot' })),
+  ...Array.from({ length: 4 }, (_, i) => ({ id: `SF-${i + 1}`, label: `SF slot ${i + 1}`, round: 'SF' as KnockoutRoundId, note: 'Semi-final slot' })),
+  { id: 'FINAL-1', label: 'Finalist 1', round: 'FINAL', note: 'First finalist' },
+  { id: 'FINAL-2', label: 'Finalist 2', round: 'FINAL', note: 'Second finalist' },
+]
+
+const makeKnockoutFixtures = (round: KnockoutRoundId, roundName: string, count: number, firstMatchNumber: number, ukDates: string[], venues: string[]): KnockoutFixture[] =>
+  Array.from({ length: count }, (_, i) => {
+    const [dateLabel, ukKickoff] = ukDates[i % ukDates.length].split(' | ')
+    const [venue, location, hostEmoji] = venues[i % venues.length].split(' | ')
+    const slotPrefix = round === 'FINAL' ? 'FINAL' : round
+    const homeSlot = round === 'FINAL' ? 'FINAL-1' : `${slotPrefix}-${i * 2 + 1}`
+    const awaySlot = round === 'FINAL' ? 'FINAL-2' : `${slotPrefix}-${i * 2 + 2}`
+    return {
+      id: `ko-${round.toLowerCase()}-${i + 1}`,
+      round,
+      roundName,
+      matchNumber: firstMatchNumber + i,
+      homeSlot,
+      awaySlot,
+      ukKickoff,
+      dateLabel,
+      venue,
+      location,
+      hostEmoji,
+    }
+  })
+
+export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
+  ...makeKnockoutFixtures('R32', 'Round of 32', 16, 73,
+    ['Sun 28 Jun | 18:00', 'Sun 28 Jun | 21:00', 'Mon 29 Jun | 18:00', 'Mon 29 Jun | 21:00', 'Tue 30 Jun | 18:00', 'Tue 30 Jun | 21:00', 'Wed 1 Jul | 18:00', 'Wed 1 Jul | 21:00'],
+    ['BMO Field | Toronto, Canada | 🇨🇦', 'SoFi Stadium | Los Angeles, USA | 🇺🇸', 'Estadio Azteca | Mexico City, Mexico | 🇲🇽', 'Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸', 'BC Place | Vancouver, Canada | 🇨🇦', 'Hard Rock Stadium | Miami, USA | 🇺🇸', 'Estadio BBVA | Guadalupe, Mexico | 🇲🇽', 'AT&T Stadium | Arlington, USA | 🇺🇸']
+  ),
+  ...makeKnockoutFixtures('R16', 'Round of 16', 8, 89,
+    ['Thu 2 Jul | 18:00', 'Thu 2 Jul | 21:00', 'Fri 3 Jul | 18:00', 'Fri 3 Jul | 21:00', 'Sat 4 Jul | 18:00', 'Sat 4 Jul | 21:00'],
+    ['MetLife Stadium | New Jersey, USA | 🇺🇸', 'NRG Stadium | Houston, USA | 🇺🇸', 'Estadio Azteca | Mexico City, Mexico | 🇲🇽', 'Lumen Field | Seattle, USA | 🇺🇸']
+  ),
+  ...makeKnockoutFixtures('QF', 'Quarter-finals', 4, 97,
+    ['Thu 9 Jul | 20:00', 'Fri 10 Jul | 20:00', 'Sat 11 Jul | 20:00', 'Sun 12 Jul | 20:00'],
+    ['SoFi Stadium | Los Angeles, USA | 🇺🇸', 'Gillette Stadium | Foxborough, USA | 🇺🇸', 'Hard Rock Stadium | Miami, USA | 🇺🇸', 'GEHA Field at Arrowhead Stadium | Kansas City, USA | 🇺🇸']
+  ),
+  ...makeKnockoutFixtures('SF', 'Semi-finals', 2, 101,
+    ['Tue 14 Jul | 20:00', 'Wed 15 Jul | 20:00'],
+    ['AT&T Stadium | Arlington, USA | 🇺🇸', 'Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸']
+  ),
+  ...makeKnockoutFixtures('FINAL', 'Final', 1, 104,
+    ['Sun 19 Jul | 20:00'],
+    ['MetLife Stadium | New Jersey, USA | 🇺🇸']
+  ),
+]
+
+export function getTeamById(teamId?: string | null): Team | null {
+  if (!teamId) return null
+  return Object.values(TEAMS).find((team) => team.id === teamId || team.code === teamId) || null
+}
+
+export const BADGES = [
+  { id: 'wizard', name: 'Exact Score Wizard', icon: 'Target', color: 'text-yellow-400' },
+  { id: 'streaker', name: 'Win Streaker', icon: 'TrendingUp', color: 'text-blue-400' },
+  { id: 'oracle', name: 'Group Oracle', icon: 'Trophy', color: 'text-purple-400' },
+];
