@@ -65,24 +65,20 @@ export default function LeaderboardPage() {
     groupPoints: 0
   }
 
-  const overallRows = useMemo(() => {
-    const userIds = new Set<string>()
+ const overallRows = useMemo(() => {
+  return Object.entries(users)
+    .filter(([_, profile]) => profile?.actualName || profile?.displayName)
+    .map(([userId, profile]) => {
+      const scored = scores.find((s) => s.userId === userId)
 
-  Object.keys(users).forEach((id) => userIds.add(id))
-
-    return Array.from(userIds)
-      .map((userId) => {
-        const scored = scores.find((s) => s.userId === userId)
-
-        return scored || {
-          userId,
-          score: { total: 0 },
-          profile: users[userId],
-        }
-      })
-      .sort((a, b) => b.score.total - a.score.total)
-  }, [users, scores])
-
+      return scored || {
+        userId,
+        score: { total: 0 },
+        profile,
+      }
+    })
+    .sort((a, b) => b.score.total - a.score.total)
+}, [users, scores])
   return (
     <main className="min-h-screen pb-24 md:pb-8 pt-6 px-4 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
       <header className="mb-8">
