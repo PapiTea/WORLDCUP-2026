@@ -94,10 +94,18 @@ export function MatchCard({ match, onSave }: MatchCardProps) {
 
   const kickoffTime = new Date(match.kickoff)
 
-  const isLocked =
-    now >= kickoffTime ||
-    match.status === "FINISHED" ||
-    match.status === "LIVE"
+ const currentActual =
+  typeof window !== "undefined"
+    ? window.localStorage.getItem(`wc-result-${match.id}`)
+    : null
+
+const hasResult = Boolean(currentActual)
+
+const isLocked =
+  now >= kickoffTime ||
+  hasResult ||
+  match.status === "FINISHED" ||
+  match.status === "LIVE"
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -205,13 +213,6 @@ export function MatchCard({ match, onSave }: MatchCardProps) {
   const confidenceUsed = confidenceIds.length
   const confidenceLimitReached =
     confidenceUsed >= CONFIDENCE_LIMIT && !isConfidencePick
-
-  const currentActual =
-    typeof window !== "undefined"
-      ? window.localStorage.getItem(`wc-result-${match.id}`)
-      : null
-
-  const hasResult = Boolean(currentActual)
 
   const persistCurrentScore = async (confidenceOverride?: boolean) => {
     if (isLocked) return
