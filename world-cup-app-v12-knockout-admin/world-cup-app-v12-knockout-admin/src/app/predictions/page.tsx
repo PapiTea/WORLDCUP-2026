@@ -9,6 +9,55 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
+const TEAM_SEARCH_NAMES: Record<string, string> = {
+  ENG: "England",
+  SCO: "Scotland",
+  WAL: "Wales",
+  USA: "United States USA America",
+  CAN: "Canada",
+  MEX: "Mexico",
+  BRA: "Brazil",
+  ARG: "Argentina",
+  FRA: "France",
+  ESP: "Spain",
+  GER: "Germany",
+  ITA: "Italy",
+  POR: "Portugal",
+  NED: "Netherlands Holland",
+  BEL: "Belgium",
+  CRO: "Croatia",
+  DEN: "Denmark",
+  SUI: "Switzerland",
+  AUT: "Austria",
+  POL: "Poland",
+  IRN: "Iran",
+  JPN: "Japan",
+  KOR: "South Korea Korea",
+  AUS: "Australia",
+  MAR: "Morocco",
+  EGY: "Egypt",
+  SEN: "Senegal",
+  NGA: "Nigeria",
+  GHA: "Ghana",
+  CIV: "Ivory Coast Côte d'Ivoire",
+  URU: "Uruguay",
+  COL: "Colombia",
+  CHI: "Chile",
+  PAR: "Paraguay",
+  ECU: "Ecuador",
+  PER: "Peru",
+  QAT: "Qatar",
+  KSA: "Saudi Arabia",
+  UAE: "United Arab Emirates",
+  TUN: "Tunisia",
+  ALG: "Algeria",
+  NZL: "New Zealand",
+  TUR: "Turkey Türkiye",
+  CZE: "Czech Republic Czechia",
+  BIH: "Bosnia Herzegovina Bosnia and Herzegovina",
+  HAI: "Haiti",
+}
+
 export default function PredictionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -18,7 +67,20 @@ export default function PredictionsPage() {
     if (!query) return MATCHES
 
     return MATCHES.filter((match) => {
-      const searchableText = Object.values(match)
+      const homeCode = String(
+        match.homeTeamCode || match.homeTeam || match.home || ""
+      ).toUpperCase()
+
+      const awayCode = String(
+        match.awayTeamCode || match.awayTeam || match.away || ""
+      ).toUpperCase()
+
+      const searchableText = [
+        ...Object.values(match),
+        TEAM_SEARCH_NAMES[homeCode],
+        TEAM_SEARCH_NAMES[awayCode],
+        `group ${String(match.group || "").toLowerCase()}`,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -67,6 +129,7 @@ export default function PredictionsPage() {
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 size={16}
               />
+
               <Input
                 className="h-12 rounded-2xl bg-card/70 pl-11"
                 placeholder="Search teams, groups, venues..."
@@ -95,6 +158,7 @@ export default function PredictionsPage() {
               <h2 className="font-headline text-2xl font-black">
                 Knockout predictions
               </h2>
+
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 These cards unlock naturally as you assign teams to bracket slots from the Admin page. Empty ties show as TBC, so players know the stage is prepared but not ready yet.
               </p>
@@ -111,6 +175,7 @@ export default function PredictionsPage() {
                     <h3 className="font-headline text-xl font-black md:text-2xl">
                       {round.name}
                     </h3>
+
                     <p className="text-sm text-muted-foreground">
                       {round.helper}
                     </p>
