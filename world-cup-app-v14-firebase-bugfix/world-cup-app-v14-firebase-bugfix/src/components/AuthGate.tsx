@@ -89,18 +89,22 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (current) => {
-      setUser(current)
+const unsub = onAuthStateChanged(auth, async (current) => {
+  setUser(current)
 
-      if (current) {
-        await refreshProfile()
-      } else {
-        setProfile(null)
-      }
-
-      setLoading(false)
-    })
-
+  try {
+    if (current) {
+      await refreshProfile()
+    } else {
+      setProfile(null)
+    }
+  } catch (error) {
+    console.error("Failed to refresh profile:", error)
+    setProfile(null)
+  } finally {
+    setLoading(false)
+  }
+})
     return () => unsub()
   }, [])
 
