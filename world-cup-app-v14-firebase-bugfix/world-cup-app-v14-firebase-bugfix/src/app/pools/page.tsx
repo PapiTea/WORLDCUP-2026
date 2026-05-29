@@ -416,7 +416,7 @@ export default function PoolsPage() {
                         const name =
                           memberProfile?.actualName ||
                           memberProfile?.displayName ||
-                          `User ${member.userId.slice(0, 4)}`
+                          `User ${String(member.userId || "unknown").slice(0, 4)}`
 
                         const isOwner = league.ownerId === member.userId
 
@@ -436,16 +436,18 @@ export default function PoolsPage() {
                             </div>
 
                             {!isOwner && (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="rounded-xl font-bold"
-                                onClick={() =>
-                                  kickMember(league.code, member.userId)
-                                }
-                              >
-                                Remove
-                              </Button>
+                             <Button
+  size="sm"
+  variant="outline"
+  className="rounded-xl font-bold"
+  onClick={() => {
+    if (member.userId) {
+      kickMember(league.code, member.userId)
+    }
+  }}
+>
+  Remove
+</Button>
                             )}
                           </div>
                         )
