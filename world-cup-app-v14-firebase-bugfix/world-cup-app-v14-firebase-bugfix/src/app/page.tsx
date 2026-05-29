@@ -6,8 +6,13 @@ import { CalendarDays, MapPin, Trophy } from "lucide-react"
 
 function getMatchValue(match: any, keys: string[]) {
   for (const key of keys) {
-    if (match?.[key]) return match[key]
+    const value = match?.[key]
+
+    if (typeof value === "string" || typeof value === "number") {
+      return String(value)
+    }
   }
+
   return ""
 }
 
@@ -33,34 +38,50 @@ export default function HomePage() {
           {MATCHES.map((match: any) => {
             const home =
               getMatchValue(match, ["homeTeam", "homeTeamCode", "home"]) || "TBC"
+
             const away =
               getMatchValue(match, ["awayTeam", "awayTeamCode", "away"]) || "TBC"
-            const group = getMatchValue(match, ["group"]) || "Group"
+
+            const group = getMatchValue(match, ["group"]) || "TBC"
+
             const time =
-              getMatchValue(match, ["ukTime", "time", "kickoffUk", "kickoffTime"]) ||
-              "TBC"
-            const venue = getMatchValue(match, ["venue", "stadium"]) || "Venue TBC"
-            const city = getMatchValue(match, ["city", "location"]) || ""
+              getMatchValue(match, [
+                "ukTime",
+                "time",
+                "kickoffUk",
+                "kickoffTime",
+              ]) || "TBC"
+
+            const venue =
+              getMatchValue(match, ["venue", "stadium"]) || "Venue TBC"
+
+            const city = getMatchValue(match, ["city", "location"])
+
             const country =
-              getMatchValue(match, ["countryEmoji", "hostEmoji", "emoji"]) ||
-              getMatchValue(match, ["country", "hostCountry"]) ||
-              ""
+              getMatchValue(match, [
+                "countryEmoji",
+                "hostEmoji",
+                "emoji",
+                "country",
+                "hostCountry",
+              ]) || ""
 
             return (
               <article
-                key={match.id}
+                key={String(match.id)}
                 className="rounded-[2rem] border border-white/10 bg-card/75 p-5 shadow-xl backdrop-blur"
               >
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
                     Group {group}
                   </span>
+
                   <span className="text-xl">{country}</span>
                 </div>
 
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
                   <div className="min-w-0">
-                    <div className="text-2xl font-black">{home}</div>
+                    <div className="truncate text-2xl font-black">{home}</div>
                   </div>
 
                   <div className="rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
@@ -68,14 +89,16 @@ export default function HomePage() {
                   </div>
 
                   <div className="min-w-0">
-                    <div className="text-2xl font-black">{away}</div>
+                    <div className="truncate text-2xl font-black">{away}</div>
                   </div>
                 </div>
 
                 <div className="mt-5 space-y-2 rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <CalendarDays size={16} />
-                    <span className="font-bold text-foreground">{time} UK time</span>
+                    <span className="font-bold text-foreground">
+                      {time} UK time
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-2">
