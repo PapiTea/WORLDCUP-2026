@@ -197,7 +197,7 @@ export default function PoolsPage() {
         </p>
       </header>
 
-      <Card className="glass-card mb-6 p-4 space-y-4">
+<Card className="hidden md:block glass-card mb-6 p-4 space-y-4">
         <div className="flex items-center gap-2 font-headline font-bold">
           <UserCircle size={18} className="text-primary" /> Player profile
         </div>
@@ -415,11 +415,10 @@ export default function PoolsPage() {
                     ) : (
                       members.map((member) => {
                         const memberProfile = allUsers[member.userId]
-                        const name =
-                          memberProfile?.actualName ||
-                          memberProfile?.displayName ||
-                          `User ${String(member.userId || "unknown").slice(0, 4)}`
-
+                       const name =
+  memberProfile?.actualName ||
+  memberProfile?.displayName ||
+  "Unknown User"
                         const isOwner = league.ownerId === member.userId
 
                         return (
