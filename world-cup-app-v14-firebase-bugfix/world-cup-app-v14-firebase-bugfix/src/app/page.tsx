@@ -1,56 +1,24 @@
 "use client"
 
+import Image from "next/image"
 import { BottomNav } from "@/components/BottomNav"
 import { MATCHES } from "@/lib/mock-data"
 import { CalendarDays, MapPin, Trophy } from "lucide-react"
 
-function text(value: any): string {
-  if (!value) return ""
-  if (typeof value === "string" || typeof value === "number") return String(value)
-  if (typeof value === "object") {
+function TeamFlag({ team }: { team: any }) {
+  if (team?.flagImage) {
     return (
-      value.name ||
-      value.team ||
-      value.label ||
-      value.country ||
-      value.code ||
-      value.id ||
-      ""
+      <Image
+        src={team.flagImage}
+        alt={`${team.name} flag`}
+        width={72}
+        height={48}
+        className="h-12 w-16 rounded-xl object-cover shadow-md"
+      />
     )
   }
-  return ""
-}
 
-function get(match: any, keys: string[]) {
-  for (const key of keys) {
-    const value = text(match?.[key])
-    if (value) return value
-  }
-  return ""
-}
-
-function teamName(team: any, fallback: string) {
-  if (!team) return fallback
-  if (typeof team === "string") return team
-  return team.name || team.team || team.country || team.label || team.code || fallback
-}
-
-function hostMarker(match: any) {
-  const raw =
-    match.countryEmoji ||
-    match.hostEmoji ||
-    match.emoji ||
-    match.hostCountry ||
-    match.country ||
-    ""
-
-  const value = text(raw).toLowerCase()
-
-  if (value.includes("mexico") || value === "mx") return "🇲🇽"
-  if (value.includes("canada") || value === "ca") return "🇨🇦"
-  if (value.includes("usa") || value.includes("united states") || value === "us") return "🇺🇸"
-
-  return text(raw)
+  return <span className="text-4xl">{team?.flag || "🏳️"}</span>
 }
 
 export default function HomePage() {
@@ -72,61 +40,66 @@ export default function HomePage() {
         </div>
 
         <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-          {MATCHES.map((match: any) => {
-            const home = teamName(match.homeTeam || match.home || match.homeTeamCode, "TBC")
-            const away = teamName(match.awayTeam || match.away || match.awayTeamCode, "TBC")
-            const group = get(match, ["group"]) || "TBC"
-            const time = get(match, ["ukTime", "time", "kickoffUk", "kickoffTime"]) || "TBC"
-            const venue = get(match, ["venue", "stadium"]) || "Venue TBC"
-            const city = get(match, ["city", "location"])
-            const host = hostMarker(match)
+          {MATCHES.map((match) => (
+            <article
+              key={match.id}
+              className="rounded-[2rem] border border-white/10 bg-card/75 p-5 shadow-xl backdrop-blur"
+            >
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
+                  Group {match.group}
+                </span>
 
-            return (
-              <article
-                key={String(match.id)}
-                className="rounded-[2rem] border border-white/10 bg-card/75 p-5 shadow-xl backdrop-blur"
-              >
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
-                    Group {group}
+                <span className="text-xl">{match.hostEmoji}</span>
+              </div>
+
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
+                <div className="flex min-w-0 flex-col items-center gap-3">
+                  <TeamFlag team={match.homeTeam} />
+                  <div className="min-w-0">
+                    <div className="truncate text-xl font-black">
+                      {match.homeTeam.name}
+                    </div>
+                    <div className="text-xs font-black uppercase text-muted-foreground">
+                      {match.homeTeam.code}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
+                  vs
+                </div>
+
+                <div className="flex min-w-0 flex-col items-center gap-3">
+                  <TeamFlag team={match.awayTeam} />
+                  <div className="min-w-0">
+                    <div className="truncate text-xl font-black">
+                      {match.awayTeam.name}
+                    </div>
+                    <div className="text-xs font-black uppercase text-muted-foreground">
+                      {match.awayTeam.code}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-2 rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CalendarDays size={16} />
+                  <span className="font-bold text-foreground">
+                    {match.ukKickoff} UK time
                   </span>
-
-                  <span className="text-xl">{host}</span>
                 </div>
 
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
-                  <div className="min-w-0">
-                    <div className="truncate text-2xl font-black">{home}</div>
-                  </div>
-
-                  <div className="rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
-                    vs
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="truncate text-2xl font-black">{away}</div>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} />
+                  <span>
+                    {match.venue}, {match.location}
+                  </span>
                 </div>
-
-                <div className="mt-5 space-y-2 rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays size={16} />
-                    <span className="font-bold text-foreground">
-                      {time} UK time
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    <span>
-                      {venue}
-                      {city ? `, ${city}` : ""}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            )
-          })}
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
