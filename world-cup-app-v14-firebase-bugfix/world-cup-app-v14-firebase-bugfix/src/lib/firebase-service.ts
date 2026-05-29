@@ -81,8 +81,41 @@ export async function createLeague(name: string, ownerId: string) {
   await setDoc(doc(db, 'leagueMembers', `${code}_${ownerId}`), { id: `${code}_${ownerId}`, leagueId: code, userId: ownerId, joinedAt: serverTimestamp() })
   return league
 }
+function cleanLeagueCode(input: string) {
+  const trimmed = input.trim()
+
+  try {
+    const url = new URL(trimmed)
+    const leagueFromUrl = url.searchParams.get("league")
+    if (leagueFromUrl) return leagueFromUrl.trim().toUpperCase()
+  } catch {
+    // Not a URL, continue as normal code
+  }
+
+  return trimmed.toUpperCase()
+}
+
 export async function joinLeague(code: string, userId: string) {
-  await setDoc(doc(db, 'leagueMembers', `${code}_${userId}`), { id: `${code}_${userId}`, leagueId: code, userId, joinedAt: serverTimestamp() }, { merge: true })
+  const cleanCode = cleanLeagueCode(code)
+
+  const leagueSnap = await getDocs(
+    query(collection(db, "leagues"), where("code", "==", cleanCode))
+  )
+
+  if (leagueSnap.empty) {
+    throw new Error("League not found. Check the code or invite link.")
+  }
+
+  await setDoc(
+    doc(db, "leagueMembers", `${cleanCode}_${userId}`),
+    {
+      id: `${cleanCode}_${userId}`,
+      leagueId: cleanCode,
+      userId,
+      joinedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
 }
 export async function leaveLeague(code: string, userId: string) { return deleteDoc(doc(db, 'leagueMembers', `${code}_${userId}`)) }
 export async function deleteLeague(code: string) {
