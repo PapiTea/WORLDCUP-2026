@@ -1,113 +1,199 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { MATCHES } from "@/lib/mock-data"
 import { BottomNav } from "@/components/BottomNav"
-import { TeamFlag } from "@/components/TeamFlag"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { MatchCard } from "@/components/MatchCard"
+import { KnockoutMatchCard } from "@/components/KnockoutMatchCard"
+import { KNOCKOUT_FIXTURES, KNOCKOUT_ROUNDS, MATCHES } from "@/lib/mock-data"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Search, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { HostBadge } from "@/components/HostBadge"
-import { CalendarDays, Clock, Search, Trophy } from "lucide-react"
 
-function prettyDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    timeZone: "Europe/London",
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  })
+const TEAM_SEARCH_NAMES: Record<string, string> = {
+  ENG: "England",
+  SCO: "Scotland",
+  WAL: "Wales",
+  USA: "United States USA America",
+  CAN: "Canada",
+  MEX: "Mexico",
+  BRA: "Brazil",
+  ARG: "Argentina",
+  FRA: "France",
+  ESP: "Spain",
+  GER: "Germany",
+  ITA: "Italy",
+  POR: "Portugal",
+  NED: "Netherlands Holland",
+  BEL: "Belgium",
+  CRO: "Croatia",
+  DEN: "Denmark",
+  SUI: "Switzerland",
+  AUT: "Austria",
+  POL: "Poland",
+  IRN: "Iran",
+  JPN: "Japan",
+  KOR: "South Korea Korea",
+  AUS: "Australia",
+  MAR: "Morocco",
+  EGY: "Egypt",
+  SEN: "Senegal",
+  NGA: "Nigeria",
+  GHA: "Ghana",
+  CIV: "Ivory Coast Côte d'Ivoire",
+  URU: "Uruguay",
+  COL: "Colombia",
+  CHI: "Chile",
+  PAR: "Paraguay",
+  ECU: "Ecuador",
+  PER: "Peru",
+  QAT: "Qatar",
+  KSA: "Saudi Arabia",
+  UAE: "United Arab Emirates",
+  TUN: "Tunisia",
+  ALG: "Algeria",
+  NZL: "New Zealand",
+  TUR: "Turkey Türkiye",
+  CZE: "Czech Republic Czechia",
+  BIH: "Bosnia Herzegovina Bosnia and Herzegovina",
+  HAI: "Haiti",
 }
 
-export default function HomePage() {
-  const [query, setQuery] = useState("")
-  const [groupFilter, setGroupFilter] = useState("All")
+export default function PredictionsPage() {
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const groups = ["All", ...Array.from(new Set(MATCHES.map((m) => m.group)))]
   const filteredMatches = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return MATCHES.filter((match) => {
-      const groupOk = groupFilter === "All" || match.group === groupFilter
-      const text = `${match.homeTeam.name} ${match.awayTeam.name} ${match.location} ${match.venue} Group ${match.group}`.toLowerCase()
-      return groupOk && (!q || text.includes(q))
-    })
-  }, [query, groupFilter])
+    const query = searchQuery.trim().toLowerCase()
 
-  const byDate = filteredMatches.reduce<Record<string, typeof MATCHES>>((acc, match) => {
-    const key = prettyDate(match.kickoff)
-    acc[key] ||= []
-    acc[key].push(match)
-    return acc
-  }, {})
+    if (!query) return MATCHES
+
+    return MATCHES.filter((match) => {
+      const homeCode = String(
+        match.homeTeamCode || match.homeTeam || match.home || ""
+      ).toUpperCase()
+
+      const awayCode = String(
+        match.awayTeamCode || match.awayTeam || match.away || ""
+      ).toUpperCase()
+
+      const searchableText = [
+        ...Object.values(match),
+        TEAM_SEARCH_NAMES[homeCode],
+        TEAM_SEARCH_NAMES[awayCode],
+        `group ${String(match.group || "").toLowerCase()}`,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+
+      return searchableText.includes(query)
+    })
+  }, [searchQuery])
 
   return (
     <main className="min-h-screen px-4 pb-28 pt-6 md:pl-28 md:pr-8 md:pb-10">
-      <section className="mx-auto max-w-7xl space-y-6">
-        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-card/75 p-6 shadow-2xl backdrop-blur md:p-8">
+      <section className="mx-auto max-w-7xl">
+        <div className="mb-8 overflow-hidden rounded-[2rem] border border-white/10 bg-card/70 p-6 shadow-2xl backdrop-blur md:p-8">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary">
-            <Trophy size={14} /> World Cup App
+            <Sparkles size={14} /> Score predictions
           </div>
-          <h1 className="font-headline text-4xl font-black tracking-tight md:text-6xl">Fixtures</h1>
+
+          <h1 className="font-headline text-4xl font-black tracking-tight md:text-5xl">
+            Match Predictions
+          </h1>
+
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
-            All group-stage fixtures are shown in UK time, with the host city, stadium and country marker. Fixtures only on this home page. Use Picks to predict scores and Groups to choose qualifiers.
+            Predict scores for the group stage now. The knockout tab is ready for later: once you assign qualified teams in Admin, players will see those knockout ties here and can predict them.
           </p>
         </div>
 
-        <div className="sticky top-0 z-20 -mx-4 border-y border-white/5 bg-background/90 px-4 py-3 backdrop-blur md:top-0 md:mx-0 md:rounded-3xl md:border md:bg-card/70">
+        <Tabs defaultValue="group" className="space-y-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-              <Input value={query} onChange={(e) => setQuery(e.target.value)} className="h-12 rounded-2xl bg-card/70 pl-11" placeholder="Search team, stadium or city..." />
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
-              {groups.map((group) => (
-                <Button key={group} size="sm" variant={groupFilter === group ? "default" : "outline"} className="shrink-0 rounded-2xl font-black" onClick={() => setGroupFilter(group)}>
-                  {group === "All" ? "All" : `Group ${group}`}
-                </Button>
-              ))}
+            <TabsList className="h-12 rounded-2xl bg-muted/70 p-1">
+              <TabsTrigger
+                value="group"
+                className="rounded-xl px-5 font-black data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Group Stage
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="knockouts"
+                className="rounded-xl px-5 font-black data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Knockouts
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="relative w-full md:w-80">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={16}
+              />
+
+              <Input
+                className="h-12 rounded-2xl bg-card/70 pl-11"
+                placeholder="Search teams, groups, venues..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
             </div>
           </div>
-        </div>
 
-        <div className="space-y-8">
-          {Object.entries(byDate).map(([date, matches]) => (
-            <section key={date} className="space-y-4">
-              <div className="flex items-center gap-2 text-primary">
-                <CalendarDays size={18} />
-                <h2 className="font-headline text-xl font-black md:text-2xl">{date}</h2>
+          <TabsContent value="group" className="space-y-4">
+            {filteredMatches.length === 0 ? (
+              <div className="rounded-[2rem] border border-white/10 bg-card/70 p-6 text-center text-sm text-muted-foreground shadow-xl">
+                No matches found. Try searching for a team, group, venue or country.
               </div>
-              <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-                {matches.map((match) => (
-                  <Card key={match.id} className="rounded-3xl border border-white/10 bg-card/75 p-4 shadow-xl backdrop-blur transition hover:-translate-y-0.5 hover:shadow-2xl">
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <Badge variant="outline" className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary">Group {match.group}</Badge>
-                      <div className="flex items-center gap-1.5 text-sm font-black text-foreground"><Clock size={15} /> {match.ukKickoff}</div>
-                    </div>
-                    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3">
-                      <FixtureTeam team={match.homeTeam} />
-                      <div className="mt-5 rounded-full bg-muted/60 px-3 py-1 text-xs font-black text-muted-foreground">vs</div>
-                      <FixtureTeam team={match.awayTeam} />
-                    </div>
-                    <HostBadge location={match.location} venue={match.venue} className="mt-4" />
-                  </Card>
+            ) : (
+              <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+                {filteredMatches.map((match) => (
+                  <MatchCard key={match.id} match={match} />
                 ))}
               </div>
-            </section>
-          ))}
-        </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="knockouts" className="space-y-8">
+            <div className="rounded-[2rem] border border-white/10 bg-card/70 p-5 shadow-xl backdrop-blur md:p-6">
+              <h2 className="font-headline text-2xl font-black">
+                Knockout predictions
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                These cards unlock naturally as you assign teams to bracket slots from the Admin page. Empty ties show as TBC, so players know the stage is prepared but not ready yet.
+              </p>
+            </div>
+
+            {KNOCKOUT_ROUNDS.map((round) => {
+              const fixtures = KNOCKOUT_FIXTURES.filter(
+                (fixture) => fixture.round === round.id
+              )
+
+              return (
+                <section key={round.id} className="space-y-4">
+                  <div>
+                    <h3 className="font-headline text-xl font-black md:text-2xl">
+                      {round.name}
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground">
+                      {round.helper}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+                    {fixtures.map((fixture) => (
+                      <KnockoutMatchCard key={fixture.id} fixture={fixture} />
+                    ))}
+                  </div>
+                </section>
+              )
+            })}
+          </TabsContent>
+        </Tabs>
       </section>
+
       <BottomNav />
     </main>
-  )
-}
-
-function FixtureTeam({ team }: { team: typeof MATCHES[number]["homeTeam"] }) {
-  return (
-    <div className="min-w-0 text-center">
-      <TeamFlag team={team} className="mx-auto h-14 w-20 rounded-2xl object-cover sm:h-16 sm:w-24" />
-      <div className="mx-auto mt-2 line-clamp-2 min-h-[2.1rem] max-w-full px-1 text-center text-[11px] font-black leading-tight sm:text-xs" title={team.name}>{team.name}</div>
-      <div className="mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">{team.code}</div>
-    </div>
   )
 }
