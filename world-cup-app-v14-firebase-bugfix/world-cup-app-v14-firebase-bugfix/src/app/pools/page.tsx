@@ -388,10 +388,12 @@ export default function PoolsPage() {
           </p>
 
           <div className="space-y-4">
-            {Object.values(leagueMap).map((league) => {
-              const members = allMembers.filter(
-                (member) => member.leagueId === league.code
-              )
+          {Object.values(leagueMap)
+  .filter((league) => league?.code && league?.name)
+  .map((league) => {
+             const members = allMembers.filter(
+  (member) => member?.leagueId === league.code && member?.userId
+)
 
               return (
                 <div
