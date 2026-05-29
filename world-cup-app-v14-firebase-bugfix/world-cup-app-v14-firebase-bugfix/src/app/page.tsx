@@ -4,16 +4,53 @@ import { BottomNav } from "@/components/BottomNav"
 import { MATCHES } from "@/lib/mock-data"
 import { CalendarDays, MapPin, Trophy } from "lucide-react"
 
-function getMatchValue(match: any, keys: string[]) {
-  for (const key of keys) {
-    const value = match?.[key]
-
-    if (typeof value === "string" || typeof value === "number") {
-      return String(value)
-    }
+function text(value: any): string {
+  if (!value) return ""
+  if (typeof value === "string" || typeof value === "number") return String(value)
+  if (typeof value === "object") {
+    return (
+      value.name ||
+      value.team ||
+      value.label ||
+      value.country ||
+      value.code ||
+      value.id ||
+      ""
+    )
   }
-
   return ""
+}
+
+function get(match: any, keys: string[]) {
+  for (const key of keys) {
+    const value = text(match?.[key])
+    if (value) return value
+  }
+  return ""
+}
+
+function teamName(team: any, fallback: string) {
+  if (!team) return fallback
+  if (typeof team === "string") return team
+  return team.name || team.team || team.country || team.label || team.code || fallback
+}
+
+function hostMarker(match: any) {
+  const raw =
+    match.countryEmoji ||
+    match.hostEmoji ||
+    match.emoji ||
+    match.hostCountry ||
+    match.country ||
+    ""
+
+  const value = text(raw).toLowerCase()
+
+  if (value.includes("mexico") || value === "mx") return "🇲🇽"
+  if (value.includes("canada") || value === "ca") return "🇨🇦"
+  if (value.includes("usa") || value.includes("united states") || value === "us") return "🇺🇸"
+
+  return text(raw)
 }
 
 export default function HomePage() {
@@ -36,35 +73,13 @@ export default function HomePage() {
 
         <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
           {MATCHES.map((match: any) => {
-            const home =
-              getMatchValue(match, ["homeTeam", "homeTeamCode", "home"]) || "TBC"
-
-            const away =
-              getMatchValue(match, ["awayTeam", "awayTeamCode", "away"]) || "TBC"
-
-            const group = getMatchValue(match, ["group"]) || "TBC"
-
-            const time =
-              getMatchValue(match, [
-                "ukTime",
-                "time",
-                "kickoffUk",
-                "kickoffTime",
-              ]) || "TBC"
-
-            const venue =
-              getMatchValue(match, ["venue", "stadium"]) || "Venue TBC"
-
-            const city = getMatchValue(match, ["city", "location"])
-
-            const country =
-              getMatchValue(match, [
-                "countryEmoji",
-                "hostEmoji",
-                "emoji",
-                "country",
-                "hostCountry",
-              ]) || ""
+            const home = teamName(match.homeTeam || match.home || match.homeTeamCode, "TBC")
+            const away = teamName(match.awayTeam || match.away || match.awayTeamCode, "TBC")
+            const group = get(match, ["group"]) || "TBC"
+            const time = get(match, ["ukTime", "time", "kickoffUk", "kickoffTime"]) || "TBC"
+            const venue = get(match, ["venue", "stadium"]) || "Venue TBC"
+            const city = get(match, ["city", "location"])
+            const host = hostMarker(match)
 
             return (
               <article
@@ -76,7 +91,7 @@ export default function HomePage() {
                     Group {group}
                   </span>
 
-                  <span className="text-xl">{country}</span>
+                  <span className="text-xl">{host}</span>
                 </div>
 
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
