@@ -102,7 +102,8 @@ export default function PredictionsPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
-            Predict scores for the group stage now. The knockout tab is ready for later: once you assign qualified teams in Admin, players will see those knockout ties here and can predict them.
+  Submit your predictions before each match kicks off. Once kick-off time is reached, that fixture locks and no further changes can be made. Group stage matches are open now, with knockout predictions unlocking throughout the tournament as teams qualify. Earn points for accurate predictions and climb the leaderboard.
+</p>
           </p>
         </div>
 
