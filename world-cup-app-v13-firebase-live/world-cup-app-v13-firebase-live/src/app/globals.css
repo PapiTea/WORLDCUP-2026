@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 28% 96%;
+    --foreground: 140 45% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 140 45% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 140 45% 10%;
+    --primary: 142 72% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 42 95% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 140 20% 91%;
+    --muted-foreground: 140 12% 38%;
+    --accent: 42 95% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 140 18% 84%;
+    --input: 140 18% 84%;
+    --ring: 142 72% 35%;
+    --radius: 1rem;
+    --chart-1: 262 83% 58%;
+    --chart-2: 224 92% 57%;
+    --chart-3: 160 60% 45%;
+    --chart-4: 30 80% 55%;
+    --chart-5: 340 75% 55%;
+  }
+  .dark {
+    --background: 130 45% 5%;
+    --foreground: 0 0% 100%;
+    --card: 130 40% 8%;
+    --card-foreground: 0 0% 100%;
+    --popover: 130 40% 8%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 120 95% 68%;
+    --primary-foreground: 130 45% 5%;
+    --secondary: 42 95% 56%;
+    --secondary-foreground: 130 45% 5%;
+    --muted: 130 30% 14%;
+    --muted-foreground: 120 20% 70%;
+    --accent: 42 95% 56%;
+    --accent-foreground: 130 45% 5%;
+    --border: 130 25% 18%;
+    --input: 130 25% 18%;
+    --ring: 120 95% 68%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    background-image: 
+      radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.15), transparent 70%),
+      radial-gradient(circle at 0% 100%, hsl(var(--secondary) / 0.1), transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+.glass-card {
+  @apply bg-card/60 backdrop-blur-md border border-white/5 shadow-xl;
+}
+
+.font-headline {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type='number'] { -moz-appearance: textfield; }
+
+@media (min-width: 768px) {
+  body {
+    padding-left: 88px;
+  }
+}

@@ -1,0 +1,103 @@
+import { collection, deleteDoc, doc, getDocs, onSnapshot, query, serverTimestamp, setDoc, where, type Unsubscribe } from 'firebase/firestore'
+import { db } from './firebase'
+import type { UserProfile } from './profile'
+
+export type Score = { home: number; away: number }
+export type MatchPrediction = Score & { confidence?: boolean; userId: string; matchId: string; type: 'group' | 'knockout'; updatedAt?: unknown }
+export type GroupPrediction = { userId: string; groupId: string; picks: string[]; updatedAt?: unknown }
+export type League = { id: string; code: string; name: string; ownerId: string; createdAt?: unknown }
+export type LeagueMember = { id: string; leagueId: string; userId: string; joinedAt?: unknown }
+export type UserDoc = UserProfile & { email?: string }
+
+export function subscribeDocMap<T>(collectionName: string, cb: (items: Record<string, T>) => void): Unsubscribe {
+  return onSnapshot(collection(db, collectionName), (snap) => {
+    const out: Record<string, T> = {}
+    snap.forEach((d) => { out[d.id] = d.data() as T })
+    cb(out)
+  })
+}
+
+export function saveMatchPrediction(userId: string, matchId: string, type: 'group' | 'knockout', pick: Score & { confidence?: boolean }) {
+  const id = `${userId}_${type}_${matchId}`
+  return setDoc(doc(db, 'predictions', id), { userId, matchId, type, ...pick, updatedAt: serverTimestamp() }, { merge: true })
+}
+
+export function subscribeUserMatchPredictions(userId: string, cb: (items: Record<string, MatchPrediction>) => void): Unsubscribe {
+  return onSnapshot(query(collection(db, 'predictions'), where('userId', '==', userId)), (snap) => {
+    const out: Record<string, MatchPrediction> = {}
+    snap.forEach((d) => { const data = d.data() as MatchPrediction; out[`${data.type}_${data.matchId}`] = data })
+    cb(out)
+  })
+}
+
+export function saveGroupPrediction(userId: string, groupId: string, picks: string[]) {
+  return setDoc(doc(db, 'predictions', `${userId}_qualifiers_${groupId}`), { userId, groupId, type: 'qualifiers', picks, updatedAt: serverTimestamp() }, { merge: true })
+}
+
+export function subscribeUserGroupPredictions(userId: string, cb: (items: Record<string, string[]>) => void): Unsubscribe {
+  return onSnapshot(query(collection(db, 'predictions'), where('userId', '==', userId), where('type', '==', 'qualifiers')), (snap) => {
+    const out: Record<string, string[]> = {}
+    snap.forEach((d) => { const data = d.data() as GroupPrediction & { type: string }; if (data.groupId) out[data.groupId] = data.picks || [] })
+    cb(out)
+  })
+}
+
+export function saveMatchResult(matchId: string, score: Score) {
+  return setDoc(doc(db, 'matchResults', matchId), { matchId, ...score, updatedAt: serverTimestamp() }, { merge: true })
+}
+export function deleteMatchResult(matchId: string) { return deleteDoc(doc(db, 'matchResults', matchId)) }
+export function subscribeResults(cb: (items: Record<string, Score>) => void): Unsubscribe {
+  return onSnapshot(collection(db, 'matchResults'), (snap) => {
+    const out: Record<string, Score> = {}
+    snap.forEach((d) => { const data = d.data() as Score; if (typeof data.home === 'number' && typeof data.away === 'number') out[d.id] = { home: data.home, away: data.away } })
+    cb(out)
+  })
+}
+
+export function saveQualifier(groupId: string, picks: string[]) {
+  return setDoc(doc(db, 'knockoutSetup', `qualified_${groupId}`), { groupId, picks, updatedAt: serverTimestamp() }, { merge: true })
+}
+export function saveKnockoutSlot(slotId: string, teamId: string) {
+  return setDoc(doc(db, 'knockoutSetup', `slot_${slotId}`), { slotId, teamId, updatedAt: serverTimestamp() }, { merge: true })
+}
+export function clearKnockoutSlot(slotId: string) { return deleteDoc(doc(db, 'knockoutSetup', `slot_${slotId}`)) }
+export function subscribeKnockoutSetup(cb: (setup: { qualifiers: Record<string, string[]>; slots: Record<string, string> }) => void): Unsubscribe {
+  return onSnapshot(collection(db, 'knockoutSetup'), (snap) => {
+    const qualifiers: Record<string, string[]> = {}
+    const slots: Record<string, string> = {}
+    snap.forEach((d) => {
+      const data = d.data() as any
+      if (d.id.startsWith('qualified_') && data.groupId) qualifiers[data.groupId] = data.picks || []
+      if (d.id.startsWith('slot_') && data.slotId && data.teamId) slots[data.slotId] = data.teamId
+    })
+    cb({ qualifiers, slots })
+  })
+}
+
+export async function createLeague(name: string, ownerId: string) {
+  const code = Math.random().toString(36).slice(2, 8).toUpperCase()
+  const league: League = { id: code, code, name, ownerId, createdAt: serverTimestamp() }
+  await setDoc(doc(db, 'leagues', code), league)
+  await setDoc(doc(db, 'leagueMembers', `${code}_${ownerId}`), { id: `${code}_${ownerId}`, leagueId: code, userId: ownerId, joinedAt: serverTimestamp() })
+  return league
+}
+export async function joinLeague(code: string, userId: string) {
+  await setDoc(doc(db, 'leagueMembers', `${code}_${userId}`), { id: `${code}_${userId}`, leagueId: code, userId, joinedAt: serverTimestamp() }, { merge: true })
+}
+export async function leaveLeague(code: string, userId: string) { return deleteDoc(doc(db, 'leagueMembers', `${code}_${userId}`)) }
+export async function deleteLeague(code: string) {
+  const members = await getDocs(query(collection(db, 'leagueMembers'), where('leagueId', '==', code)))
+  await Promise.all(members.docs.map((m) => deleteDoc(m.ref)))
+  return deleteDoc(doc(db, 'leagues', code))
+}
+export function subscribeMyLeagueMemberships(userId: string, cb: (members: LeagueMember[]) => void): Unsubscribe {
+  return onSnapshot(query(collection(db, 'leagueMembers'), where('userId', '==', userId)), (snap) => cb(snap.docs.map(d => d.data() as LeagueMember)))
+}
+export function subscribeLeagues(cb: (leagues: Record<string, League>) => void): Unsubscribe { return subscribeDocMap<League>('leagues', cb) }
+export function subscribeUsers(cb: (users: Record<string, UserDoc>) => void): Unsubscribe { return subscribeDocMap<UserDoc>('users', cb) }
+export function subscribeAllPredictions(cb: (predictions: MatchPrediction[]) => void): Unsubscribe {
+  return onSnapshot(collection(db, 'predictions'), (snap) => cb(snap.docs.map(d => d.data() as MatchPrediction)))
+}
+export function subscribeAllLeagueMembers(cb: (members: LeagueMember[]) => void): Unsubscribe {
+  return onSnapshot(collection(db, 'leagueMembers'), (snap) => cb(snap.docs.map(d => d.data() as LeagueMember)))
+}

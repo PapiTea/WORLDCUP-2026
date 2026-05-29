@@ -1,0 +1,107 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "wc2026-hero",
+      "description": "World Cup 2026 Stadium",
+      "imageUrl": "https://picsum.photos/seed/wc2026/1200/600",
+      "imageHint": "soccer stadium"
+    },
+    {
+      "id": "flag-mex",
+      "description": "Mexico Flag",
+      "imageUrl": "https://picsum.photos/seed/mexico/100/60",
+      "imageHint": "mexico flag"
+    },
+    {
+      "id": "flag-rsa",
+      "description": "South Africa Flag",
+      "imageUrl": "https://picsum.photos/seed/southafrica/100/60",
+      "imageHint": "southafrica flag"
+    },
+    {
+      "id": "flag-kor",
+      "description": "South Korea Flag",
+      "imageUrl": "https://picsum.photos/seed/korea/100/60",
+      "imageHint": "south korea flag"
+    },
+    {
+      "id": "flag-cze",
+      "description": "Czechia Flag",
+      "imageUrl": "https://picsum.photos/seed/czech/100/60",
+      "imageHint": "czech flag"
+    },
+    {
+      "id": "flag-can",
+      "description": "Canada Flag",
+      "imageUrl": "https://picsum.photos/seed/canada/100/60",
+      "imageHint": "canada flag"
+    },
+    {
+      "id": "flag-sui",
+      "description": "Switzerland Flag",
+      "imageUrl": "https://picsum.photos/seed/swiss/100/60",
+      "imageHint": "swiss flag"
+    },
+    {
+      "id": "flag-bra",
+      "description": "Brazil Flag",
+      "imageUrl": "https://picsum.photos/seed/brazil/100/60",
+      "imageHint": "brazil flag"
+    },
+    {
+      "id": "flag-mar",
+      "description": "Morocco Flag",
+      "imageUrl": "https://picsum.photos/seed/morocco/100/60",
+      "imageHint": "morocco flag"
+    },
+    {
+      "id": "flag-usa",
+      "description": "USA Flag",
+      "imageUrl": "https://picsum.photos/seed/usa/100/60",
+      "imageHint": "usa flag"
+    },
+    {
+      "id": "flag-irn",
+      "description": "Iran Lion and Sun Flag",
+      "imageUrl": "https://picsum.photos/seed/iranlion/100/60",
+      "imageHint": "iran lion sun"
+    },
+    {
+      "id": "flag-eng",
+      "description": "England Flag",
+      "imageUrl": "https://picsum.photos/seed/england/100/60",
+      "imageHint": "england flag"
+    },
+    {
+      "id": "flag-fra",
+      "description": "France Flag",
+      "imageUrl": "https://picsum.photos/seed/france/100/60",
+      "imageHint": "france flag"
+    },
+    {
+      "id": "flag-ger",
+      "description": "Germany Flag",
+      "imageUrl": "https://picsum.photos/seed/germany/100/60",
+      "imageHint": "germany flag"
+    },
+    {
+      "id": "flag-arg",
+      "description": "Argentina Flag",
+      "imageUrl": "https://picsum.photos/seed/argentina/100/60",
+      "imageHint": "argentina flag"
+    },
+    {
+      "id": "flag-qat",
+      "description": "Qatar Flag",
+      "imageUrl": "https://picsum.photos/seed/qatar/100/60",
+      "imageHint": "qatar flag"
+    },
+    {
+      "id": "flag-bih",
+      "description": "Bosnia Flag",
+      "imageUrl": "https://picsum.photos/seed/bosnia/100/60",
+      "imageHint": "bosnia flag"
+    }
+  ]
+}
