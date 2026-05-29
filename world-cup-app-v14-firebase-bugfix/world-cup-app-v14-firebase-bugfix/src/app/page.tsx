@@ -191,11 +191,19 @@ export default function HomePage() {
               ))}
             </select>
 
-            <div className="rounded-2xl bg-muted/50 px-4 py-3 text-sm font-bold text-muted-foreground">
-              {selectedTeam
-                ? `${selectedTeam.flag || "🏳️"} ${selectedTeam.name} selected`
-                : "No winner selected yet"}
-            </div>
+      <div className="flex items-center gap-3 rounded-2xl bg-muted/50 px-4 py-3 text-sm font-bold text-muted-foreground">
+        {selectedTeam ? (
+      <>
+     <TeamFlag
+  team={selectedTeam}
+  className="h-8 w-12 rounded-lg object-cover"
+/>
+      <span>{selectedTeam.name} selected</span>
+    </>
+  ) : (
+    <span>No winner selected yet</span>
+  )}
+</div>
           </div>
 
           {tournamentLocked && (
