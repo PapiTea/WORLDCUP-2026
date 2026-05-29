@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { BottomNav } from "@/components/BottomNav"
 import { MATCHES } from "@/lib/mock-data"
 import { CalendarDays, MapPin, Trophy } from "lucide-react"
@@ -8,12 +7,10 @@ import { CalendarDays, MapPin, Trophy } from "lucide-react"
 function TeamFlag({ team }: { team: any }) {
   if (team?.flagImage) {
     return (
-      <Image
+      <img
         src={team.flagImage}
         alt={`${team.name} flag`}
-        width={72}
-        height={48}
-        className="h-12 w-16 rounded-xl object-cover shadow-md"
+        className="h-14 w-20 rounded-xl object-cover shadow-md"
       />
     )
   }
@@ -53,30 +50,30 @@ export default function HomePage() {
                 <span className="text-xl">{match.hostEmoji}</span>
               </div>
 
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-4 text-center">
                 <div className="flex min-w-0 flex-col items-center gap-3">
                   <TeamFlag team={match.homeTeam} />
-                  <div className="min-w-0">
-                    <div className="truncate text-xl font-black">
+                  <div className="min-w-0 max-w-full">
+                    <div className="break-words text-lg font-black leading-tight md:text-xl">
                       {match.homeTeam.name}
                     </div>
-                    <div className="text-xs font-black uppercase text-muted-foreground">
+                    <div className="mt-1 text-xs font-black uppercase text-muted-foreground">
                       {match.homeTeam.code}
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
+                <div className="mt-8 rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
                   vs
                 </div>
 
                 <div className="flex min-w-0 flex-col items-center gap-3">
                   <TeamFlag team={match.awayTeam} />
-                  <div className="min-w-0">
-                    <div className="truncate text-xl font-black">
+                  <div className="min-w-0 max-w-full">
+                    <div className="break-words text-lg font-black leading-tight md:text-xl">
                       {match.awayTeam.name}
                     </div>
-                    <div className="text-xs font-black uppercase text-muted-foreground">
+                    <div className="mt-1 text-xs font-black uppercase text-muted-foreground">
                       {match.awayTeam.code}
                     </div>
                   </div>
@@ -91,8 +88,8 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} />
+                <div className="flex items-start gap-2">
+                  <MapPin size={16} className="mt-0.5 shrink-0" />
                   <span>
                     {match.venue}, {match.location}
                   </span>
