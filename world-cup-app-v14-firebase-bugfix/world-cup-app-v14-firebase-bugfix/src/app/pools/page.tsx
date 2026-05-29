@@ -67,7 +67,7 @@ export default function PoolsPage() {
     if (!user) return
     const code = joinCode.trim().toUpperCase()
     if (!code) return
-    await joinLeague(code, user.uid)
+    await joinLeague(joinCode, user.uid)
     setJoinCode('')
   }
 
