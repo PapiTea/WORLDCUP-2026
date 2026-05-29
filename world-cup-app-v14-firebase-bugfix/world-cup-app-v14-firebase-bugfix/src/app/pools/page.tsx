@@ -50,6 +50,7 @@ export default function PoolsPage() {
   const [actualName, setActualName] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [avatar, setAvatar] = useState("⚽")
+  const [profileMessage, setProfileMessage] = useState("")
 
   useEffect(() => {
     if (!profile) return
@@ -102,32 +103,38 @@ export default function PoolsPage() {
     [memberships, leagueMap]
   )
 
-  const saveProfile = async () => {
-    if (!user) return
+const saveProfile = async () => {
+  if (!user) return
 
-    const cleanActual = actualName.trim()
-    const cleanDisplay = displayName.trim()
+  const cleanActual = actualName.trim()
+  const cleanDisplay = displayName.trim()
 
-    if (!cleanActual || !cleanDisplay) return
+  if (!cleanActual || !cleanDisplay) {
+    setProfileMessage("Please enter both a name and username.")
+    return
+  }
 
-    const next: UserProfile = {
-      actualName: cleanActual,
-      displayName: cleanDisplay,
-      avatar,
-    }
-
+  try {
     await setDoc(
       doc(db, "users", user.uid),
       {
-        ...next,
-        email: user.email,
+        actualName: cleanActual,
+        displayName: cleanDisplay,
+        avatar,
+        email: user.email || "",
         updatedAt: serverTimestamp(),
       },
       { merge: true }
     )
 
     await refreshProfile()
+
+    setProfileMessage("Profile saved successfully.")
+  } catch (error) {
+    console.error(error)
+    setProfileMessage("Failed to save profile.")
   }
+}
 
   const createPool = async (name: string) => {
     if (!user) return
@@ -246,6 +253,11 @@ export default function PoolsPage() {
           >
             Save profile
           </Button>
+          {profileMessage && (
+  <p className="text-xs font-bold text-primary">
+    {profileMessage}
+  </p>
+)}
         </div>
       </Card>
 
