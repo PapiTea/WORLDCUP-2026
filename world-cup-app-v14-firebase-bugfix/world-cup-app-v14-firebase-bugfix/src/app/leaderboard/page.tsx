@@ -68,8 +68,7 @@ export default function LeaderboardPage() {
   const overallRows = useMemo(() => {
     const userIds = new Set<string>()
 
-    Object.keys(users).forEach((id) => userIds.add(id))
-    scores.forEach((s) => userIds.add(s.userId))
+  Object.keys(users).forEach((id) => userIds.add(id))
 
     return Array.from(userIds)
       .map((userId) => {
