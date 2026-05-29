@@ -103,7 +103,7 @@ export default function PredictionsPage() {
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
   Submit your predictions before each match kicks off. Once kick-off time is reached, that fixture locks and no further changes can be made. Group stage matches are open now, with knockout predictions unlocking throughout the tournament as teams qualify. Earn points for accurate predictions and climb the leaderboard.
-</p>
+
           </p>
         </div>
 
