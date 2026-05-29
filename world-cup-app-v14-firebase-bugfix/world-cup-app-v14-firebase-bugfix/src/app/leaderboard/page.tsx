@@ -59,7 +59,30 @@ export default function LeaderboardPage() {
     })).sort((a, b) => b.score.total - a.score.total)
   }, [predictions, results, qualifiers, users])
 
-  const myScore = scores.find(s => s.userId === user?.uid)?.score || { total: 0, matchPoints: 0, groupPoints: 0 }
+   const myScore = scores.find(s => s.userId === user?.uid)?.score || {
+    total: 0,
+    matchPoints: 0,
+    groupPoints: 0
+  }
+
+  const overallRows = useMemo(() => {
+    const userIds = new Set<string>()
+
+    Object.keys(users).forEach((id) => userIds.add(id))
+    scores.forEach((s) => userIds.add(s.userId))
+
+    return Array.from(userIds)
+      .map((userId) => {
+        const scored = scores.find((s) => s.userId === userId)
+
+        return scored || {
+          userId,
+          score: { total: 0 },
+          profile: users[userId],
+        }
+      })
+      .sort((a, b) => b.score.total - a.score.total)
+  }, [users, scores])
 
   return (
     <main className="min-h-screen pb-24 md:pb-8 pt-6 px-4 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
@@ -108,7 +131,7 @@ const rows = members
         </TabsContent>
 
         <TabsContent value="overall" className="space-y-3">
-          {scores.length ? scores.map((row, i) => <PlayerRow key={row.userId} rank={i + 1} userId={row.userId} profile={row.profile} score={row.score.total} isYou={row.userId === user?.uid} />) : <EmptyState title="Leaderboard is blank" text="It will populate when users save predictions." />}
+         {overallRows.length ? overallRows.map((row, i) => <PlayerRow key={row.userId} rank={i + 1} userId={row.userId} profile={row.profile} score={row.score.total} isYou={row.userId === user?.uid} />) : <EmptyState title="Leaderboard is blank" text="It will populate when users save predictions." />}
         </TabsContent>
       </Tabs>
 
