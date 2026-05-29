@@ -21,7 +21,32 @@ export function saveMatchPrediction(userId: string, matchId: string, type: 'grou
   const id = `${userId}_${type}_${matchId}`
   return setDoc(doc(db, 'predictions', id), { userId, matchId, type, ...pick, updatedAt: serverTimestamp() }, { merge: true })
 }
+export function saveTournamentWinner(userId: string, teamId: string) {
+  return setDoc(
+    doc(db, "predictions", `${userId}_tournament_winner`),
+    {
+      userId,
+      type: "tournamentWinner",
+      teamId,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
+}
 
+export function subscribeTournamentWinner(
+  userId: string,
+  cb: (teamId: string) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, "predictions", `${userId}_tournament_winner`),
+    (snap) => {
+      if (!snap.exists()) return
+      const data = snap.data() as any
+      cb(data.teamId || "")
+    }
+  )
+}
 export function subscribeUserMatchPredictions(userId: string, cb: (items: Record<string, MatchPrediction>) => void): Unsubscribe {
   return onSnapshot(query(collection(db, 'predictions'), where('userId', '==', userId)), (snap) => {
     const out: Record<string, MatchPrediction> = {}
