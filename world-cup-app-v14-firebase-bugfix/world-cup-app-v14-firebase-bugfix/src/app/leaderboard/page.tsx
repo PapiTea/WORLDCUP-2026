@@ -83,7 +83,17 @@ export default function LeaderboardPage() {
         <TabsContent value="my-leagues" className="space-y-4">
           {myLeagueIds.length === 0 ? <EmptyState title="No league leaderboard yet" text="Create or join a league first." /> : myLeagueIds.map((leagueId) => {
             const members = allMembers.filter(m => m.leagueId === leagueId).map(m => m.userId)
-            const rows = scores.filter(s => members.includes(s.userId))
+const rows = members
+  .map((memberId) => {
+    const scored = scores.find((s) => s.userId === memberId)
+
+    return scored || {
+      userId: memberId,
+      score: { total: 0 },
+      profile: users[memberId],
+    }
+  })
+  .sort((a, b) => b.score.total - a.score.total)
             const league = leagueMap[leagueId]
             return (
               <Card key={leagueId} className="glass-card p-4">
