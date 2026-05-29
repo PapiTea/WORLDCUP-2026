@@ -1,16 +1,26 @@
 "use client"
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, type User } from 'firebase/auth'
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { auth, db, ADMIN_EMAIL } from '@/lib/firebase'
-import { FOOTBALL_AVATARS, type UserProfile } from '@/lib/profile'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Trophy, LogOut, ShieldCheck } from 'lucide-react'
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  type User,
+} from "firebase/auth"
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore"
+import { auth, db, ADMIN_EMAIL } from "@/lib/firebase"
+import { FOOTBALL_AVATARS, type UserProfile } from "@/lib/profile"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Trophy, LogOut, ShieldCheck } from "lucide-react"
 
-type AppUser = UserProfile & { uid: string; email: string; isAdmin: boolean }
+type AppUser = UserProfile & {
+  uid: string
+  email: string
+  isAdmin: boolean
+}
 
 type AuthContextValue = {
   user: User | null
@@ -25,7 +35,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used inside AuthGate')
+  if (!ctx) throw new Error("useAuth must be used inside AuthGate")
   return ctx
 }
 
@@ -36,57 +46,84 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = async () => {
     const current = auth.currentUser
+
     if (!current) {
       setProfile(null)
       return
     }
-    const ref = doc(db, 'users', current.uid)
+
+    const ref = doc(db, "users", current.uid)
     const snap = await getDoc(ref)
+
     if (snap.exists()) {
       const data = snap.data() as Partial<UserProfile> & { email?: string }
+
       setProfile({
         uid: current.uid,
-        email: current.email || data.email || '',
-        actualName: data.actualName || current.email || 'Player',
-        displayName: data.displayName || data.actualName || 'player',
-        avatar: data.avatar || '⚽',
-        isAdmin: (current.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+        email: current.email || data.email || "",
+        actualName: data.actualName || current.email || "Player",
+        displayName: data.displayName || data.actualName || "player",
+        avatar: data.avatar || "⚽",
+        isAdmin:
+          (current.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase(),
       })
     } else {
       const next = {
-        email: current.email || '',
-        actualName: current.email?.split('@')[0] || 'Player',
-        displayName: current.email?.split('@')[0] || 'player',
-        avatar: '⚽',
+        email: current.email || "",
+        actualName: current.email?.split("@")[0] || "Player",
+        displayName: current.email?.split("@")[0] || "player",
+        avatar: "⚽",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       }
+
       await setDoc(ref, next, { merge: true })
-      setProfile({ uid: current.uid, ...next, isAdmin: (current.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase() })
+
+      setProfile({
+        uid: current.uid,
+        ...next,
+        isAdmin:
+          (current.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+      })
     }
   }
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (current) => {
       setUser(current)
-      if (current) await refreshProfile()
-      else setProfile(null)
+
+      if (current) {
+        await refreshProfile()
+      } else {
+        setProfile(null)
+      }
+
       setLoading(false)
     })
+
     return () => unsub()
   }, [])
 
-  const value = useMemo<AuthContextValue>(() => ({
-    user,
-    profile,
-    loading,
-    isAdmin: Boolean(profile?.isAdmin),
-    refreshProfile,
-    logout: () => signOut(auth),
-  }), [user, profile, loading])
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      profile,
+      loading,
+      isAdmin: Boolean(profile?.isAdmin),
+      refreshProfile,
+      logout: () => signOut(auth),
+    }),
+    [user, profile, loading]
+  )
 
   if (loading) {
-    return <main className="flex min-h-screen items-center justify-center p-6"><Card className="glass-card p-8 text-center font-black">Loading World Cup App...</Card></main>
+    return (
+      <main className="flex min-h-screen items-center justify-center p-6">
+        <Card className="glass-card p-8 text-center font-black">
+          Loading World Cup App...
+        </Card>
+      </main>
+    )
   }
 
   if (!user) return <LoginScreen />
@@ -94,46 +131,68 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={value}>
       <div className="fixed right-4 top-4 z-[60] hidden items-center gap-2 rounded-full border border-white/10 bg-background/85 px-3 py-2 text-xs font-bold shadow-xl backdrop-blur md:flex">
-        <span>{profile?.avatar || '⚽'}</span>
-        <span className="max-w-[160px] truncate">{profile?.actualName || user.email}</span>
+        <span>{profile?.avatar || "⚽"}</span>
+        <span className="max-w-[160px] truncate">
+          {profile?.actualName || user.email}
+        </span>
         {profile?.isAdmin && <ShieldCheck size={14} className="text-primary" />}
-        <button onClick={() => signOut(auth)} className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground" title="Sign out"><LogOut size={14} /></button>
+        <button
+          onClick={() => signOut(auth)}
+          className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+          title="Sign out"
+        >
+          <LogOut size={14} />
+        </button>
       </div>
+
       {children}
     </AuthContext.Provider>
   )
 }
 
 function LoginScreen() {
-  const [mode, setMode] = useState<'login' | 'signup'>('signup')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [actualName, setActualName] = useState('')
-  const [displayName, setDisplayName] = useState('')
-  const [avatar, setAvatar] = useState('⚽')
-  const [error, setError] = useState('')
+  const [mode, setMode] = useState<"login" | "signup">("signup")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [actualName, setActualName] = useState("")
+  const [displayName, setDisplayName] = useState("")
+  const [avatar, setAvatar] = useState("⚽")
+  const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
 
   const submit = async () => {
-    setError('')
+    setError("")
     setBusy(true)
+
     try {
-      if (mode === 'signup') {
-        if (!actualName.trim() || !displayName.trim()) throw new Error('Add your real name and display name first.')
-        const cred = await createUserWithEmailAndPassword(auth, email.trim(), password)
-        await setDoc(doc(db, 'users', cred.user.uid), {
-          email: email.trim(),
-          actualName: actualName.trim(),
-          displayName: displayName.trim(),
-          avatar,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        }, { merge: true })
+      if (mode === "signup") {
+        if (!actualName.trim() || !displayName.trim()) {
+          throw new Error("Add your real name and display name first.")
+        }
+
+        const cred = await createUserWithEmailAndPassword(
+          auth,
+          email.trim(),
+          password
+        )
+
+        await setDoc(
+          doc(db, "users", cred.user.uid),
+          {
+            email: email.trim(),
+            actualName: actualName.trim(),
+            displayName: displayName.trim(),
+            avatar,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        )
       } else {
         await signInWithEmailAndPassword(auth, email.trim(), password)
       }
     } catch (err: any) {
-      setError(err?.message || 'Something went wrong.')
+      setError(err?.message || "Something went wrong.")
     } finally {
       setBusy(false)
     }
@@ -143,35 +202,114 @@ function LoginScreen() {
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="glass-card w-full max-w-xl p-6 shadow-2xl md:p-8">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/15 text-primary"><Trophy size={34} /></div>
-          <h1 className="font-headline text-3xl font-black">World Cup App</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Sign up to join leagues, save predictions and appear on live leaderboards.</p>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/15 text-primary">
+            <Trophy size={34} />
+          </div>
+
+          <h1 className="font-headline text-3xl font-black">
+            World Cup App
+          </h1>
+
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sign up to join leagues, save predictions and appear on live leaderboards.
+          </p>
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-muted/60 p-1">
-          <Button variant={mode === 'signup' ? 'default' : 'ghost'} className="rounded-xl font-black" onClick={() => setMode('signup')}>Sign up</Button>
-          <Button variant={mode === 'login' ? 'default' : 'ghost'} className="rounded-xl font-black" onClick={() => setMode('login')}>Log in</Button>
+          <Button
+            type="button"
+            variant={mode === "signup" ? "default" : "ghost"}
+            className="rounded-xl font-black"
+            onClick={() => setMode("signup")}
+          >
+            Sign up
+          </Button>
+
+          <Button
+            type="button"
+            variant={mode === "login" ? "default" : "ghost"}
+            className="rounded-xl font-black"
+            onClick={() => setMode("login")}
+          >
+            Log in
+          </Button>
         </div>
 
-        <div className="space-y-3">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" />
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-          {mode === 'signup' && (
+        <form
+          className="space-y-3"
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (!busy && email.trim() && password.trim()) {
+              submit()
+            }
+          }}
+        >
+          <Input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Email address"
+            autoComplete="email"
+          />
+
+          <Input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+          />
+
+          {mode === "signup" && (
             <>
               <div className="grid gap-3 md:grid-cols-2">
-                <Input value={actualName} onChange={(e) => setActualName(e.target.value)} placeholder="Actual name for leaderboard" />
-                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name / nickname" />
+                <Input
+                  value={actualName}
+                  onChange={(event) => setActualName(event.target.value)}
+                  placeholder="Actual name for leaderboard"
+                  autoComplete="name"
+                />
+
+                <Input
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  placeholder="Display name / nickname"
+                />
               </div>
+
               <div className="flex flex-wrap gap-2">
                 {FOOTBALL_AVATARS.map((item) => (
-                  <button key={item} type="button" onClick={() => setAvatar(item)} className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-xl transition ${avatar === item ? 'border-primary bg-primary/20' : 'border-border bg-background/45 hover:border-primary/40'}`}>{item}</button>
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setAvatar(item)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-xl transition ${
+                      avatar === item
+                        ? "border-primary bg-primary/20"
+                        : "border-border bg-background/45 hover:border-primary/40"
+                    }`}
+                  >
+                    {item}
+                  </button>
                 ))}
               </div>
             </>
           )}
-          {error && <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm font-bold text-destructive">{error}</div>}
-          <Button className="h-12 w-full rounded-2xl font-black" disabled={busy || !email.trim() || !password.trim()} onClick={submit}>{busy ? 'Working...' : mode === 'signup' ? 'Create account' : 'Log in'}</Button>
-        </div>
+
+          {error && (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm font-bold text-destructive">
+              {error}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-2xl font-black"
+            disabled={busy || !email.trim() || !password.trim()}
+          >
+            {busy ? "Working..." : mode === "signup" ? "Create account" : "Log in"}
+          </Button>
+        </form>
       </Card>
     </main>
   )
