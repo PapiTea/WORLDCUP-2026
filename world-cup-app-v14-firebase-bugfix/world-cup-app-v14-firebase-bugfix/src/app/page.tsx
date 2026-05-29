@@ -18,7 +18,36 @@ function TeamFlag({ team }: { team: any }) {
   return <span className="text-4xl">{team?.flag || "🏳️"}</span>
 }
 
+function formatDate(kickoff: string) {
+  const date = new Date(kickoff)
+
+  if (Number.isNaN(date.getTime())) return "Date TBC"
+
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/London",
+  }).format(date)
+}
+
 export default function HomePage() {
+  const matchesByDate = MATCHES.reduce<Record<string, typeof MATCHES>>(
+    (groups, match) => {
+      const dateLabel = formatDate(match.kickoff)
+
+      if (!groups[dateLabel]) {
+        groups[dateLabel] = []
+      }
+
+      groups[dateLabel].push(match)
+
+      return groups
+    },
+    {}
+  )
+
   return (
     <main className="min-h-screen px-4 pb-28 pt-6 md:pl-28 md:pr-8 md:pb-10">
       <section className="mx-auto max-w-7xl">
@@ -32,70 +61,82 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
-            View the World Cup 2026 fixtures, UK kick-off times, venues and host countries.
+            World Cup 2026 fixtures by date, showing UK kick-off times, venues and host countries.
           </p>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-          {MATCHES.map((match) => (
-            <article
-              key={match.id}
-              className="rounded-[2rem] border border-white/10 bg-card/75 p-5 shadow-xl backdrop-blur"
-            >
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
-                  Group {match.group}
-                </span>
-
-                <span className="text-xl">{match.hostEmoji}</span>
+        <div className="space-y-10">
+          {Object.entries(matchesByDate).map(([dateLabel, matches]) => (
+            <section key={dateLabel} className="space-y-4">
+              <div className="sticky top-3 z-20 rounded-2xl border border-white/10 bg-background/90 px-4 py-3 shadow-xl backdrop-blur">
+                <h2 className="font-headline text-xl font-black md:text-2xl">
+                  {dateLabel}
+                </h2>
               </div>
 
-              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-4 text-center">
-                <div className="flex min-w-0 flex-col items-center gap-3">
-                  <TeamFlag team={match.homeTeam} />
-                  <div className="min-w-0 max-w-full">
-                    <div className="break-words text-lg font-black leading-tight md:text-xl">
-                      {match.homeTeam.name}
-                    </div>
-                    <div className="mt-1 text-xs font-black uppercase text-muted-foreground">
-                      {match.homeTeam.code}
-                    </div>
-                  </div>
-                </div>
+              <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+                {matches.map((match) => (
+                  <article
+                    key={match.id}
+                    className="rounded-[2rem] border border-white/10 bg-card/75 p-5 shadow-xl backdrop-blur"
+                  >
+                    <div className="mb-5 flex items-center justify-between gap-3">
+                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
+                        Group {match.group}
+                      </span>
 
-                <div className="mt-8 rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
-                  vs
-                </div>
+                      <span className="text-xl">{match.hostEmoji}</span>
+                    </div>
 
-                <div className="flex min-w-0 flex-col items-center gap-3">
-                  <TeamFlag team={match.awayTeam} />
-                  <div className="min-w-0 max-w-full">
-                    <div className="break-words text-lg font-black leading-tight md:text-xl">
-                      {match.awayTeam.name}
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-4 text-center">
+                      <div className="flex min-w-0 flex-col items-center gap-3">
+                        <TeamFlag team={match.homeTeam} />
+                        <div className="min-w-0 max-w-full">
+                          <div className="break-words text-lg font-black leading-tight md:text-xl">
+                            {match.homeTeam.name}
+                          </div>
+                          <div className="mt-1 text-xs font-black uppercase text-muted-foreground">
+                            {match.homeTeam.code}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">
+                        vs
+                      </div>
+
+                      <div className="flex min-w-0 flex-col items-center gap-3">
+                        <TeamFlag team={match.awayTeam} />
+                        <div className="min-w-0 max-w-full">
+                          <div className="break-words text-lg font-black leading-tight md:text-xl">
+                            {match.awayTeam.name}
+                          </div>
+                          <div className="mt-1 text-xs font-black uppercase text-muted-foreground">
+                            {match.awayTeam.code}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-1 text-xs font-black uppercase text-muted-foreground">
-                      {match.awayTeam.code}
+
+                    <div className="mt-5 space-y-2 rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CalendarDays size={16} />
+                        <span className="font-bold text-foreground">
+                          {match.ukKickoff} UK time
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <MapPin size={16} className="mt-0.5 shrink-0" />
+                        <span>
+                          {match.venue}, {match.location}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </article>
+                ))}
               </div>
-
-              <div className="mt-5 space-y-2 rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CalendarDays size={16} />
-                  <span className="font-bold text-foreground">
-                    {match.ukKickoff} UK time
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <MapPin size={16} className="mt-0.5 shrink-0" />
-                  <span>
-                    {match.venue}, {match.location}
-                  </span>
-                </div>
-              </div>
-            </article>
+            </section>
           ))}
         </div>
       </section>
