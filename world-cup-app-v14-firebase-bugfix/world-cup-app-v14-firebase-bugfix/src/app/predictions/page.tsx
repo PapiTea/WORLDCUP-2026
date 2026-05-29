@@ -75,15 +75,27 @@ export default function PredictionsPage() {
         match.awayTeamCode || match.awayTeam || match.away || ""
       ).toUpperCase()
 
-      const searchableText = [
-        ...Object.values(match),
-        TEAM_SEARCH_NAMES[homeCode],
-        TEAM_SEARCH_NAMES[awayCode],
-        `group ${String(match.group || "").toLowerCase()}`,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
+const searchableText = [
+  ...Object.values(match),
+
+  match.homeTeam?.name,
+  match.homeTeam?.code,
+
+  match.awayTeam?.name,
+  match.awayTeam?.code,
+
+  TEAM_SEARCH_NAMES[homeCode],
+  TEAM_SEARCH_NAMES[awayCode],
+
+  match.location,
+  match.venue,
+
+  String(match.group || ""),
+  `group ${String(match.group || "").toLowerCase()}`,
+]
+  .filter(Boolean)
+  .join(" ")
+  .toLowerCase()
 
       return searchableText.includes(query)
     })
