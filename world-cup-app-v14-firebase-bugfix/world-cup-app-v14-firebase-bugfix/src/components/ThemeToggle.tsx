@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
     const saved = window.localStorage.getItem('wc-theme') as 'light' | 'dark' | null
