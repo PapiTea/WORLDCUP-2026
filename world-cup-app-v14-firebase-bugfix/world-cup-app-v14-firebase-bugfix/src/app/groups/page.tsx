@@ -25,9 +25,8 @@ export default function GroupsPage() {
               </h1>
 
               <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
-                Choose the two teams you think will qualify from each group.
-                Group qualifier picks lock when the World Cup starts and cannot
-                be changed afterwards.
+Choose the two teams you think will finish highest in each group.
+The best third-placed teams will be added to the knockout stage by the admin once confirmed. Group picks lock when the World Cup starts and cannot be changed afterwards.
               </p>
             </div>
 
