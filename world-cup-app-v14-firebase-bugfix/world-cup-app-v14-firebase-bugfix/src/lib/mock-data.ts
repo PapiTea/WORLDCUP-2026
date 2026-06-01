@@ -188,11 +188,11 @@ export interface KnockoutFixture {
 }
 
 export const KNOCKOUT_ROUNDS: { id: KnockoutRoundId; name: string; helper: string }[] = [
-  { id: 'R32', name: 'Round of 32', helper: 'First knockout round. Fill these from the admin page once groups are complete.' },
-  { id: 'R16', name: 'Round of 16', helper: 'Use admin to move winners into these slots after Round of 32 results.' },
-  { id: 'QF', name: 'Quarter-finals', helper: 'Use admin to move winners into these slots after Round of 16 results.' },
-  { id: 'SF', name: 'Semi-finals', helper: 'Use admin to move winners into these slots after quarter-final results.' },
-  { id: 'FINAL', name: 'Final', helper: 'Use admin to set the two finalists when known.' },
+  { id: 'R32', name: 'Round of 32', helper: 'Knockout fixtures will unlock once the tournament reaches this stage.' },
+  { id: 'R16', name: 'Round of 16', helper: 'Predict who progresses once these fixtures are confirmed.' },
+  { id: 'QF', name: 'Quarter-finals', helper: 'Quarter-final fixtures will appear once teams progress.' },
+  { id: 'SF', name: 'Semi-finals', helper: 'Semi-final fixtures will appear once teams progress.' },
+  { id: 'FINAL', name: 'Final', helper: 'Predict the final once the two finalists are confirmed.' },
 ]
 
 export const KNOCKOUT_SLOTS: { id: string; label: string; round: KnockoutRoundId; note: string }[] = [
