@@ -132,3 +132,4 @@ return {
   groupPoints,
   winnerPoints,
 }
+}
