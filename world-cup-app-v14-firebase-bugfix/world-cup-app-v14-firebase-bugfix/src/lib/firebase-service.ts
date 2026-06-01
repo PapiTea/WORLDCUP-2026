@@ -158,6 +158,8 @@ export function subscribeAllPredictions(cb: (predictions: MatchPrediction[]) => 
 }
 export function subscribeAllLeagueMembers(cb: (members: LeagueMember[]) => void): Unsubscribe {
   return onSnapshot(collection(db, 'leagueMembers'), (snap) => cb(snap.docs.map(d => d.data() as LeagueMember)))
+}
+
 export function saveGlobalMessage(message: string) {
   return setDoc(
     doc(db, "appSettings", "globalMessage"),
@@ -170,25 +172,19 @@ export function saveGlobalMessage(message: string) {
 }
 
 export function clearGlobalMessage() {
-  return deleteDoc(
-    doc(db, "appSettings", "globalMessage")
-  )
+  return deleteDoc(doc(db, "appSettings", "globalMessage"))
 }
 
 export function subscribeGlobalMessage(
   cb: (message: string) => void
 ): Unsubscribe {
-  return onSnapshot(
-    doc(db, "appSettings", "globalMessage"),
-    (snap) => {
-      if (!snap.exists()) {
-        cb("")
-        return
-      }
-
-      const data = snap.data() as any
-      cb(data.message || "")
+  return onSnapshot(doc(db, "appSettings", "globalMessage"), (snap) => {
+    if (!snap.exists()) {
+      cb("")
+      return
     }
-  )
-}
+
+    const data = snap.data() as any
+    cb(data.message || "")
+  })
 }
