@@ -137,7 +137,7 @@ export default function HomePage() {
   <button
     type="button"
     onClick={() => setShowHowToPlay(true)}
-    className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary"
+   className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-background"
   >
     How To Play
   </button>
@@ -145,7 +145,7 @@ export default function HomePage() {
   <button
     type="button"
     onClick={() => setShowPoints(true)}
-    className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary"
+   className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-background"
   >
     Points
   </button>
