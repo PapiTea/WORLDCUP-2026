@@ -8,6 +8,23 @@ export type GroupPrediction = { userId: string; groupId: string; picks: string[]
 export type League = { id: string; code: string; name: string; ownerId: string; createdAt?: unknown }
 export type LeagueMember = { id: string; leagueId: string; userId: string; joinedAt?: unknown }
 export type UserDoc = UserProfile & { email?: string }
+export function subscribeUserSingleMatchPrediction(
+  userId: string,
+  matchId: string,
+  type: 'group' | 'knockout',
+  cb: (prediction: MatchPrediction | null) => void
+): Unsubscribe {
+  const id = `${userId}_${type}_${matchId}`
+
+  return onSnapshot(doc(db, 'predictions', id), (snap) => {
+    if (!snap.exists()) {
+      cb(null)
+      return
+    }
+
+    cb(snap.data() as MatchPrediction)
+  })
+}
 
 export function subscribeDocMap<T>(collectionName: string, cb: (items: Record<string, T>) => void): Unsubscribe {
   return onSnapshot(collection(db, collectionName), (snap) => {
