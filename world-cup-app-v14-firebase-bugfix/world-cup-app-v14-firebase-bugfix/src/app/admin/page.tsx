@@ -312,19 +312,31 @@ export default function AdminPage() {
     notifyKnockoutChange()
   }
 
-  const publishAdminMessage = async () => {
-    const cleanMessage = adminMessage.trim()
-    if (!cleanMessage) return
+const publishAdminMessage = async () => {
+  const cleanMessage = adminMessage.trim()
+  if (!cleanMessage) return
 
+  try {
     await saveGlobalMessage(cleanMessage)
     setSaved(true)
+    window.alert("Message published!")
+  } catch (error) {
+    console.error("Message publish failed:", error)
+    window.alert("Message failed to publish. Check Firebase rules.")
   }
+}
 
-  const clearAdminMessage = async () => {
+const clearAdminMessage = async () => {
+  try {
     await clearGlobalMessage()
     setAdminMessage("")
     setSaved(true)
+    window.alert("Message cleared!")
+  } catch (error) {
+    console.error("Message clear failed:", error)
+    window.alert("Message failed to clear. Check Firebase rules.")
   }
+}
 
   if (!isAdmin) {
     return (
