@@ -1,8 +1,10 @@
-import { GROUPS, KNOCKOUT_FIXTURES, MATCHES } from './mock-data'
+import { GROUPS, KNOCKOUT_FIXTURES, MATCHES, TEAMS } from './mock-data'
 
 export type SavedPick = { home: number; away: number; confidence?: boolean }
 export type SavedResult = { home: number; away: number }
-
+export type TournamentWinnerPick = {
+  teamId: string
+}
 type StorageLike = Pick<Storage, 'getItem'>
 
 function readJson<T>(storage: StorageLike, key: string, fallback: T): T {
@@ -96,6 +98,8 @@ export function calculateScoreFromData(input: {
   results: Record<string, SavedResult | undefined>
   knockoutResults: Record<string, SavedResult | undefined>
   qualifiers: Record<string, string[] | undefined>
+  tournamentWinnerPick?: string
+  actualTournamentWinner?: string
 }) {
   let matchPoints = 0
   let groupPoints = 0
@@ -112,5 +116,19 @@ export function calculateScoreFromData(input: {
     const correctPositions = picks.filter((id, index) => qualified[index] === id).length
     groupPoints += correctTeams * 2 + correctPositions * 3
   })
-  return { total: matchPoints + groupPoints, matchPoints, groupPoints }
+  let winnerPoints = 0
+
+if (
+  input.tournamentWinnerPick &&
+  input.actualTournamentWinner &&
+  input.tournamentWinnerPick === input.actualTournamentWinner
+) {
+  winnerPoints = 50
+}
+
+return {
+  total: matchPoints + groupPoints + winnerPoints,
+  matchPoints,
+  groupPoints,
+  winnerPoints,
 }
