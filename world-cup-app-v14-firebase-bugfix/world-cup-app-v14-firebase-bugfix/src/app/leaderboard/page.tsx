@@ -83,7 +83,7 @@ export default function LeaderboardPage() {
     <main className="min-h-screen pb-24 md:pb-8 pt-6 px-4 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
       <header className="mb-8">
         <h1 className="text-3xl font-headline font-bold mb-2">Leaderboard</h1>
-        <p className="text-muted-foreground text-sm">Live leaderboards now use Firebase: predictions, leagues and admin results sync across users.</p>
+        <p className="text-muted-foreground text-sm">Live leaderboards.</p>
       </header>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
