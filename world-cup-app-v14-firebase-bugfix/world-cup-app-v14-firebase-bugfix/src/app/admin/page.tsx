@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { GROUPS, KNOCKOUT_FIXTURES, KNOCKOUT_ROUNDS, KNOCKOUT_SLOTS, MATCHES, TEAMS, getTeamById } from "@/lib/mock-data"
 import { useAuth } from "@/components/AuthGate"
-import { clearKnockoutSlot, deleteMatchResult, saveKnockoutSlot, saveMatchResult, saveQualifier, subscribeKnockoutSetup, subscribeResults } from "@/lib/firebase-service"
+import { clearKnockoutSlot,saveGlobalMessage,clearGlobalMessage, deleteMatchResult, saveKnockoutSlot, saveMatchResult, saveQualifier, subscribeKnockoutSetup, subscribeResults } from "@/lib/firebase-service"
 import { CheckCircle2, RotateCcw, ShieldCheck, Trophy, Lock } from "lucide-react"
 
 type ScoreMap = Record<string, { home: number | ""; away: number | "" }>
@@ -25,6 +25,7 @@ export default function AdminPage() {
   const [qualifiers, setQualifiers] = useState<QualifierMap>({})
   const [slots, setSlots] = useState<SlotMap>({})
   const [saved, setSaved] = useState(false)
+  const [adminMessage, setAdminMessage] = useState("")
 
   useEffect(() => {
     if (!isAdmin) return
@@ -208,10 +209,41 @@ export default function AdminPage() {
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
             This page is purely for you to populate final scores and the knockout bracket because the app is not using a live sports API. Whatever you save here becomes the source of truth for final scores, knockout fixtures and point calculations for everyone.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            {saved && <span className="inline-flex items-center gap-1 text-sm font-bold text-primary"><CheckCircle2 size={16} /> Saved online</span>}
-            <Button variant="outline" className="rounded-2xl" onClick={resetAdminData}><RotateCcw size={15} className="mr-2" /> Reset admin data</Button>
-          </div>
+<div className="mt-4 flex flex-wrap items-center gap-3">
+  ...
+</div>
+
+<div className="mt-6 rounded-3xl border border-white/10 bg-background/40 p-4">
+  <h3 className="mb-3 font-black">
+    Global Message
+  </h3>
+
+  <textarea
+    value={adminMessage}
+    onChange={(e) => setAdminMessage(e.target.value)}
+    placeholder="Write a message for all users..."
+    className="min-h-[120px] w-full rounded-2xl border border-border bg-background p-3 text-sm"
+  />
+
+  <div className="mt-3 flex gap-2">
+    <Button
+      onClick={() => saveGlobalMessage(adminMessage)}
+      className="rounded-2xl font-black"
+    >
+      Publish Message
+    </Button>
+
+    <Button
+      variant="outline"
+      onClick={() => {
+        clearGlobalMessage()
+        setAdminMessage("")
+      }}
+      className="rounded-2xl font-black"
+    >
+      Clear Message
+    </Button>
+  </div>
         </div>
 
         <section className="space-y-4">
