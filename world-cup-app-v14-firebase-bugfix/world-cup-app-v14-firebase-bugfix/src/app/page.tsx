@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { HowToPlayModal } from "@/components/HowToPlayModal"
+import { PointsModal } from "@/components/PointsModal"
 import { BottomNav } from "@/components/BottomNav"
 import { GROUPS, MATCHES } from "@/lib/mock-data"
 import { CalendarDays, Lock, MapPin, Trophy } from "lucide-react"
@@ -56,6 +58,8 @@ function getCountdown(now: Date) {
 
 export default function HomePage() {
   const { user } = useAuth()
+  const [showHowToPlay, setShowHowToPlay] = useState(false)
+  const [showPoints, setShowPoints] = useState(false)
   const [now, setNow] = useState(() => new Date())
   const [winnerPick, setWinnerPick] = useState("")
 
@@ -121,15 +125,31 @@ export default function HomePage() {
     <main className="min-h-screen px-4 pb-28 pt-6 md:pl-28 md:pr-8 md:pb-10">
       <section className="mx-auto max-w-7xl">
         <div className="mb-8 overflow-hidden rounded-[2rem] border border-white/10 bg-card/70 p-6 shadow-2xl backdrop-blur md:p-8">
-          <div className="mb-3 flex flex-wrap items-center gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary">
-              <Trophy size={14} /> World Cup App
-            </div>
+         <div className="mb-3 flex flex-wrap items-center gap-3">
+  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary">
+    <Trophy size={14} /> World Cup App
+  </div>
 
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary">
-              {tournamentLocked ? "Tournament started" : getCountdown(now)}
-            </div>
-          </div>
+  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary">
+    {tournamentLocked ? "Tournament started" : getCountdown(now)}
+  </div>
+
+  <button
+    type="button"
+    onClick={() => setShowHowToPlay(true)}
+    className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary"
+  >
+    How To Play
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setShowPoints(true)}
+    className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-primary"
+  >
+    Points
+  </button>
+</div>
 
           <h1 className="font-headline text-4xl font-black tracking-tight md:text-5xl">
             Fixtures
@@ -289,7 +309,13 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+{showHowToPlay && (
+  <HowToPlayModal onClose={() => setShowHowToPlay(false)} />
+)}
 
+{showPoints && (
+  <PointsModal onClose={() => setShowPoints(false)} />
+)}
       <BottomNav />
     </main>
   )
