@@ -131,17 +131,29 @@ const isLocked =
   useEffect(() => {
     const savedPick = window.localStorage.getItem(`wc-match-${match.id}`)
 
-    if (savedPick) {
-      try {
-        const pick = JSON.parse(savedPick)
+if (savedPick) {
+  try {
+    const pick = JSON.parse(savedPick)
 
-        setScoreState({
-          homeScore: pick.home === undefined ? "" : String(pick.home),
-          awayScore: pick.away === undefined ? "" : String(pick.away),
-          saved: true,
-        })
-      } catch {}
-    } else {
+    setScoreState({
+      homeScore: pick.home === undefined ? "" : String(pick.home),
+      awayScore: pick.away === undefined ? "" : String(pick.away),
+      saved: true,
+    })
+
+    if (
+      user &&
+      pick.home !== undefined &&
+      pick.away !== undefined
+    ) {
+      saveMatchPrediction(user.uid, match.id, "group", {
+        home: Number(pick.home),
+        away: Number(pick.away),
+        confidence: Boolean(pick.confidence),
+      })
+    }
+  } catch {}
+} else {
       setScoreState({
         homeScore: "",
         awayScore: "",
@@ -162,7 +174,7 @@ const isLocked =
       window.removeEventListener("storage", onConfidenceUpdate)
       window.removeEventListener("focus", onConfidenceUpdate)
     }
-  }, [match.id])
+  }, [match.id, user])
 
 useEffect(() => {
   if (!user) return
