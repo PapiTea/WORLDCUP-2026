@@ -13,7 +13,7 @@ import { HostBadge } from "@/components/HostBadge"
 import { useAuth } from "@/components/AuthGate"
 import {
   saveMatchPrediction,
-  subscribeUserMatchPredictions,
+  subscribeUserSingleMatchPrediction,
 } from "@/lib/firebase-service"
 
 interface MatchCardProps {
@@ -164,12 +164,14 @@ const isLocked =
     }
   }, [match.id])
 
-  useEffect(() => {
-    if (!user) return
+useEffect(() => {
+  if (!user) return
 
-    const unsub = subscribeUserMatchPredictions(user.uid, (items) => {
-      const remote = items[`group_${match.id}`]
-
+  const unsub = subscribeUserSingleMatchPrediction(
+    user.uid,
+    match.id,
+    "group",
+    (remote) => {
       if (!remote) return
 
       const nextHome = remote.home === undefined ? "" : String(remote.home)
