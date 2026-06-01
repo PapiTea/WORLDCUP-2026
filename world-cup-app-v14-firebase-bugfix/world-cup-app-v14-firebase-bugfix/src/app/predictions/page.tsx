@@ -173,7 +173,7 @@ const searchableText = [
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                These cards unlock naturally as you assign teams to bracket slots from the Admin page. Empty ties show as TBC, so players know the stage is prepared but not ready yet.
+                Once each fixture is populated, predit your scores! Empty ties show as TBC, meaning the stage is prepared but not ready yet.
               </p>
             </div>
 
