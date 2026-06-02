@@ -120,15 +120,31 @@ const unsub = onAuthStateChanged(auth, async (current) => {
     [user, profile, loading]
   )
 
-  if (loading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center p-6">
-        <Card className="glass-card p-8 text-center font-black">
-          Loading World Cup App...
-        </Card>
-      </main>
-    )
-  }
+if (loading) {
+  return (
+    <main className="fixed inset-0 z-[999] flex min-h-screen items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-5">
+        <div className="relative flex h-28 w-28 items-center justify-center">
+          <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+          <div className="absolute h-24 w-24 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+
+          <div className="z-10 flex h-16 w-16 items-center justify-center rounded-full bg-card text-4xl shadow-2xl">
+            ⚽
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p className="font-headline text-sm font-black uppercase tracking-[0.28em] text-primary">
+            Loading
+          </p>
+          <p className="mt-1 text-xs font-bold text-muted-foreground">
+            Setting up your World Cup picks...
+          </p>
+        </div>
+      </div>
+    </main>
+  )
+}
 
   if (!user) return <LoginScreen />
 
