@@ -29,7 +29,7 @@ import {
 } from "@/lib/firebase-service"
 
 export default function LeaderboardPage() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
 
   const [users, setUsers] = useState<Record<string, UserDoc>>({})
   const [predictions, setPredictions] = useState<MatchPrediction[]>([])
@@ -178,19 +178,21 @@ export default function LeaderboardPage() {
       </div>
 
       <Tabs defaultValue="my-leagues" className="space-y-6">
-        <TabsList className="glass-card w-full grid grid-cols-2 p-1 h-12">
+       <TabsList className={`glass-card w-full grid p-1 h-12 ${isAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
           <TabsTrigger
             value="my-leagues"
             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg font-bold"
           >
             My Leagues
           </TabsTrigger>
-          <TabsTrigger
+         {isAdmin && (
+         <TabsTrigger
             value="overall"
             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg font-bold"
           >
             Overall
           </TabsTrigger>
+      )}
         </TabsList>
 
         <TabsContent value="my-leagues" className="space-y-4">
@@ -269,6 +271,7 @@ export default function LeaderboardPage() {
           )}
         </TabsContent>
 
+       {isAdmin && (
         <TabsContent value="overall" className="space-y-3">
           {overallRows.length ? (
             overallRows.map((row, index) => (
@@ -289,6 +292,7 @@ export default function LeaderboardPage() {
             />
           )}
         </TabsContent>
+      )}
       </Tabs>
 
       <BottomNav />
