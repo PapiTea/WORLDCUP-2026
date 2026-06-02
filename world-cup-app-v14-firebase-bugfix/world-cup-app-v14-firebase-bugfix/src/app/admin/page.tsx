@@ -311,7 +311,64 @@ export default function AdminPage() {
 
     notifyKnockoutChange()
   }
+const syncLiveScores = async () => {
+  try {
+    const response = await fetch("/api/sync-scores", {
+      method: "GET",
+    })
 
+    const data = await response.json()
+
+    if (!response.ok) {
+      console.error(data)
+      window.alert("Live score sync failed. Check console/API settings.")
+      return
+    }
+
+    const synced = data.synced || []
+
+    if (!synced.length) {
+      window.alert("No matching scores found from the API.")
+      return
+    }
+
+    for (const item of synced) {
+      if (
+        !item ||
+        !item.matchId ||
+        typeof item.home !== "number" ||
+        typeof item.away !== "number"
+      ) {
+        continue
+      }
+
+      window.localStorage.setItem(
+        `wc-result-${item.matchId}`,
+        JSON.stringify({
+          home: item.home,
+          away: item.away,
+          status: item.status,
+          elapsed: item.elapsed ?? null,
+          apiFixtureId: item.apiFixtureId,
+        })
+      )
+
+      await saveMatchResult(item.matchId, {
+        home: item.home,
+        away: item.away,
+        status: item.status,
+        elapsed: item.elapsed ?? null,
+        apiFixtureId: item.apiFixtureId,
+      })
+    }
+
+    setSaved(true)
+    window.alert(`Synced ${synced.length} match updates.`)
+  } catch (error) {
+    console.error("Live score sync failed:", error)
+    window.alert("Live score sync failed. Check console.")
+  }
+}
 const publishAdminMessage = async () => {
   const cleanMessage = adminMessage.trim()
   if (!cleanMessage) return
@@ -381,7 +438,12 @@ const clearAdminMessage = async () => {
                 <CheckCircle2 size={16} /> Saved online
               </span>
             )}
-
+<Button
+  className="rounded-2xl font-black"
+  onClick={syncLiveScores}
+>
+  Sync Live Scores
+</Button>
             <Button
               variant="outline"
               className="rounded-2xl"
