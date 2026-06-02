@@ -205,26 +205,25 @@ function LoginScreen() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="glass-card w-full max-w-xl p-6 shadow-2xl md:p-8">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/15 text-primary">
-<div className="mb-6 flex justify-center">
-  <img
-    src="/flags/world-cup-logo-light.png"
-    alt="World Cup 2026"
-    className="h-52 w-52 object-contain dark:hidden"
-  />
+       <div className="mb-6 text-center">
+  <div className="mb-6 flex justify-center">
+    <img
+      src="/flags/world-cup-logo-light.png"
+      alt="World Cup 2026"
+      className="h-52 w-52 object-contain dark:hidden"
+    />
 
-  <img
-    src="/flags/world-cup-logo-dark.png"
-    alt="World Cup 2026"
-    className="hidden h-52 w-52 object-contain dark:block"
-  />
+    <img
+      src="/flags/world-cup-logo-dark.png"
+      alt="World Cup 2026"
+      className="hidden h-52 w-52 object-contain dark:block"
+    />
+  </div>
+
+  <p className="text-center text-sm font-medium text-muted-foreground">
+    Sign up to join leagues, save predictions and compete with friends.
+  </p>
 </div>
-
-<p className="text-center text-sm font-medium text-muted-foreground">
-  Sign up to join leagues, save predictions and compete with friends.
-</p>
-
         <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-muted/60 p-1">
           <Button
             type="button"
