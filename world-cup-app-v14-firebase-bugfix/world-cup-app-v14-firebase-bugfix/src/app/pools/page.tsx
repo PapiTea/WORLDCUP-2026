@@ -288,7 +288,6 @@ const joinPool = async () => {
             placeholder="e.g. Friends League or Office League"
           />
 
-          <Button
 <Button
   variant={createStatus === "created" ? "default" : "outline"}
   className={
