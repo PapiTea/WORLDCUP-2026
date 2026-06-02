@@ -326,7 +326,6 @@ useEffect(() => {
                   </article>
   )
 })}
-                ))}
               </div>
             </section>
           ))}
