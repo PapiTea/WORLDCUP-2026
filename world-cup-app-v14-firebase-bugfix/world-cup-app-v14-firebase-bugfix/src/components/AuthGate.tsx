@@ -207,7 +207,19 @@ function LoginScreen() {
       <Card className="glass-card w-full max-w-xl p-6 shadow-2xl md:p-8">
         <div className="mb-6 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/15 text-primary">
-            <Trophy size={34} />
+          <div className="mx-auto mb-4 flex justify-center">
+  <img
+    src="/flags/world-cup-logo-light.png"
+    alt="World Cup 2026"
+    className="h-28 w-28 object-contain dark:hidden"
+  />
+
+  <img
+    src="/flags/world-cup-logo-dark.png"
+    alt="World Cup 2026"
+    className="hidden h-28 w-28 object-contain dark:block"
+  />
+</div>
           </div>
 
           <h1 className="font-headline text-3xl font-black">
