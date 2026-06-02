@@ -14,6 +14,8 @@ import { useAuth } from "@/components/AuthGate"
 import {
   saveMatchPrediction,
   subscribeUserSingleMatchPrediction,
+  subscribeResults,
+  type Score,
 } from "@/lib/firebase-service"
 
 interface MatchCardProps {
@@ -73,6 +75,14 @@ export function MatchCard({ match, onSave }: MatchCardProps) {
   const [confidenceIds, setConfidenceIds] = useState<string[]>([])
   const [limitMessage, setLimitMessage] = useState(false)
   const [now, setNow] = useState(() => new Date())
+  const [liveResult, setLiveResult] = useState<Score | null>(null)
+  useEffect(() => {
+  const unsub = subscribeResults((items) => {
+    setLiveResult(items[match.id] || null)
+  })
+
+  return () => unsub()
+}, [match.id])
 
   const scoreRef = useRef<ScoreState>({
     homeScore: "",
@@ -94,12 +104,13 @@ export function MatchCard({ match, onSave }: MatchCardProps) {
 
   const kickoffTime = new Date(match.kickoff)
 
- const currentActual =
+const currentActual =
   typeof window !== "undefined"
     ? window.localStorage.getItem(`wc-result-${match.id}`)
     : null
 
-const hasResult = Boolean(currentActual)
+const hasResult = Boolean(currentActual || liveResult)
+const isLive = liveResult?.status === "LIVE"
 
 const isLocked =
   now >= kickoffTime ||
@@ -311,11 +322,16 @@ useEffect(() => {
             </span>
           )}
 
-          {hasResult && (
-            <span className="text-[10px] font-black uppercase text-muted-foreground">
-              Result added
-            </span>
-          )}
+  {isLive ? (
+  <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 px-2 py-1 text-[10px] font-black uppercase text-green-600 shadow-[0_0_14px_rgba(34,197,94,0.45)]">
+    <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+    Live {liveResult?.elapsed ? `${liveResult.elapsed}'` : ""}
+  </span>
+) : hasResult ? (
+  <span className="text-[10px] font-black uppercase text-muted-foreground">
+    Result added
+  </span>
+) : null}
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-muted-foreground">
@@ -356,7 +372,11 @@ useEffect(() => {
             className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg"
           />
         </div>
-
+{liveResult && (
+  <div className="mt-3 rounded-2xl bg-muted/50 px-3 py-2 text-center text-xs font-black text-muted-foreground">
+    Actual score: {liveResult.home} - {liveResult.away}
+  </div>
+)}
         <TeamBlock team={match.awayTeam} />
       </div>
 
