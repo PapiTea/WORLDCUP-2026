@@ -57,15 +57,22 @@ export function BottomNav() {
       </nav>
 
       <aside className="fixed bottom-0 left-0 top-0 z-50 hidden w-[88px] flex-col border-r border-white/5 bg-background/85 px-2 py-5 backdrop-blur-xl md:flex">
-        <Link
-          href="/"
-          className="mb-6 flex flex-col items-center gap-1 rounded-2xl p-2 text-center text-primary"
-        >
-          <Trophy size={26} />
-          <span className="text-[10px] font-black uppercase leading-tight">
-            World Cup App
-          </span>
-        </Link>
+       <Link
+  href="/"
+  className="mb-6 flex flex-col items-center gap-1 rounded-2xl p-2 text-center text-primary"
+>
+  <img
+    src="/flags/world-cup-logo-light.png"
+    alt="World Cup 2026"
+    className="h-16 w-16 object-contain dark:hidden"
+  />
+
+  <img
+    src="/flags/world-cup-logo-dark.png"
+    alt="World Cup 2026"
+    className="hidden h-16 w-16 object-contain dark:block"
+  />
+</Link>
 
         <div className="flex flex-1 flex-col gap-2">
           {navItems.map((item) => {
