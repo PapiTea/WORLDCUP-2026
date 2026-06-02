@@ -2,7 +2,14 @@ import { collection, deleteDoc, doc, getDocs, onSnapshot, query, serverTimestamp
 import { db } from './firebase'
 import type { UserProfile } from './profile'
 
-export type Score = { home: number; away: number }
+export type Score = {
+  home: number
+  away: number
+  status?: "SCHEDULED" | "LIVE" | "FINISHED"
+  elapsed?: number | null
+  apiFixtureId?: number
+  updatedAt?: unknown
+}
 export type MatchPrediction = Score & { confidence?: boolean; userId: string; matchId: string; type: 'group' | 'knockout'; updatedAt?: unknown }
 export type GroupPrediction = { userId: string; groupId: string; picks: string[]; updatedAt?: unknown }
 export type League = { id: string; code: string; name: string; ownerId: string; createdAt?: unknown }
@@ -85,13 +92,37 @@ export function subscribeUserGroupPredictions(userId: string, cb: (items: Record
 }
 
 export function saveMatchResult(matchId: string, score: Score) {
-  return setDoc(doc(db, 'matchResults', matchId), { matchId, ...score, updatedAt: serverTimestamp() }, { merge: true })
+  return setDoc(
+    doc(db, "matchResults", matchId),
+    {
+      matchId,
+      ...score,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
 }
 export function deleteMatchResult(matchId: string) { return deleteDoc(doc(db, 'matchResults', matchId)) }
-export function subscribeResults(cb: (items: Record<string, Score>) => void): Unsubscribe {
-  return onSnapshot(collection(db, 'matchResults'), (snap) => {
+export function subscribeResults(
+  cb: (items: Record<string, Score>) => void
+): Unsubscribe {
+  return onSnapshot(collection(db, "matchResults"), (snap) => {
     const out: Record<string, Score> = {}
-    snap.forEach((d) => { const data = d.data() as Score; if (typeof data.home === 'number' && typeof data.away === 'number') out[d.id] = { home: data.home, away: data.away } })
+
+    snap.forEach((d) => {
+      const data = d.data() as Score
+
+      if (typeof data.home === "number" && typeof data.away === "number") {
+        out[d.id] = {
+          home: data.home,
+          away: data.away,
+          status: data.status,
+          elapsed: data.elapsed ?? null,
+          apiFixtureId: data.apiFixtureId,
+        }
+      }
+    })
+
     cb(out)
   })
 }
