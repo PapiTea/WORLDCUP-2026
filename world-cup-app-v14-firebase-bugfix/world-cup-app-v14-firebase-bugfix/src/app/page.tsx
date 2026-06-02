@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/BottomNav"
 import { GROUPS, MATCHES } from "@/lib/mock-data"
 import { CalendarDays, Lock, MapPin, Trophy } from "lucide-react"
 import { useAuth } from "@/components/AuthGate"
+import { subscribeResults, type Score } from "@/lib/firebase-service"
 import {
   saveTournamentWinner,
   subscribeTournamentWinner,
@@ -58,6 +59,7 @@ function getCountdown(now: Date) {
 
 export default function HomePage() {
   const { user } = useAuth()
+  const [liveResults, setLiveResults] = useState<Record<string, Score>>({})
   const [showHowToPlay, setShowHowToPlay] = useState(false)
   const [showPoints, setShowPoints] = useState(false)
   const [now, setNow] = useState(() => new Date())
@@ -88,7 +90,11 @@ export default function HomePage() {
 
     return () => window.clearInterval(timer)
   }, [])
+useEffect(() => {
+  const unsub = subscribeResults(setLiveResults)
 
+  return () => unsub()
+}, [])
   useEffect(() => {
     if (!user) return
 
@@ -244,7 +250,11 @@ export default function HomePage() {
               </div>
 
               <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-                {matches.map((match) => (
+              {matches.map((match) => {
+  const liveResult = liveResults[match.id]
+  const isLive = liveResult?.status === "LIVE"
+
+  return (
                   <article
                     key={match.id}
                     className="rounded-[2rem] border border-white/10 bg-card/75 p-5 shadow-xl backdrop-blur"
@@ -254,7 +264,14 @@ export default function HomePage() {
                         Group {match.group}
                       </span>
 
-                      <span className="text-xl">{match.hostEmoji}</span>
+                    {isLive ? (
+  <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 px-2 py-1 text-[10px] font-black uppercase text-green-600 shadow-[0_0_14px_rgba(34,197,94,0.45)]">
+    <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+    Live {liveResult?.elapsed ? `${liveResult.elapsed}'` : ""}
+  </span>
+) : (
+  <span className="text-xl">{match.hostEmoji}</span>
+)}
                     </div>
 
                     <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-4 text-center">
@@ -286,7 +303,11 @@ export default function HomePage() {
                         </div>
                       </div>
                     </div>
-
+{liveResult && (
+  <div className="mt-5 rounded-2xl bg-muted/50 px-4 py-3 text-center text-sm font-black text-foreground">
+    Current score: {liveResult.home} - {liveResult.away}
+  </div>
+)}
                     <div className="mt-5 space-y-2 rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <CalendarDays size={16} />
@@ -303,6 +324,8 @@ export default function HomePage() {
                       </div>
                     </div>
                   </article>
+  )
+})}
                 ))}
               </div>
             </section>
