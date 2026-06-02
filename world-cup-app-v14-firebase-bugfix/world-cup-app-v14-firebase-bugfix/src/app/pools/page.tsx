@@ -46,6 +46,8 @@ export default function PoolsPage() {
   const [poolName, setPoolName] = useState("")
   const [joinCode, setJoinCode] = useState("")
   const [copied, setCopied] = useState("")
+  const [joinStatus, setJoinStatus] = useState<"idle" | "joined" | "invalid">("idle")
+const [createStatus, setCreateStatus] = useState<"idle" | "created">("idle")
 
   const [actualName, setActualName] = useState("")
   const [displayName, setDisplayName] = useState("")
@@ -136,25 +138,38 @@ const saveProfile = async () => {
   }
 }
 
-  const createPool = async (name: string) => {
-    if (!user) return
+const createPool = async (name: string) => {
+  if (!user) return
 
-    const cleanName = name.trim() || "My League"
+  const cleanName = name.trim() || "My League"
 
-    await createLeague(cleanName, user.uid)
-    setPoolName("")
-  }
+  await createLeague(cleanName, user.uid)
+  setPoolName("")
+  setCreateStatus("created")
 
-  const joinPool = async () => {
-    if (!user) return
+  setTimeout(() => setCreateStatus("idle"), 2000)
+}
 
-    const code = joinCode.trim()
+const joinPool = async () => {
+  if (!user) return
 
-    if (!code) return
+  const code = joinCode.trim()
 
+  if (!code) return
+
+  try {
     await joinLeague(code, user.uid)
     setJoinCode("")
+    setJoinStatus("joined")
+
+    setTimeout(() => setJoinStatus("idle"), 2000)
+  } catch (error) {
+    console.error(error)
+    setJoinStatus("invalid")
+
+    setTimeout(() => setJoinStatus("idle"), 2500)
   }
+}
 
   const removePool = async (pool: League) => {
     if (!user) return
@@ -274,12 +289,17 @@ const saveProfile = async () => {
           />
 
           <Button
-            variant="outline"
-            className="w-full h-11 border-primary/40 bg-primary/10 text-foreground hover:bg-primary/20"
-            onClick={() => createPool(poolName)}
-          >
-            Create share link
-          </Button>
+<Button
+  variant={createStatus === "created" ? "default" : "outline"}
+  className={
+    createStatus === "created"
+      ? "w-full h-11 rounded-2xl font-black"
+      : "w-full h-11 rounded-2xl border-primary/40 bg-primary/10 text-foreground hover:bg-primary/20"
+  }
+  onClick={() => createPool(poolName)}
+>
+  {createStatus === "created" ? "Link Created ✓" : "Create share link"}
+</Button>
         </Card>
 
         <Card className="glass-card p-4 space-y-3">
@@ -293,13 +313,23 @@ const saveProfile = async () => {
             placeholder="Paste league code or invite link"
           />
 
-          <Button
-            variant="outline"
-            className="w-full h-11 border-border bg-card hover:bg-muted"
-            onClick={joinPool}
-          >
-            Join league
-          </Button>
+         <Button
+  variant={joinStatus === "joined" ? "default" : "outline"}
+  className={
+    joinStatus === "invalid"
+      ? "w-full h-11 rounded-2xl border-destructive bg-destructive/10 font-black text-destructive hover:bg-destructive/20"
+      : joinStatus === "joined"
+        ? "w-full h-11 rounded-2xl font-black"
+        : "w-full h-11 rounded-2xl border-border bg-card hover:bg-muted"
+  }
+  onClick={joinPool}
+>
+  {joinStatus === "invalid"
+    ? "Code Invalid"
+    : joinStatus === "joined"
+      ? "Joined ✓"
+      : "Join league"}
+</Button>
         </Card>
       </section>
 
