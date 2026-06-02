@@ -349,34 +349,38 @@ useEffect(() => {
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-3">
         <TeamBlock team={match.homeTeam} />
 
-        <div className="mt-5 flex shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-background/55 p-1.5 ring-1 ring-border sm:mt-6 sm:gap-2 sm:p-2">
-          <Input
-            type="number"
-            inputMode="numeric"
-            placeholder="-"
-            value={homeScore}
-            onChange={(event) => onHomeChange(event.target.value)}
-            disabled={isLocked}
-            className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg"
-          />
+<div className="mt-5 flex shrink-0 flex-col items-center sm:mt-6">
+  <div className="flex items-center justify-center gap-1.5 rounded-2xl bg-background/55 p-1.5 ring-1 ring-border sm:gap-2 sm:p-2">
+    <Input
+      type="number"
+      inputMode="numeric"
+      placeholder="-"
+      value={homeScore}
+      onChange={(event) => onHomeChange(event.target.value)}
+      disabled={isLocked}
+      className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg"
+    />
 
-          <span className="font-black text-muted-foreground">:</span>
+    <span className="font-black text-muted-foreground">:</span>
 
-          <Input
-            type="number"
-            inputMode="numeric"
-            placeholder="-"
-            value={awayScore}
-            onChange={(event) => onAwayChange(event.target.value)}
-            disabled={isLocked}
-            className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg"
-          />
-        </div>
-{liveResult && (
-  <div className="mt-3 rounded-2xl bg-muted/50 px-3 py-2 text-center text-xs font-black text-muted-foreground">
-    Actual score: {liveResult.home} - {liveResult.away}
+    <Input
+      type="number"
+      inputMode="numeric"
+      placeholder="-"
+      value={awayScore}
+      onChange={(event) => onAwayChange(event.target.value)}
+      disabled={isLocked}
+      className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg"
+    />
   </div>
-)}
+
+  {liveResult && (
+    <div className="mt-2 text-center text-xs font-black text-muted-foreground">
+      Actual score: {liveResult.home} - {liveResult.away}
+    </div>
+  )}
+</div>
+
         <TeamBlock team={match.awayTeam} />
       </div>
 
