@@ -217,8 +217,6 @@ function LoginScreen() {
   const [avatar, setAvatar] = useState("⚽")
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState("")
-  const [busy, setBusy] = useState(false)
   const [resetMessage, setResetMessage] = useState("")
 
   const submit = async () => {
