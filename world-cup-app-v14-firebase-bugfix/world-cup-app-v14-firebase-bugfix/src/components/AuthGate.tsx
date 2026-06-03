@@ -87,7 +87,39 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       })
     }
   }
+const INACTIVITY_LIMIT = 5 * 24 * 60 * 60 * 1000
 
+useEffect(() => {
+  const updateActivity = () => {
+    window.localStorage.setItem("wc-last-activity", String(Date.now()))
+  }
+
+  const checkInactivity = async () => {
+    const lastActivity = Number(
+      window.localStorage.getItem("wc-last-activity") || Date.now()
+    )
+
+    const inactiveTooLong = Date.now() - lastActivity > INACTIVITY_LIMIT
+
+    if (auth.currentUser && inactiveTooLong) {
+      await signOut(auth)
+      window.localStorage.removeItem("wc-last-activity")
+    }
+  }
+
+  checkInactivity()
+  updateActivity()
+
+  window.addEventListener("click", updateActivity)
+  window.addEventListener("keydown", updateActivity)
+  window.addEventListener("touchstart", updateActivity)
+
+  return () => {
+    window.removeEventListener("click", updateActivity)
+    window.removeEventListener("keydown", updateActivity)
+    window.removeEventListener("touchstart", updateActivity)
+  }
+}, [])
   useEffect(() => {
 const unsub = onAuthStateChanged(auth, async (current) => {
   setUser(current)
@@ -164,7 +196,12 @@ if (loading) {
           <LogOut size={14} />
         </button>
       </div>
-
+<button
+  onClick={() => signOut(auth)}
+  className="fixed bottom-20 right-4 z-[60] rounded-full border border-white/10 bg-background/90 px-3 py-2 text-xs font-black uppercase text-muted-foreground shadow-xl backdrop-blur md:hidden"
+>
+  Log out
+</button>
       {children}
     </AuthContext.Provider>
   )
