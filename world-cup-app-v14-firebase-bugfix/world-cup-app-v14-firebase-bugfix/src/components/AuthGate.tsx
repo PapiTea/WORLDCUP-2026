@@ -5,6 +5,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   type User,
 } from "firebase/auth"
@@ -216,6 +217,9 @@ function LoginScreen() {
   const [avatar, setAvatar] = useState("⚽")
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [resetMessage, setResetMessage] = useState("")
 
   const submit = async () => {
     setError("")
@@ -254,7 +258,24 @@ function LoginScreen() {
       setBusy(false)
     }
   }
+const resetPassword = async () => {
+  setError("")
+  setResetMessage("")
 
+  const cleanEmail = email.trim()
+
+  if (!cleanEmail) {
+    setError("Enter your email address first, then click forgot password.")
+    return
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, cleanEmail)
+    setResetMessage("Password reset email sent. Check your inbox.")
+  } catch (err: any) {
+    setError(err?.message || "Could not send password reset email.")
+  }
+}
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="glass-card w-full max-w-xl p-6 shadow-2xl md:p-8">
@@ -321,7 +342,15 @@ function LoginScreen() {
             placeholder="Password"
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
           />
-
+{mode === "login" && (
+  <button
+    type="button"
+    onClick={resetPassword}
+    className="text-xs font-bold text-primary hover:underline"
+  >
+    Forgot password?
+  </button>
+)}
           {mode === "signup" && (
             <>
               <div className="grid gap-3 md:grid-cols-2">
@@ -363,7 +392,11 @@ function LoginScreen() {
               {error}
             </div>
           )}
-
+{resetMessage && (
+  <div className="rounded-2xl border border-primary/30 bg-primary/10 p-3 text-sm font-bold text-primary">
+    {resetMessage}
+  </div>
+)}
           <Button
             type="submit"
             className="h-12 w-full rounded-2xl font-black"
