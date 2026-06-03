@@ -361,14 +361,6 @@ const syncLiveScores = async () => {
       })
     }
 
-const syncedAt = new Date().toLocaleString("en-GB", {
-  timeZone: "Europe/London",
-  dateStyle: "medium",
-  timeStyle: "short",
-})
-
-setLastSynced(syncedAt)
-window.localStorage.setItem("wc-last-score-sync", syncedAt)
 
 setSaved(true)
 window.alert(`Synced ${synced.length} match updates.`)
@@ -452,11 +444,6 @@ const clearAdminMessage = async () => {
 >
   Sync Live Scores
 </Button>
-            {lastSynced && (
-  <span className="rounded-2xl bg-muted/60 px-3 py-2 text-xs font-bold text-muted-foreground">
-    Last synced: {lastSynced}
-  </span>
-)}
             <Button
               variant="outline"
               className="rounded-2xl"
