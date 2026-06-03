@@ -45,7 +45,6 @@ export default function AdminPage() {
   const [slots, setSlots] = useState<SlotMap>({})
   const [saved, setSaved] = useState(false)
   const [adminMessage, setAdminMessage] = useState("")
-  const [lastSynced, setLastSynced] = useState("")
 
   useEffect(() => {
     if (!isAdmin) return
@@ -90,13 +89,6 @@ export default function AdminPage() {
         } catch {}
       }
     }
-useEffect(() => {
-  const savedSync = window.localStorage.getItem("wc-last-score-sync")
-
-  if (savedSync) {
-    setLastSynced(savedSync)
-  }
-}, [])
     const nextKoScores: ScoreMap = {}
 
     for (const fixture of KNOCKOUT_FIXTURES) {
