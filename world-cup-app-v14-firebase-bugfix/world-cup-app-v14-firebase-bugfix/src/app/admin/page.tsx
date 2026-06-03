@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [slots, setSlots] = useState<SlotMap>({})
   const [saved, setSaved] = useState(false)
   const [adminMessage, setAdminMessage] = useState("")
+  const [lastSynced, setLastSynced] = useState("")
 
   useEffect(() => {
     if (!isAdmin) return
@@ -89,7 +90,13 @@ export default function AdminPage() {
         } catch {}
       }
     }
+useEffect(() => {
+  const savedSync = window.localStorage.getItem("wc-last-score-sync")
 
+  if (savedSync) {
+    setLastSynced(savedSync)
+  }
+}, [])
     const nextKoScores: ScoreMap = {}
 
     for (const fixture of KNOCKOUT_FIXTURES) {
@@ -362,8 +369,17 @@ const syncLiveScores = async () => {
       })
     }
 
-    setSaved(true)
-    window.alert(`Synced ${synced.length} match updates.`)
+const syncedAt = new Date().toLocaleString("en-GB", {
+  timeZone: "Europe/London",
+  dateStyle: "medium",
+  timeStyle: "short",
+})
+
+setLastSynced(syncedAt)
+window.localStorage.setItem("wc-last-score-sync", syncedAt)
+
+setSaved(true)
+window.alert(`Synced ${synced.length} match updates.`)
   } catch (error) {
     console.error("Live score sync failed:", error)
     window.alert("Live score sync failed. Check console.")
@@ -444,6 +460,11 @@ const clearAdminMessage = async () => {
 >
   Sync Live Scores
 </Button>
+            {lastSynced && (
+  <span className="rounded-2xl bg-muted/60 px-3 py-2 text-xs font-bold text-muted-foreground">
+    Last synced: {lastSynced}
+  </span>
+)}
             <Button
               variant="outline"
               className="rounded-2xl"
