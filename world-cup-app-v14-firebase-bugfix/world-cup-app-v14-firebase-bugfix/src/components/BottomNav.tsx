@@ -40,9 +40,18 @@ export function BottomNav() {
 
   return (
     <>
-      <div className="fixed right-4 top-4 z-50 md:hidden">
-        <ThemeToggle />
-      </div>
+<div className="fixed right-4 top-4 z-50 md:hidden">
+  <ThemeToggle />
+</div>
+
+{isAdmin && (
+  <Link
+    href="/admin"
+    className="fixed left-4 top-4 z-50 rounded-full bg-primary px-3 py-2 text-xs font-black uppercase text-primary-foreground shadow-xl md:hidden"
+  >
+    Admin
+  </Link>
+)}
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-background/85 backdrop-blur-xl pb-safe md:hidden">
         <div className="flex h-16 items-center justify-around px-2">
