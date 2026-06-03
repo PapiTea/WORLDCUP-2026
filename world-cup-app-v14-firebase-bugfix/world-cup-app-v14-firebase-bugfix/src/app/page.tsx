@@ -12,22 +12,10 @@ import {
   saveTournamentWinner,
   subscribeTournamentWinner,
 } from "@/lib/firebase-service"
+import { TeamFlag } from "@/components/TeamFlag"
 
 const TOURNAMENT_LOCK_TIME = new Date("2026-06-11T19:00:00Z")
 
-function TeamFlag({ team }: { team: any }) {
-  if (team?.flagImage) {
-    return (
-      <img
-        src={team.flagImage}
-        alt={`${team.name} flag`}
-        className="h-14 w-20 rounded-xl object-cover shadow-md"
-      />
-    )
-  }
-
-  return <span className="text-4xl">{team?.flag || "🏳️"}</span>
-}
 
 function formatDate(kickoff: string) {
   const date = new Date(kickoff)
