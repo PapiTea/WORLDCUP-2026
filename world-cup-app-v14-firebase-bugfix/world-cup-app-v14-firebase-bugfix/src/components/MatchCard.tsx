@@ -304,7 +304,78 @@ useEffect(() => {
     if (isLocked) return
     setScoreState({ awayScore: value, saved: false })
   }
+if (hasResult) {
+  return (
+    <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
+      <div className="mb-3 flex items-center justify-between">
+        <Badge
+          variant="outline"
+          className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary"
+        >
+          Group {match.group}
+        </Badge>
 
+        <span className="text-xs font-black uppercase text-primary">
+          Full Time
+        </span>
+      </div>
+
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div className="flex items-center gap-2">
+          <TeamFlag
+            team={match.homeTeam}
+            className="h-8 w-10 rounded-lg object-cover"
+          />
+
+          <div>
+            <div className="text-sm font-black">
+              {match.homeTeam.name}
+            </div>
+
+            <div className="text-[10px] font-black uppercase text-muted-foreground">
+              {match.homeTeam.code}
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div className="text-2xl font-black">
+            {liveResult?.home} - {liveResult?.away}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2">
+          <div className="text-right">
+            <div className="text-sm font-black">
+              {match.awayTeam.name}
+            </div>
+
+            <div className="text-[10px] font-black uppercase text-muted-foreground">
+              {match.awayTeam.code}
+            </div>
+          </div>
+
+          <TeamFlag
+            team={match.awayTeam}
+            className="h-8 w-10 rounded-lg object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between text-xs font-bold text-muted-foreground">
+        <span>
+          Your pick: {homeScore || "-"} - {awayScore || "-"}
+        </span>
+
+        {isConfidencePick && (
+          <span className="text-primary">
+            ⚡ Confidence used
+          </span>
+        )}
+      </div>
+    </Card>
+  )
+}
   return (
     <Card className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-card/75 p-4 shadow-xl backdrop-blur transition hover:-translate-y-0.5 hover:shadow-2xl sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
