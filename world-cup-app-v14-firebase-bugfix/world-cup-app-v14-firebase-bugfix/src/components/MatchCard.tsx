@@ -306,7 +306,7 @@ useEffect(() => {
   }
 if (hasResult) {
   return (
-    <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
+   <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
       <div className="mb-3 flex items-center justify-between">
         <Badge
           variant="outline"
@@ -362,10 +362,10 @@ if (hasResult) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-xs font-bold text-muted-foreground">
-        <span>
-          Your pick: {homeScore || "-"} - {awayScore || "-"}
-        </span>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-xs font-bold text-muted-foreground">
+      <span>
+  🎯 Your pick: {homeScore || "-"} - {awayScore || "-"}
+</span>
 
         {isConfidencePick && (
           <span className="text-primary">
