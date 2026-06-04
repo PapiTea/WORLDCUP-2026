@@ -158,7 +158,7 @@ const searchableText = [
                 No matches found. Try searching for a team, group, venue or country.
               </div>
             ) : (
-              <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+              <div className="grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                 {filteredMatches.map((match) => (
                   <MatchCard key={match.id} match={match} />
                 ))}
