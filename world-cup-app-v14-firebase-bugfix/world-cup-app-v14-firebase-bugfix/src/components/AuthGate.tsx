@@ -9,6 +9,7 @@ import {
   signOut,
   type User,
 } from "firebase/auth"
+import { DeadlineAlerts } from "@/components/DeadlineAlerts"
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore"
 import { auth, db, ADMIN_EMAIL } from "@/lib/firebase"
 import { FOOTBALL_AVATARS, type UserProfile } from "@/lib/profile"
@@ -204,6 +205,7 @@ if (loading) {
   Log out
 </button>
       {children}
+<DeadlineAlerts />
     </AuthContext.Provider>
   )
 }
