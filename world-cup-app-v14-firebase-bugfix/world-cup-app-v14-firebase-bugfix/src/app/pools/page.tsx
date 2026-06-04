@@ -1,5 +1,5 @@
 "use client"
-
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { BottomNav } from "@/components/BottomNav"
 import { Card } from "@/components/ui/card"
@@ -353,7 +353,11 @@ const joinPool = async () => {
             const isCreator = pool.ownerId === user?.uid
 
             return (
-              <Card key={pool.id} className="glass-card p-4">
+              <Link
+  href={`/leaderboard?league=${pool.id}`}
+  className="block"
+>
+  <Card className="glass-card p-4 transition-all hover:scale-[1.01] hover:border-primary/30">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -413,7 +417,8 @@ const joinPool = async () => {
                       : pool.code}
                   </span>
                 </div>
-              </Card>
+           </Card>
+</Link>
             )
           })
         )}
