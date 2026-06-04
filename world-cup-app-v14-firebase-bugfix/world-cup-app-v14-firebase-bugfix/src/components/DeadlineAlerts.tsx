@@ -174,7 +174,7 @@ if (nextMatch) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.25),transparent_35%),linear-gradient(135deg,transparent,transparent_45%,hsl(var(--primary)/0.08)_45%,hsl(var(--primary)/0.08)_55%,transparent_55%)]" />
 
         <div className="relative flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_0_24px_hsl(var(--primary)/0.35)]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_0_24px_hsl(var(--primary)/0.35)] animate-pulse">
             {alert.type === "winner" ? (
               <Trophy size={24} />
             ) : (
