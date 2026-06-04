@@ -13,7 +13,7 @@ import {
 const TOURNAMENT_LOCK_TIME = new Date("2026-06-11T19:00:00Z")
 const MATCH_DAY_WARNING_WINDOW = 24 * 60 * 60 * 1000
 const MATCH_FINAL_WARNING_WINDOW = 2 * 60 * 60 * 1000
-const WINNER_WARNING_WINDOW = 24 * 60 * 60 * 1000
+const WINNER_WARNING_WINDOW = 9999 * 60 * 60 * 1000
 
 function formatTimeLeft(ms: number) {
   const totalMinutes = Math.max(0, Math.floor(ms / 60000))
