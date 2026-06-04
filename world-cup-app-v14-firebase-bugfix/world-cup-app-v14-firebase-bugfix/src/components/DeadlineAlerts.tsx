@@ -11,7 +11,8 @@ import {
 } from "@/lib/firebase-service"
 
 const TOURNAMENT_LOCK_TIME = new Date("2026-06-11T19:00:00Z")
-const MATCH_WARNING_WINDOW = 2 * 60 * 60 * 1000
+const MATCH_DAY_WARNING_WINDOW = 24 * 60 * 60 * 1000
+const MATCH_FINAL_WARNING_WINDOW = 2 * 60 * 60 * 1000
 const WINNER_WARNING_WINDOW = 24 * 60 * 60 * 1000
 
 function formatTimeLeft(ms: number) {
@@ -112,42 +113,51 @@ export function DeadlineAlerts() {
       }
     }
 
-    const nextMatch = MATCHES
-      .map((match) => {
-        const kickoff = new Date(match.kickoff)
-        const diff = kickoff.getTime() - now.getTime()
+const nextMatch = MATCHES
+  .map((match) => {
+    const kickoff = new Date(match.kickoff)
+    const diff = kickoff.getTime() - now.getTime()
 
-        return { match, diff }
-      })
-      .filter(({ match, diff }) => {
-        const alreadySaved = savedMatchIds.includes(match.id)
-        const alreadyDismissed = dismissed.has(`match-${match.id}`)
+    const alertStage =
+      diff <= MATCH_FINAL_WARNING_WINDOW
+        ? "final"
+        : diff <= MATCH_DAY_WARNING_WINDOW
+          ? "day"
+          : ""
 
-        return (
-          diff > 0 &&
-          diff <= MATCH_WARNING_WINDOW &&
-          !alreadySaved &&
-          !alreadyDismissed
-        )
-      })
-      .sort((a, b) => a.diff - b.diff)[0]
+    return { match, diff, alertStage }
+  })
+  .filter(({ match, diff, alertStage }) => {
+    const alreadySaved = savedMatchIds.includes(match.id)
+    const alertId = alertStage ? `match-${match.id}-${alertStage}` : ""
+    const alreadyDismissed = alertId ? dismissed.has(alertId) : true
 
-    if (nextMatch) {
-      const { match, diff } = nextMatch
+    return (
+      diff > 0 &&
+      alertStage &&
+      !alreadySaved &&
+      !alreadyDismissed
+    )
+  })
+  .sort((a, b) => a.diff - b.diff)[0]
 
-      return {
-        id: `match-${match.id}`,
-        type: "match",
-        eyebrow: "Prediction deadline",
-        title: `${match.homeTeam.name} v ${match.awayTeam.name}`,
-        description: `This match locks in ${formatTimeLeft(
-          diff
-        )}. Add your score before kick-off.`,
-        href: "/predictions",
-        action: "Go to picks",
-      }
-    }
+if (nextMatch) {
+  const { match, diff, alertStage } = nextMatch
 
+  const urgent = alertStage === "final"
+
+  return {
+    id: `match-${match.id}-${alertStage}`,
+    type: "match",
+    eyebrow: urgent ? "Final warning" : "Prediction reminder",
+    title: `${match.homeTeam.name} v ${match.awayTeam.name}`,
+    description: urgent
+      ? `Kick-off is in ${formatTimeLeft(diff)}. Lock your score now.`
+      : `This match kicks off in ${formatTimeLeft(diff)}. Add your score prediction before it locks.`,
+    href: "/predictions",
+    action: "Go to picks",
+  }
+}
     return null
   }, [user, now, winnerPick, savedMatchIds, dismissedIds])
 
