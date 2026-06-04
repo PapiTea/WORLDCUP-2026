@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { BottomNav } from "@/components/BottomNav"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -30,7 +31,8 @@ import {
 
 export default function LeaderboardPage() {
   const { user, isAdmin } = useAuth()
-
+const searchParams = useSearchParams()
+const selectedLeagueId = searchParams.get("league")
   const [users, setUsers] = useState<Record<string, UserDoc>>({})
   const [predictions, setPredictions] = useState<MatchPrediction[]>([])
   const [results, setResults] = useState<Record<string, SavedResult>>({})
@@ -202,7 +204,9 @@ export default function LeaderboardPage() {
               text="Create or join a league first."
             />
           ) : (
-            myLeagueIds.map((leagueId) => {
+           myLeagueIds
+  .filter((leagueId) => !selectedLeagueId || leagueId === selectedLeagueId)
+  .map((leagueId) => {
               const members = allMembers
                 .filter((member) => member.leagueId === leagueId && member.userId)
                 .map((member) => member.userId)
