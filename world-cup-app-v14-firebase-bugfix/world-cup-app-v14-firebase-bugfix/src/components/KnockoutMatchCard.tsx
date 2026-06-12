@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { TeamFlag } from "@/components/TeamFlag"
 import { HostBadge } from "@/components/HostBadge"
 import { useAuth } from "@/components/AuthGate"
+import { scoreMatchPick } from "@/lib/scoring"
 import { saveMatchPrediction, subscribeKnockoutSetup, subscribeResults, subscribeUserMatchPredictions } from "@/lib/firebase-service"
 import { CheckCircle2, Lock, Timer } from "lucide-react"
 
@@ -26,7 +27,9 @@ export function KnockoutMatchCard({ fixture }: { fixture: KnockoutFixture }) {
   const [awayTeam, setAwayTeam] = useState<Team | null>(null)
   const [score, setScore] = useState<Score>({ home: "", away: "" })
   const [saved, setSaved] = useState(false)
-  const [hasResult, setHasResult] = useState(false)
+ const [hasResult, setHasResult] = useState(false)
+const [actualResult, setActualResult] = useState<{ home: number; away: number } | null>(null)
+const [showBreakdown, setShowBreakdown] = useState(false)
 
   useEffect(() => {
     const refresh = () => {
@@ -50,7 +53,17 @@ export function KnockoutMatchCard({ fixture }: { fixture: KnockoutFixture }) {
       setHomeTeam(getTeamById(slots[fixture.homeSlot]) || null)
       setAwayTeam(getTeamById(slots[fixture.awaySlot]) || null)
     })
-    const unsubResults = subscribeResults((results) => setHasResult(Boolean(results[`ko_${fixture.id}`])))
+    const unsubResults = subscribeResults((results) => {
+  const result = results[`ko_${fixture.id}`]
+
+  if (result && typeof result.home === "number" && typeof result.away === "number") {
+    setActualResult({ home: result.home, away: result.away })
+    setHasResult(true)
+  } else {
+    setActualResult(null)
+    setHasResult(false)
+  }
+})
     const unsubPicks = user ? subscribeUserMatchPredictions(user.uid, (items) => {
       const remote = items[`knockout_${fixture.id}`]
       if (!remote) return
@@ -69,6 +82,16 @@ export function KnockoutMatchCard({ fixture }: { fixture: KnockoutFixture }) {
   }, [fixture.id, fixture.homeSlot, fixture.awaySlot, user])
 
   const ready = Boolean(homeTeam && awayTeam)
+  const userPick =
+  score.home !== "" && score.away !== ""
+    ? {
+        home: Number(score.home),
+        away: Number(score.away),
+        confidence: false,
+      }
+    : null
+
+const matchScore = scoreMatchPick(userPick, actualResult)
 
   const save = async () => {
     if (!ready || score.home === "" || score.away === "") return
@@ -77,7 +100,149 @@ export function KnockoutMatchCard({ fixture }: { fixture: KnockoutFixture }) {
     if (user) await saveMatchPrediction(user.uid, fixture.id, "knockout", pick)
     setSaved(true)
   }
+if (hasResult && ready && actualResult) {
+  return (
+    <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <Badge
+          variant="outline"
+          className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary"
+        >
+          {fixture.roundName}
+        </Badge>
 
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black uppercase text-primary">
+            Full Time
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setShowBreakdown(true)}
+            className="rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground shadow-lg shadow-primary/20"
+          >
+            {matchScore.total > 0 ? "+" : ""}
+            {matchScore.total} pts
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div className="flex items-center gap-2">
+          <TeamFlag
+            team={homeTeam}
+            className="h-8 w-10 rounded-lg object-cover"
+          />
+
+          <div>
+            <div className="text-sm font-black">{homeTeam.name}</div>
+            <div className="text-[10px] font-black uppercase text-muted-foreground">
+              {homeTeam.code}
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div className="text-2xl font-black">
+            {actualResult.home} - {actualResult.away}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2">
+          <div className="text-right">
+            <div className="text-sm font-black">{awayTeam.name}</div>
+            <div className="text-[10px] font-black uppercase text-muted-foreground">
+              {awayTeam.code}
+            </div>
+          </div>
+
+          <TeamFlag
+            team={awayTeam}
+            className="h-8 w-10 rounded-lg object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-xs font-bold text-muted-foreground">
+        <span>
+          🎯 Your pick: {score.home || "-"} - {score.away || "-"}
+        </span>
+      </div>
+
+      {showBreakdown && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl">
+            <div className="mb-4">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">
+                Score breakdown
+              </p>
+
+              <h3 className="mt-1 font-headline text-2xl font-black">
+                {homeTeam.name} v {awayTeam.name}
+              </h3>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Your pick
+                </span>
+                <span className="font-black">
+                  {score.home || "-"} - {score.away || "-"}
+                </span>
+              </div>
+
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Actual result
+                </span>
+                <span className="font-black">
+                  {actualResult.home} - {actualResult.away}
+                </span>
+              </div>
+
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Base points
+                </span>
+                <span className="font-black">{matchScore.base}</span>
+              </div>
+
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Confidence
+                </span>
+                <span className="font-black">Not used</span>
+              </div>
+
+              <div className="rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-center">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-primary">
+                  Total
+                </div>
+                <div className="mt-1 text-4xl font-black text-primary">
+                  {matchScore.total > 0 ? "+" : ""}
+                  {matchScore.total}
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-muted/40 px-4 py-3 text-xs font-bold text-muted-foreground">
+                {matchScore.reason}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowBreakdown(false)}
+              className="mt-5 h-11 w-full rounded-2xl bg-primary text-sm font-black text-primary-foreground"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </Card>
+  )
+}
   return (
     <Card className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-card/75 p-4 shadow-xl backdrop-blur sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
