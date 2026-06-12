@@ -9,6 +9,14 @@ import { KNOCKOUT_FIXTURES, KNOCKOUT_ROUNDS, MATCHES } from "@/lib/mock-data"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/components/AuthGate"
+import {
+  subscribeKnockoutSetup,
+  subscribeResults,
+  subscribeUserMatchPredictions,
+  type MatchPrediction,
+  type Score,
+} from "@/lib/firebase-service"
 
 const TEAM_SEARCH_NAMES: Record<string, string> = {
   ENG: "England",
@@ -61,8 +69,30 @@ const TEAM_SEARCH_NAMES: Record<string, string> = {
 
 export default function PredictionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const { user } = useAuth()
 const [results, setResults] = useState<Record<string, Score>>({})
+const [knockoutSlots, setKnockoutSlots] = useState<Record<string, string>>({})
+const [userPredictions, setUserPredictions] = useState<Record<string, MatchPrediction>>({})
+const [results, setResults] = useState<Record<string, Score>>({})
+useEffect(() => {
+  const unsub = subscribeResults(setResults)
+  return () => unsub()
+}, [])
 
+useEffect(() => {
+  const unsub = subscribeKnockoutSetup(({ slots }) => {
+    setKnockoutSlots(slots)
+  })
+
+  return () => unsub()
+}, [])
+
+useEffect(() => {
+  if (!user) return
+
+  const unsub = subscribeUserMatchPredictions(user.uid, setUserPredictions)
+  return () => unsub()
+}, [user])
 useEffect(() => {
   const unsub = subscribeResults(setResults)
   return () => unsub()
@@ -206,7 +236,13 @@ const searchableText = [
 
                   <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                     {fixtures.map((fixture) => (
-                      <KnockoutMatchCard key={fixture.id} fixture={fixture} />
+                      <KnockoutMatchCard
+  key={fixture.id}
+  fixture={fixture}
+  slots={knockoutSlots}
+  liveResult={results[`ko_${fixture.id}`] || null}
+  savedPrediction={userPredictions[`knockout_${fixture.id}`] || null}
+/>
                     ))}
                   </div>
                 </section>
