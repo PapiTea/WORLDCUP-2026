@@ -11,7 +11,7 @@ import { TeamFlag } from "@/components/TeamFlag"
 import { HostBadge } from "@/components/HostBadge"
 import { useAuth } from "@/components/AuthGate"
 import { scoreMatchPick } from "@/lib/scoring"
-import { saveMatchPrediction, subscribeKnockoutSetup, subscribeResults, subscribeUserMatchPredictions } from "@/lib/firebase-service"
+import { saveMatchPrediction, type MatchPrediction, type Score as ResultScore } from "@/lib/firebase-service"
 import { CheckCircle2, Lock, Timer } from "lucide-react"
 
 type Score = { home: number | ""; away: number | "" }
@@ -21,65 +21,71 @@ function readSlot(slotId: string): Team | null {
   return getTeamById(window.localStorage.getItem(`wc-ko-slot-${slotId}`))
 }
 
-export function KnockoutMatchCard({ fixture }: { fixture: KnockoutFixture }) {
+export function KnockoutMatchCard({
+  fixture,
+  slots,
+  liveResult,
+  savedPrediction,
+}: {
+  fixture: KnockoutFixture
+  slots: Record<string, string>
+  liveResult?: ResultScore | null
+  savedPrediction?: MatchPrediction | null
+}) {
   const { user } = useAuth()
   const [homeTeam, setHomeTeam] = useState<Team | null>(null)
   const [awayTeam, setAwayTeam] = useState<Team | null>(null)
   const [score, setScore] = useState<Score>({ home: "", away: "" })
   const [saved, setSaved] = useState(false)
- const [hasResult, setHasResult] = useState(false)
-const [actualResult, setActualResult] = useState<{ home: number; away: number } | null>(null)
+  const [confidencePicked, setConfidencePicked] = useState(false)
+const actualResult =
+  liveResult &&
+  typeof liveResult.home === "number" &&
+  typeof liveResult.away === "number"
+    ? { home: liveResult.home, away: liveResult.away }
+    : null
+
+const hasResult = Boolean(actualResult)
 const [showBreakdown, setShowBreakdown] = useState(false)
 
-  useEffect(() => {
-    const refresh = () => {
-      setHomeTeam(readSlot(fixture.homeSlot))
-      setAwayTeam(readSlot(fixture.awaySlot))
-      const rawPick = window.localStorage.getItem(`wc-ko-pick-${fixture.id}`)
-      if (rawPick) {
-        try {
-          const parsed = JSON.parse(rawPick)
-          setScore({ home: parsed.home ?? "", away: parsed.away ?? "" })
-          setSaved(true)
-        } catch {}
-      }
-      setHasResult(Boolean(window.localStorage.getItem(`wc-ko-result-${fixture.id}`)))
-    }
-    refresh()
-    window.addEventListener("storage", refresh)
-    window.addEventListener("focus", refresh)
-    window.addEventListener("wc-knockout-updated", refresh)
-    const unsubSetup = subscribeKnockoutSetup(({ slots }) => {
-      setHomeTeam(getTeamById(slots[fixture.homeSlot]) || null)
-      setAwayTeam(getTeamById(slots[fixture.awaySlot]) || null)
-    })
-    const unsubResults = subscribeResults((results) => {
-  const result = results[`ko_${fixture.id}`]
+useEffect(() => {
+  setHomeTeam(getTeamById(slots[fixture.homeSlot]) || readSlot(fixture.homeSlot))
+  setAwayTeam(getTeamById(slots[fixture.awaySlot]) || readSlot(fixture.awaySlot))
+}, [slots, fixture.homeSlot, fixture.awaySlot])
 
-  if (result && typeof result.home === "number" && typeof result.away === "number") {
-    setActualResult({ home: result.home, away: result.away })
-    setHasResult(true)
-  } else {
-    setActualResult(null)
-    setHasResult(false)
-  }
-})
-    const unsubPicks = user ? subscribeUserMatchPredictions(user.uid, (items) => {
-      const remote = items[`knockout_${fixture.id}`]
-      if (!remote) return
-      setScore({ home: remote.home ?? "", away: remote.away ?? "" })
+useEffect(() => {
+  const rawPick = window.localStorage.getItem(`wc-ko-pick-${fixture.id}`)
+
+  if (rawPick) {
+    try {
+      const parsed = JSON.parse(rawPick)
+      setScore({ home: parsed.home ?? "", away: parsed.away ?? "" })
+      setConfidencePicked(Boolean(parsed.confidence))
       setSaved(true)
-      window.localStorage.setItem(`wc-ko-pick-${fixture.id}`, JSON.stringify({ home: remote.home, away: remote.away }))
-    }) : (() => {})
-    return () => {
-      window.removeEventListener("storage", refresh)
-      window.removeEventListener("focus", refresh)
-      window.removeEventListener("wc-knockout-updated", refresh)
-      unsubSetup()
-      unsubResults()
-      unsubPicks()
-    }
-  }, [fixture.id, fixture.homeSlot, fixture.awaySlot, user])
+    } catch {}
+  }
+}, [fixture.id])
+
+useEffect(() => {
+  if (!savedPrediction) return
+
+  setScore({
+    home: savedPrediction.home ?? "",
+    away: savedPrediction.away ?? "",
+  })
+
+  setConfidencePicked(Boolean(savedPrediction.confidence))
+  setSaved(true)
+
+  window.localStorage.setItem(
+    `wc-ko-pick-${fixture.id}`,
+    JSON.stringify({
+      home: savedPrediction.home,
+      away: savedPrediction.away,
+      confidence: Boolean(savedPrediction.confidence),
+    })
+  )
+}, [savedPrediction, fixture.id])
 
   const ready = Boolean(homeTeam && awayTeam)
   const userPick =
@@ -87,7 +93,7 @@ const [showBreakdown, setShowBreakdown] = useState(false)
     ? {
         home: Number(score.home),
         away: Number(score.away),
-        confidence: false,
+      confidence: confidencePicked,
       }
     : null
 
@@ -95,7 +101,11 @@ const matchScore = scoreMatchPick(userPick, actualResult)
 
   const save = async () => {
     if (!ready || score.home === "" || score.away === "") return
-    const pick = { home: Number(score.home), away: Number(score.away) }
+    const pick = {
+  home: Number(score.home),
+  away: Number(score.away),
+  confidence: confidencePicked,
+}
     window.localStorage.setItem(`wc-ko-pick-${fixture.id}`, JSON.stringify(pick))
     if (user) await saveMatchPrediction(user.uid, fixture.id, "knockout", pick)
     setSaved(true)
@@ -167,6 +177,11 @@ if (hasResult && ready && actualResult) {
         <span>
           🎯 Your pick: {score.home || "-"} - {score.away || "-"}
         </span>
+        {confidencePicked && (
+  <span className="text-primary">
+    ⚡ Confidence used
+  </span>
+)}
       </div>
 
       {showBreakdown && (
@@ -212,7 +227,11 @@ if (hasResult && ready && actualResult) {
                 <span className="font-bold text-muted-foreground">
                   Confidence
                 </span>
-                <span className="font-black">Not used</span>
+                <span className="font-black">
+  {confidencePicked
+    ? `${matchScore.confidenceBonus > 0 ? "+" : ""}${matchScore.confidenceBonus}`
+    : "Not used"}
+</span>
               </div>
 
               <div className="rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-center">
@@ -275,12 +294,33 @@ if (hasResult && ready && actualResult) {
           <Lock size={14} /> Waiting for admin to assign teams to this tie.
         </div>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button size="sm" className="h-11 rounded-2xl font-black" onClick={save} disabled={score.home === "" || score.away === ""}>Save score</Button>
-          <div className="flex items-center justify-center rounded-2xl bg-muted/50 px-2 text-center text-[11px] font-bold text-muted-foreground">
-            {hasResult ? "Final result added" : "Admin result pending"}
-          </div>
-        </div>
+<div className="mt-4 space-y-2.5">
+  <div className="grid grid-cols-2 gap-2">
+    <Button
+      type="button"
+      size="sm"
+      variant={confidencePicked ? "default" : "outline"}
+      className="h-11 rounded-2xl font-black"
+      onClick={() => setConfidencePicked((current) => !current)}
+      disabled={hasResult}
+    >
+      ⚡ {confidencePicked ? "Confidence picked" : "Confidence x2"}
+    </Button>
+
+    <Button
+      size="sm"
+      className="h-11 rounded-2xl font-black"
+      onClick={save}
+      disabled={score.home === "" || score.away === "" || hasResult}
+    >
+      Save score
+    </Button>
+  </div>
+
+  <div className="flex items-center justify-center rounded-2xl bg-muted/50 px-2 py-2 text-center text-[11px] font-bold text-muted-foreground">
+    {hasResult ? "Final result added" : "Admin result pending"}
+  </div>
+</div>
       )}
     </Card>
   )
