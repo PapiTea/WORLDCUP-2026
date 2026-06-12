@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { subscribeResults, type Score } from "@/lib/firebase-service"
 import { BottomNav } from "@/components/BottomNav"
 import { MatchCard } from "@/components/MatchCard"
 import { KnockoutMatchCard } from "@/components/KnockoutMatchCard"
@@ -60,7 +61,12 @@ const TEAM_SEARCH_NAMES: Record<string, string> = {
 
 export default function PredictionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
+const [results, setResults] = useState<Record<string, Score>>({})
 
+useEffect(() => {
+  const unsub = subscribeResults(setResults)
+  return () => unsub()
+}, [])
   const filteredMatches = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
@@ -160,7 +166,11 @@ const searchableText = [
             ) : (
               <div className="grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                 {filteredMatches.map((match) => (
-                  <MatchCard key={match.id} match={match} />
+                 <MatchCard
+  key={match.id}
+  match={match}
+  liveResult={results[match.id] || null}
+/>
                 ))}
               </div>
             )}
