@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { TeamFlag } from "@/components/TeamFlag"
 import { HostBadge } from "@/components/HostBadge"
 import { useAuth } from "@/components/AuthGate"
+import { scoreMatchPick } from "@/lib/scoring"
 import {
   saveMatchPrediction,
   subscribeUserSingleMatchPrediction,
@@ -76,6 +77,7 @@ export function MatchCard({ match, onSave }: MatchCardProps) {
   const [limitMessage, setLimitMessage] = useState(false)
   const [now, setNow] = useState(() => new Date())
   const [liveResult, setLiveResult] = useState<Score | null>(null)
+  const [showBreakdown, setShowBreakdown] = useState(false)
   useEffect(() => {
   const unsub = subscribeResults((items) => {
     setLiveResult(items[match.id] || null)
@@ -233,7 +235,26 @@ useEffect(() => {
 
     return () => unsub()
   }, [user, match.id])
+const actualResult =
+  liveResult &&
+  typeof liveResult.home === "number" &&
+  typeof liveResult.away === "number"
+    ? {
+        home: liveResult.home,
+        away: liveResult.away,
+      }
+    : null
 
+const userPick =
+  homeScore !== "" && awayScore !== ""
+    ? {
+        home: Number(homeScore),
+        away: Number(awayScore),
+        confidence: confidenceIds.includes(match.id),
+      }
+    : null
+
+const matchScore = scoreMatchPick(userPick, actualResult)
   const isConfidencePick = confidenceIds.includes(match.id)
   const confidenceUsed = confidenceIds.length
   const confidenceLimitReached =
@@ -307,18 +328,29 @@ useEffect(() => {
 if (hasResult) {
   return (
    <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
-      <div className="mb-3 flex items-center justify-between">
-        <Badge
-          variant="outline"
-          className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary"
-        >
-          Group {match.group}
-        </Badge>
+ <div className="mb-3 flex items-center justify-between gap-2">
+  <Badge
+    variant="outline"
+    className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary"
+  >
+    Group {match.group}
+  </Badge>
 
-        <span className="text-xs font-black uppercase text-primary">
-          Full Time
-        </span>
-      </div>
+  <div className="flex items-center gap-2">
+    <span className="text-xs font-black uppercase text-primary">
+      Full Time
+    </span>
+
+    <button
+      type="button"
+      onClick={() => setShowBreakdown(true)}
+      className="rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground shadow-lg shadow-primary/20"
+    >
+      {matchScore.total > 0 ? "+" : ""}
+      {matchScore.total} pts
+    </button>
+  </div>
+</div>
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <div className="flex items-center gap-2">
@@ -373,6 +405,80 @@ if (hasResult) {
           </span>
         )}
       </div>
+         {showBreakdown && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl">
+            <div className="mb-4">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">
+                Score breakdown
+              </p>
+
+              <h3 className="mt-1 font-headline text-2xl font-black">
+                {match.homeTeam.name} v {match.awayTeam.name}
+              </h3>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Your pick
+                </span>
+                <span className="font-black">
+                  {homeScore || "-"} - {awayScore || "-"}
+                </span>
+              </div>
+
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Actual result
+                </span>
+                <span className="font-black">
+                  {actualResult?.home ?? "-"} - {actualResult?.away ?? "-"}
+                </span>
+              </div>
+
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Base points
+                </span>
+                <span className="font-black">{matchScore.base}</span>
+              </div>
+
+              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                <span className="font-bold text-muted-foreground">
+                  Confidence
+                </span>
+                <span className="font-black">
+                  {matchScore.confidenceBonus > 0 ? "+" : ""}
+                  {matchScore.confidenceBonus}
+                </span>
+              </div>
+
+              <div className="rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-center">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-primary">
+                  Total
+                </div>
+                <div className="mt-1 text-4xl font-black text-primary">
+                  {matchScore.total > 0 ? "+" : ""}
+                  {matchScore.total}
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-muted/40 px-4 py-3 text-xs font-bold text-muted-foreground">
+                {matchScore.reason}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowBreakdown(false)}
+              className="mt-5 h-11 w-full rounded-2xl bg-primary text-sm font-black text-primary-foreground"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }
