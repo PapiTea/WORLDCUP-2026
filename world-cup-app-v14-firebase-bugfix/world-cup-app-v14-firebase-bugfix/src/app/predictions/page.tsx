@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { subscribeResults, type Score } from "@/lib/firebase-service"
 import { BottomNav } from "@/components/BottomNav"
 import { MatchCard } from "@/components/MatchCard"
 import { KnockoutMatchCard } from "@/components/KnockoutMatchCard"
@@ -68,12 +67,12 @@ const TEAM_SEARCH_NAMES: Record<string, string> = {
 }
 
 export default function PredictionsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const { user } = useAuth()
+const [searchQuery, setSearchQuery] = useState("")
+const { user } = useAuth()
 const [results, setResults] = useState<Record<string, Score>>({})
 const [knockoutSlots, setKnockoutSlots] = useState<Record<string, string>>({})
 const [userPredictions, setUserPredictions] = useState<Record<string, MatchPrediction>>({})
-const [results, setResults] = useState<Record<string, Score>>({})
+
 useEffect(() => {
   const unsub = subscribeResults(setResults)
   return () => unsub()
@@ -93,10 +92,6 @@ useEffect(() => {
   const unsub = subscribeUserMatchPredictions(user.uid, setUserPredictions)
   return () => unsub()
 }, [user])
-useEffect(() => {
-  const unsub = subscribeResults(setResults)
-  return () => unsub()
-}, [])
   const filteredMatches = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
