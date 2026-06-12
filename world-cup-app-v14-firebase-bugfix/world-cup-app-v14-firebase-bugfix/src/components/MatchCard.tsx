@@ -15,12 +15,12 @@ import { scoreMatchPick } from "@/lib/scoring"
 import {
   saveMatchPrediction,
   subscribeUserSingleMatchPrediction,
-  subscribeResults,
   type Score,
 } from "@/lib/firebase-service"
 
 interface MatchCardProps {
   match: Match
+  liveResult?: Score | null
   onSave?: (prediction: {
     home: number
     away: number
@@ -66,7 +66,7 @@ function writeConfidenceIds(ids: string[]) {
   window.dispatchEvent(new CustomEvent(CONFIDENCE_EVENT, { detail: clean }))
 }
 
-export function MatchCard({ match, onSave }: MatchCardProps) {
+export function MatchCard({ match, liveResult = null, onSave }: MatchCardProps) {
   const { user } = useAuth()
 
   const [homeScore, setHomeScore] = useState("")
@@ -76,15 +76,8 @@ export function MatchCard({ match, onSave }: MatchCardProps) {
   const [confidenceIds, setConfidenceIds] = useState<string[]>([])
   const [limitMessage, setLimitMessage] = useState(false)
   const [now, setNow] = useState(() => new Date())
-  const [liveResult, setLiveResult] = useState<Score | null>(null)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  useEffect(() => {
-  const unsub = subscribeResults((items) => {
-    setLiveResult(items[match.id] || null)
-  })
 
-  return () => unsub()
-}, [match.id])
 
   const scoreRef = useRef<ScoreState>({
     homeScore: "",
