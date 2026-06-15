@@ -241,7 +241,8 @@ const selectedRow = selectedUserId
                         matchPoints: 0,
                         groupPoints: 0,
                         winnerPoints: 0,
-                      },
+                      },winnerTeam:
+  winnerTeamId ? getTeamById(winnerTeamId) : null,
                       profile: users[memberId],
                     }
                   )
@@ -385,7 +386,32 @@ const selectedRow = selectedUserId
     {selectedSection === "picks" && "Match picks will show here."}
     {selectedSection === "groups" && "Group picks will show here."}
     {selectedSection === "knockout" && "Knockout picks will show here."}
-    {selectedSection === "winner" && "Winner pick will show here."}
+{selectedSection === "winner" && (
+  <div className="flex justify-center">
+    {selectedRow?.winnerTeam ? (
+      <div className="flex items-center gap-3 rounded-2xl bg-background/60 px-4 py-3">
+        <TeamFlag
+          team={selectedRow.winnerTeam}
+          className="h-10 w-16 rounded-lg object-cover"
+        />
+
+        <div>
+          <div className="font-black">
+            {selectedRow.winnerTeam.name}
+          </div>
+
+          <div className="text-xs font-bold text-muted-foreground uppercase">
+            Tournament Winner Pick
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="text-center text-sm font-bold text-muted-foreground">
+        No winner selected.
+      </div>
+    )}
+  </div>
+)}
   </div>
 </div>
     </div>
