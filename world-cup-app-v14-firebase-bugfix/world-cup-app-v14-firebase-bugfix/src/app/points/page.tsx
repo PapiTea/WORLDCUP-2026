@@ -347,4 +347,64 @@ function MiniStat({ label, value }: { label: string; value: number }) {
     </div>
   )
 }
+function PredictionLine({
+  title,
+  pick,
+  result,
+  points,
+  confidence,
+  reason,
+}: {
+  title: string
+  pick: SavedPick | null
+  result: SavedResult | null
+  points: number
+  confidence: boolean
+  reason: string
+}) {
+  return (
+    <div className="rounded-2xl bg-muted/35 p-3 text-sm">
+      <div className="mb-2 font-black">{title}</div>
 
+      <div className="grid grid-cols-3 items-center gap-2 text-center">
+        <div className="rounded-xl bg-background/60 px-3 py-2">
+          <div className="text-[10px] font-black uppercase text-muted-foreground">
+            Pick
+          </div>
+          <div className="font-black">
+            {pick ? `${pick.home} - ${pick.away}` : "-"}
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-background/60 px-3 py-2">
+          <div className="text-[10px] font-black uppercase text-muted-foreground">
+            Result
+          </div>
+          <div className="font-black">
+            {result ? `${result.home} - ${result.away}` : "-"}
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-primary px-3 py-2 text-primary-foreground">
+          <div className="text-[10px] font-black uppercase opacity-80">
+            Points
+          </div>
+          <div className="font-black">
+            {points > 0 ? "+" : ""}
+            {points}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 flex items-center justify-between gap-2 text-xs font-bold text-muted-foreground">
+        <span>{reason}</span>
+
+        {confidence && (
+          <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">
+            ⚡ Confidence
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
