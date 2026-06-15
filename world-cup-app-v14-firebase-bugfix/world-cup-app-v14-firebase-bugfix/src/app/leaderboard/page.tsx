@@ -35,6 +35,7 @@ const selectedLeagueId = searchParams.get("league")
   const [myLeagueIds, setMyLeagueIds] = useState<string[]>([])
   const [leagueMap, setLeagueMap] = useState<Record<string, League>>({})
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [selectedSection, setSelectedSection] = useState<"picks" | "groups" | "knockout" | "winner">("picks")
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
 
 const refreshLeaderboard = async () => {
@@ -278,7 +279,10 @@ const selectedRow = selectedUserId
                           score={row.score.total}
                           isYou={row.userId === user?.uid}
                           winnerTeam={getTeamById(winnerPicksByUser[row.userId])}
-                          onClick={() => setSelectedUserId(row.userId)}
+                          onClick={() => {
+  setSelectedUserId(row.userId)
+  setSelectedSection("picks")
+}}
                         />
                       ))
                     ) : (
@@ -305,7 +309,10 @@ const selectedRow = selectedUserId
                 score={row.score.total}
                 isYou={row.userId === user?.uid}
                 winnerTeam={getTeamById(winnerPicksByUser[row.userId])}
-                onClick={() => setSelectedUserId(row.userId)}
+               onClick={() => {
+  setSelectedUserId(row.userId)
+  setSelectedSection("picks")
+}}
               />
             ))
           ) : (
@@ -351,9 +358,36 @@ const selectedRow = selectedUserId
         <Stat label="Winner" value={selectedRow.score.winnerPoints || 0} icon={<Star size={16} />} />
       </div>
 
-      <div className="mt-5 rounded-2xl bg-muted/40 p-4 text-sm font-bold text-muted-foreground">
-        Prediction details will go here next.
-      </div>
+<div className="mt-5">
+  <div className="mb-4 grid grid-cols-4 gap-2 rounded-2xl bg-muted/50 p-1">
+    {[
+      { key: "picks", label: "Picks" },
+      { key: "groups", label: "Groups" },
+      { key: "knockout", label: "Knockout" },
+      { key: "winner", label: "Winner" },
+    ].map((tab) => (
+      <button
+        key={tab.key}
+        type="button"
+        onClick={() => setSelectedSection(tab.key as any)}
+        className={`rounded-xl px-2 py-2 text-[10px] font-black uppercase ${
+          selectedSection === tab.key
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground"
+        }`}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+
+  <div className="rounded-2xl bg-muted/40 p-4 text-sm font-bold text-muted-foreground">
+    {selectedSection === "picks" && "Match picks will show here."}
+    {selectedSection === "groups" && "Group picks will show here."}
+    {selectedSection === "knockout" && "Knockout picks will show here."}
+    {selectedSection === "winner" && "Winner pick will show here."}
+  </div>
+</div>
     </div>
   </div>
 )}
