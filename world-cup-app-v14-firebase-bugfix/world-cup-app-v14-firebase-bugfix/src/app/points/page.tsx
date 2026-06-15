@@ -210,9 +210,18 @@ export default function PointsPage() {
                       <Badge variant="outline">#{index + 1}</Badge>
 
 <div className="flex items-center gap-2">
+<div className="flex items-center gap-2">
   <h2 className="font-headline text-lg font-black">
     @{row.profile?.displayName || "player"}
   </h2>
+
+  {row.winnerPick && getTeamById(row.winnerPick) && (
+    <TeamFlag
+      team={getTeamById(row.winnerPick)!}
+      className="h-5 w-8 rounded object-cover"
+    />
+  )}
+</div>
 
   {row.winnerPick && getTeamById(row.winnerPick) && (
     <TeamFlag
@@ -308,6 +317,11 @@ export default function PointsPage() {
                       </h3>
 
                       <div className="grid gap-2 sm:grid-cols-2">
+                       {Object.keys(row.userData.groupPredictions).length === 0 && (
+  <div className="rounded-2xl bg-muted/40 px-4 py-3 text-sm font-bold text-muted-foreground">
+    No group picks saved.
+  </div>
+)}
                         {Object.entries(row.userData.groupPredictions).map(
                           ([groupId, picks]) => (
                             <div
