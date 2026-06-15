@@ -236,3 +236,76 @@ export function subscribeGlobalMessage(
     cb(data.message || "")
   })
 }
+export async function getLeaderboardData(userId: string) {
+  const [
+    usersSnap,
+    predictionsSnap,
+    resultsSnap,
+    knockoutSetupSnap,
+    allMembersSnap,
+    myMembershipsSnap,
+    leaguesSnap,
+  ] = await Promise.all([
+    getDocs(collection(db, "users")),
+    getDocs(collection(db, "predictions")),
+    getDocs(collection(db, "matchResults")),
+    getDocs(collection(db, "knockoutSetup")),
+    getDocs(collection(db, "leagueMembers")),
+    getDocs(query(collection(db, "leagueMembers"), where("userId", "==", userId))),
+    getDocs(collection(db, "leagues")),
+  ])
+
+  const users: Record<string, UserDoc> = {}
+  usersSnap.forEach((d) => {
+    users[d.id] = d.data() as UserDoc
+  })
+
+  const predictions: MatchPrediction[] = []
+  predictionsSnap.forEach((d) => {
+    predictions.push(d.data() as MatchPrediction)
+  })
+
+  const results: Record<string, Score> = {}
+  resultsSnap.forEach((d) => {
+    const data = d.data() as Score
+
+    if (typeof data.home === "number" && typeof data.away === "number") {
+      results[d.id] = data
+    }
+  })
+
+  const qualifiers: Record<string, string[]> = {}
+  knockoutSetupSnap.forEach((d) => {
+    const data = d.data() as any
+
+    if (d.id.startsWith("qualified_") && data.groupId) {
+      qualifiers[data.groupId] = data.picks || []
+    }
+  })
+
+  const allMembers: LeagueMember[] = []
+  allMembersSnap.forEach((d) => {
+    allMembers.push(d.data() as LeagueMember)
+  })
+
+  const myLeagueIds: string[] = []
+  myMembershipsSnap.forEach((d) => {
+    const data = d.data() as LeagueMember
+    if (data.leagueId) myLeagueIds.push(data.leagueId)
+  })
+
+  const leagueMap: Record<string, League> = {}
+  leaguesSnap.forEach((d) => {
+    leagueMap[d.id] = d.data() as League
+  })
+
+  return {
+    users,
+    predictions,
+    results,
+    qualifiers,
+    allMembers,
+    myLeagueIds,
+    leagueMap,
+  }
+}
