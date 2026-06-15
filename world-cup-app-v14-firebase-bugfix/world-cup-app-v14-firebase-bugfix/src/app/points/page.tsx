@@ -260,15 +260,17 @@ export default function PointsPage() {
                           const points = scoreMatchPick(pick, result)
 
                           return (
-                            <PredictionLine
-                              key={match.id}
-                              title={`${match.homeTeam.name} v ${match.awayTeam.name}`}
-                              pick={pick}
-                              result={result}
-                              points={points.total}
-                              confidence={Boolean(pick?.confidence)}
-                              reason={points.reason}
-                            />
+<PredictionLine
+  key={match.id}
+  title={`${match.homeTeam.name} v ${match.awayTeam.name}`}
+  homeTeam={match.homeTeam}
+  awayTeam={match.awayTeam}
+  pick={pick}
+  result={result}
+  points={points.total}
+  confidence={Boolean(pick?.confidence)}
+  reason={points.reason}
+/>
                           )
                         })}
                       </div>
@@ -406,6 +408,8 @@ function MiniStat({
 }
 function PredictionLine({
   title,
+  homeTeam,
+  awayTeam,
   pick,
   result,
   points,
@@ -413,6 +417,8 @@ function PredictionLine({
   reason,
 }: {
   title: string
+  homeTeam?: any
+  awayTeam?: any
   pick: SavedPick | null
   result: SavedResult | null
   points: number
@@ -421,7 +427,23 @@ function PredictionLine({
 }) {
   return (
     <div className="rounded-2xl bg-muted/35 p-3 text-sm">
-      <div className="mb-2 font-black">{title}</div>
+      <div className="mb-2 flex items-center gap-2 font-black">
+  {homeTeam && (
+    <TeamFlag
+      team={homeTeam}
+      className="h-5 w-7 rounded object-cover"
+    />
+  )}
+
+  <span>{title}</span>
+
+  {awayTeam && (
+    <TeamFlag
+      team={awayTeam}
+      className="h-5 w-7 rounded object-cover"
+    />
+  )}
+</div>
 
       <div className="grid grid-cols-3 items-center gap-2 text-center">
         <div className="rounded-xl bg-background/60 px-3 py-2">
