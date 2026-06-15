@@ -20,10 +20,13 @@ const publicNavItems = [
   { name: "Picks", href: "/predictions", icon: Trophy },
   { name: "Groups", href: "/groups", icon: LayoutGrid },
   { name: "Social", href: "/pools", icon: Users },
-  { name: "Points", href: "/points", icon: BarChart3 },
   { name: "Leaderboard", href: "/leaderboard", icon: Award },
 ]
-
+const adminPointsNavItem = {
+  name: "Points",
+  href: "/points",
+  icon: BarChart3,
+}
 const adminNavItem = {
   name: "Admin",
   href: "/admin",
@@ -36,9 +39,9 @@ export function BottomNav() {
   const pathname = usePathname()
   const { isAdmin } = useAuth()
 
-  const navItems: NavItem[] = isAdmin
-    ? [...publicNavItems, adminNavItem]
-    : publicNavItems
+const navItems: NavItem[] = isAdmin
+  ? [...publicNavItems, adminPointsNavItem, adminNavItem]
+  : publicNavItems
 
   return (
     <>
