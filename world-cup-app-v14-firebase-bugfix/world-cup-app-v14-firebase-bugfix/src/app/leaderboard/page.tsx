@@ -541,7 +541,6 @@ const rows = members
 </div>
 
   </div>
-</div>
     </div>
   </div>
 )}
