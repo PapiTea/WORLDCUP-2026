@@ -1,0 +1,402 @@
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import { BottomNav } from "@/components/BottomNav"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/components/AuthGate"
+import { MATCHES, KNOCKOUT_FIXTURES } from "@/lib/mock-data"
+import {
+  calculateScoreFromData,
+  scoreMatchPick,
+  type SavedPick,
+  type SavedResult,
+} from "@/lib/scoring"
+import {
+  getLeaderboardData,
+  type LeagueMember,
+  type League,
+  type MatchPrediction,
+  type UserDoc,
+} from "@/lib/firebase-service"
+
+type PointsData = {
+  users: Record<string, UserDoc>
+  predictions: MatchPrediction[]
+  results: Record<string, SavedResult>
+  qualifiers: Record<string, string[]>
+  allMembers: LeagueMember[]
+  myLeagueIds: string[]
+  leagueMap: Record<string, League>
+}
+
+export default function PointsPage() {
+  const { user, isAdmin } = useAuth()
+
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<PointsData | null>(null)
+  const [openUserId, setOpenUserId] = useState<string | null>(null)
+
+  const refreshPoints = async () => {
+    if (!user) return
+
+    setLoading(true)
+
+    try {
+      const fresh = await getLeaderboardData(user.uid)
+      setData(fresh as PointsData)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      refreshPoints()
+    }
+  }, [user, isAdmin])
+
+  const rows = useMemo(() => {
+    if (!data) return []
+
+    const winnerPicksByUser: Record<string, string> = {}
+
+    data.predictions.forEach((prediction: any) => {
+      if (
+        prediction.type === "tournamentWinner" &&
+        prediction.userId &&
+        prediction.teamId
+      ) {
+        winnerPicksByUser[prediction.userId] = prediction.teamId
+      }
+    })
+
+    const byUser: Record<
+      string,
+      {
+        matchPredictions: Record<string, SavedPick>
+        knockoutPredictions: Record<string, SavedPick>
+        groupPredictions: Record<string, string[]>
+      }
+    > = {}
+
+    data.predictions.forEach((prediction: any) => {
+      if (!prediction.userId) return
+
+      byUser[prediction.userId] ||= {
+        matchPredictions: {},
+        knockoutPredictions: {},
+        groupPredictions: {},
+      }
+
+      if (prediction.type === "group" && prediction.matchId) {
+        byUser[prediction.userId].matchPredictions[prediction.matchId] = {
+          home: prediction.home,
+          away: prediction.away,
+          confidence: prediction.confidence,
+        }
+      }
+
+      if (prediction.type === "knockout" && prediction.matchId) {
+        byUser[prediction.userId].knockoutPredictions[prediction.matchId] = {
+          home: prediction.home,
+          away: prediction.away,
+          confidence: prediction.confidence,
+        }
+      }
+
+      if (prediction.type === "qualifiers" && prediction.groupId) {
+        byUser[prediction.userId].groupPredictions[prediction.groupId] =
+          prediction.picks || []
+      }
+    })
+
+    const knockoutResults: Record<string, SavedResult> = {}
+    const groupResults: Record<string, SavedResult> = {}
+
+    Object.entries(data.results).forEach(([id, score]) => {
+      if (id.startsWith("ko_")) {
+        knockoutResults[id.replace("ko_", "")] = score
+      } else {
+        groupResults[id] = score
+      }
+    })
+
+    return Object.entries(data.users)
+      .map(([userId, profile]) => {
+        const userData = byUser[userId] || {
+          matchPredictions: {},
+          knockoutPredictions: {},
+          groupPredictions: {},
+        }
+
+        const score = calculateScoreFromData({
+          ...userData,
+          results: groupResults,
+          knockoutResults,
+          qualifiers: data.qualifiers,
+          tournamentWinnerPick: winnerPicksByUser[userId],
+        })
+
+        return {
+          userId,
+          profile,
+          userData,
+          score,
+          winnerPick: winnerPicksByUser[userId],
+          groupResults,
+          knockoutResults,
+        }
+      })
+      .filter((row) => row.profile?.actualName || row.profile?.displayName)
+      .sort((a, b) => b.score.total - a.score.total)
+  }, [data])
+
+  if (!user) {
+    return (
+      <main className="min-h-screen px-4 py-8">
+        <Card className="glass-card p-6">Please log in.</Card>
+      </main>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <main className="min-h-screen px-4 py-8">
+        <Card className="glass-card p-6">
+          You do not have access to this page.
+        </Card>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen px-4 pb-28 pt-6 md:pl-28 md:pr-8 md:pb-10">
+      <section className="mx-auto max-w-6xl">
+        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="font-headline text-3xl font-black">
+              Admin Points
+            </h1>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Manual refresh only, so this page does not constantly read Firebase.
+            </p>
+          </div>
+
+          <Button
+            onClick={refreshPoints}
+            disabled={loading}
+            className="h-11 rounded-2xl font-black"
+          >
+            {loading ? "Refreshing..." : "Refresh points"}
+          </Button>
+        </header>
+
+        <div className="space-y-4">
+          {rows.map((row, index) => {
+            const isOpen = openUserId === row.userId
+
+            return (
+              <Card key={row.userId} className="glass-card p-4">
+                <button
+                  type="button"
+                  onClick={() => setOpenUserId(isOpen ? null : row.userId)}
+                  className="flex w-full items-center justify-between gap-4 text-left"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">#{index + 1}</Badge>
+
+                      <h2 className="font-headline text-lg font-black">
+                        @{row.profile.displayName || "player"}
+                      </h2>
+                    </div>
+
+                    <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      {row.profile.actualName || row.userId}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="font-headline text-2xl font-black text-primary">
+                      {row.score.total}
+                    </div>
+
+                    <div className="text-[10px] font-black uppercase text-muted-foreground">
+                      pts
+                    </div>
+                  </div>
+                </button>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-4">
+                  <MiniStat label="Match" value={row.score.matchPoints} />
+                  <MiniStat label="Groups" value={row.score.groupPoints} />
+                  <MiniStat label="Winner" value={row.score.winnerPoints || 0} />
+                  <MiniStat label="Total" value={row.score.total} />
+                </div>
+
+                {isOpen && (
+                  <div className="mt-5 space-y-5 border-t border-border pt-5">
+                    <section>
+                      <h3 className="mb-3 font-headline font-black">
+                        Group match predictions
+                      </h3>
+
+                      <div className="space-y-2">
+                        {MATCHES.map((match) => {
+                          const pick =
+                            row.userData.matchPredictions[match.id] || null
+                          const result = row.groupResults[match.id] || null
+                          const points = scoreMatchPick(pick, result)
+
+                          return (
+                            <PredictionLine
+                              key={match.id}
+                              title={`${match.homeTeam.name} v ${match.awayTeam.name}`}
+                              pick={pick}
+                              result={result}
+                              points={points.total}
+                              confidence={Boolean(pick?.confidence)}
+                              reason={points.reason}
+                            />
+                          )
+                        })}
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="mb-3 font-headline font-black">
+                        Knockout predictions
+                      </h3>
+
+                      <div className="space-y-2">
+                        {KNOCKOUT_FIXTURES.map((fixture) => {
+                          const pick =
+                            row.userData.knockoutPredictions[fixture.id] || null
+                          const result = row.knockoutResults[fixture.id] || null
+                          const points = scoreMatchPick(pick, result)
+
+                          return (
+                            <PredictionLine
+                              key={fixture.id}
+                              title={`${fixture.roundName} - M${fixture.matchNumber}`}
+                              pick={pick}
+                              result={result}
+                              points={points.total}
+                              confidence={Boolean(pick?.confidence)}
+                              reason={points.reason}
+                            />
+                          )
+                        })}
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="mb-3 font-headline font-black">
+                        Group qualifiers
+                      </h3>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {Object.entries(row.userData.groupPredictions).map(
+                          ([groupId, picks]) => (
+                            <div
+                              key={groupId}
+                              className="rounded-2xl bg-muted/40 px-4 py-3 text-sm"
+                            >
+                              <span className="font-black">Group {groupId}: </span>
+                              <span className="text-muted-foreground">
+                                {picks.join(", ") || "No picks"}
+                              </span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </section>
+
+                    <section>
+                      <h3 className="mb-3 font-headline font-black">
+                        Tournament winner
+                      </h3>
+
+                      <div className="rounded-2xl bg-muted/40 px-4 py-3 text-sm font-bold text-muted-foreground">
+                        {row.winnerPick || "No winner selected"}
+                      </div>
+                    </section>
+                  </div>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+      </section>
+
+      <BottomNav />
+    </main>
+  )
+}
+
+function MiniStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl bg-muted/40 px-4 py-3">
+      <div className="text-lg font-black text-primary">{value}</div>
+      <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function PredictionLine({
+  title,
+  pick,
+  result,
+  points,
+  confidence,
+  reason,
+}: {
+  title: string
+  pick: SavedPick | null
+  result: SavedResult | null
+  points: number
+  confidence: boolean
+  reason: string
+}) {
+  return (
+    <div className="grid gap-2 rounded-2xl bg-muted/35 px-4 py-3 text-sm sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-center">
+      <div className="font-bold">{title}</div>
+
+      <div className="text-muted-foreground">
+        Pick:{" "}
+        <span className="font-black text-foreground">
+          {pick ? `${pick.home} - ${pick.away}` : "-"}
+        </span>
+      </div>
+
+      <div className="text-muted-foreground">
+        Result:{" "}
+        <span className="font-black text-foreground">
+          {result ? `${result.home} - ${result.away}` : "-"}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2 sm:justify-end">
+        {confidence && (
+          <span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-black text-primary">
+            ⚡
+          </span>
+        )}
+
+        <span className="rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground">
+          {points > 0 ? "+" : ""}
+          {points} pts
+        </span>
+      </div>
+
+      <div className="text-xs font-bold text-muted-foreground sm:col-span-4">
+        {reason}
+      </div>
+    </div>
+  )
+}
