@@ -438,7 +438,7 @@ const rows = members
         const result = selectedGroupResults[match.id] || null
         const points = scoreMatchPick(pick, result)
 
-        if (!pick && !result) return null
+      if (!result) return null
 
         return (
           <MiniPredictionLine
@@ -492,7 +492,14 @@ const rows = members
 
   {selectedSection === "knockout" && (
     <div className="space-y-2">
-      {KNOCKOUT_FIXTURES.map((fixture) => {
+{selectedSection === "knockout" && (
+  <div className="space-y-2">
+    {KNOCKOUT_FIXTURES.some(
+      (fixture) =>
+        selectedUserData.knockoutPredictions[fixture.id] ||
+        selectedKnockoutResults[fixture.id]
+    ) ? (
+      KNOCKOUT_FIXTURES.map((fixture) => {
         const pick = selectedUserData.knockoutPredictions[fixture.id] || null
         const result = selectedKnockoutResults[fixture.id] || null
         const points = scoreMatchPick(pick, result)
@@ -510,9 +517,14 @@ const rows = members
             confidence={Boolean(pick?.confidence)}
           />
         )
-      })}
-    </div>
-  )}
+      })
+    ) : (
+      <div className="rounded-2xl bg-background/60 p-4 text-center text-sm font-bold text-muted-foreground">
+        Knockout predictions will appear here once the knockout fixtures are assigned and users start making picks.
+      </div>
+    )}
+  </div>
+)}
 
   {selectedSection === "winner" && (
     <div className="flex justify-center">
