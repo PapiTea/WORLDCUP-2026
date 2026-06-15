@@ -275,6 +275,7 @@ export async function getLeaderboardData(userId: string) {
   })
 
   const qualifiers: Record<string, string[]> = {}
+  const slots: Record<string, string> = {}
   knockoutSetupSnap.forEach((d) => {
     const data = d.data() as any
 
