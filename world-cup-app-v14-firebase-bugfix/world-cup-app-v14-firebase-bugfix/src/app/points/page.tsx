@@ -209,9 +209,18 @@ export default function PointsPage() {
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">#{index + 1}</Badge>
 
-                      <h2 className="font-headline text-lg font-black">
-                        @{row.profile?.displayName || "player"}
-                      </h2>
+<div className="flex items-center gap-2">
+  <h2 className="font-headline text-lg font-black">
+    @{row.profile?.displayName || "player"}
+  </h2>
+
+  {row.winnerPick && getTeamById(row.winnerPick) && (
+    <TeamFlag
+      team={getTeamById(row.winnerPick)!}
+      className="h-5 w-8 rounded object-cover"
+    />
+  )}
+</div>
                     </div>
 
                     <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -230,7 +239,7 @@ export default function PointsPage() {
                   </div>
                 </button>
 
-                <div className="mt-4 grid gap-2 sm:grid-cols-4">
+                <div className="mt-4 grid grid-cols-4 gap-2">
                   <MiniStat label="Match" value={row.score.matchPoints} />
                   <MiniStat label="Groups" value={row.score.groupPoints} />
                   <MiniStat label="Winner" value={row.score.winnerPoints || 0} />
@@ -306,9 +315,29 @@ export default function PointsPage() {
                               className="rounded-2xl bg-muted/40 px-4 py-3 text-sm"
                             >
                               <span className="font-black">Group {groupId}: </span>
-                              <span className="text-muted-foreground">
-                                {picks.join(", ") || "No picks"}
-                              </span>
+<div className="mt-2 flex flex-wrap gap-2">
+  {picks.map((teamId) => {
+    const team = getTeamById(teamId)
+
+    if (!team) return null
+
+    return (
+      <div
+        key={teamId}
+        className="flex items-center gap-2 rounded-xl bg-background/60 px-2 py-1"
+      >
+        <TeamFlag
+          team={team}
+          className="h-5 w-8 rounded object-cover"
+        />
+
+        <span className="text-xs font-bold">
+          {team.name}
+        </span>
+      </div>
+    )
+  })}
+</div>
                             </div>
                           )
                         )}
@@ -352,11 +381,20 @@ export default function PointsPage() {
   )
 }
 
-function MiniStat({ label, value }: { label: string; value: number }) {
+function MiniStat({
+  label,
+  value,
+}: {
+  label: string
+  value: number
+}) {
   return (
-    <div className="rounded-2xl bg-muted/40 px-4 py-3">
-      <div className="text-lg font-black text-primary">{value}</div>
-      <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+    <div className="rounded-2xl bg-muted/40 px-2 py-3 text-center">
+      <div className="text-lg font-black text-primary">
+        {String(value).padStart(3, "0")}
+      </div>
+
+      <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
         {label}
       </div>
     </div>
