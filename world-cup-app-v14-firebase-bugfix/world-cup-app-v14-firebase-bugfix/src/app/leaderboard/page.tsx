@@ -16,13 +16,7 @@ import {
   type SavedResult,
 } from "@/lib/scoring"
 import {
-  subscribeAllLeagueMembers,
-  subscribeAllPredictions,
-  subscribeKnockoutSetup,
-  subscribeResults,
-  subscribeUsers,
-  subscribeMyLeagueMemberships,
-  subscribeLeagues,
+  getLeaderboardData,
   type League,
   type MatchPrediction,
   type UserDoc,
@@ -40,24 +34,31 @@ const selectedLeagueId = searchParams.get("league")
   const [allMembers, setAllMembers] = useState<LeagueMember[]>([])
   const [myLeagueIds, setMyLeagueIds] = useState<string[]>([])
   const [leagueMap, setLeagueMap] = useState<Record<string, League>>({})
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
 
-  useEffect(() => {
-    if (!user) return
+const refreshLeaderboard = async () => {
+  if (!user) return
 
-    const unsubs = [
-      subscribeUsers(setUsers),
-      subscribeAllPredictions(setPredictions),
-      subscribeResults(setResults),
-      subscribeKnockoutSetup(({ qualifiers }) => setQualifiers(qualifiers)),
-      subscribeAllLeagueMembers(setAllMembers),
-      subscribeMyLeagueMemberships(user.uid, (items) =>
-        setMyLeagueIds(items.map((member) => member.leagueId))
-      ),
-      subscribeLeagues(setLeagueMap),
-    ]
+  setLoadingLeaderboard(true)
 
-    return () => unsubs.forEach((unsubscribe) => unsubscribe())
-  }, [user])
+  try {
+    const data = await getLeaderboardData(user.uid)
+
+    setUsers(data.users)
+    setPredictions(data.predictions)
+    setResults(data.results)
+    setQualifiers(data.qualifiers)
+    setAllMembers(data.allMembers)
+    setMyLeagueIds(data.myLeagueIds)
+    setLeagueMap(data.leagueMap)
+  } finally {
+    setLoadingLeaderboard(false)
+  }
+}
+
+useEffect(() => {
+  refreshLeaderboard()
+}, [user])
 
   const winnerPicksByUser = useMemo(() => {
     const out: Record<string, string> = {}
@@ -165,12 +166,23 @@ const selectedLeagueId = searchParams.get("league")
 
   return (
     <main className="min-h-screen pb-24 pt-6 px-4 md:pb-8 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
-      <header className="mb-8">
-        <h1 className="text-3xl font-headline font-bold mb-2">Leaderboard</h1>
-        <p className="text-muted-foreground text-sm">
-          Live leaderboards.
-        </p>
-      </header>
+     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 className="text-3xl font-headline font-bold mb-2">Leaderboard</h1>
+    <p className="text-muted-foreground text-sm">
+      Leaderboards update when refreshed.
+    </p>
+  </div>
+
+  <button
+    type="button"
+    onClick={refreshLeaderboard}
+    disabled={loadingLeaderboard}
+    className="rounded-2xl bg-primary px-4 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-60"
+  >
+    {loadingLeaderboard ? "Refreshing..." : "Refresh leaderboard"}
+  </button>
+</header>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-4">
         <Stat label="Your total" value={myScore.total} icon={<Trophy size={18} />} />
