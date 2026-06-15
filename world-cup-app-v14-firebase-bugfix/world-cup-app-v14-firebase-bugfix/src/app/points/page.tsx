@@ -210,12 +210,12 @@ export default function PointsPage() {
                       <Badge variant="outline">#{index + 1}</Badge>
 
                       <h2 className="font-headline text-lg font-black">
-                        @{row.profile.displayName || "player"}
+                        @{row.profile?.displayName || "player"}
                       </h2>
                     </div>
 
                     <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                      {row.profile.actualName || row.userId}
+                      {row.profile?.actualName || row.userId}
                     </p>
                   </div>
 
