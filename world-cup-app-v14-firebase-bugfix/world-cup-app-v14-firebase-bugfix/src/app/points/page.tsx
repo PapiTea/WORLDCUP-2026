@@ -180,7 +180,7 @@ const visibleUserIds = isAdmin
             </h1>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Refresh manually to view prediction points.
+              Refresh using the button to view prediction points.
             </p>
           </div>
 
