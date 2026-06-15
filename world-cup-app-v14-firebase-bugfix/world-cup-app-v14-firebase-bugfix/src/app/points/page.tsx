@@ -205,28 +205,26 @@ export default function PointsPage() {
                   onClick={() => setOpenUserId(isOpen ? null : row.userId)}
                   className="flex w-full items-center justify-between gap-4 text-left"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">#{index + 1}</Badge>
+                 <div>
+  <div className="flex items-center gap-2">
+    <Badge variant="outline">#{index + 1}</Badge>
 
-<div className="flex items-center gap-2">
-<div className="flex items-center gap-2">
-  <h2 className="font-headline text-lg font-black">
-    @{row.profile?.displayName || "player"}
-  </h2>
+    <h2 className="font-headline text-lg font-black">
+      @{row.profile?.displayName || "player"}
+    </h2>
 
-  {row.winnerPick && getTeamById(row.winnerPick) && (
-    <TeamFlag
-      team={getTeamById(row.winnerPick)!}
-      className="h-5 w-8 rounded object-cover"
-    />
-  )}
+    {row.winnerPick && getTeamById(row.winnerPick) && (
+      <TeamFlag
+        team={getTeamById(row.winnerPick)!}
+        className="h-5 w-8 rounded object-cover"
+      />
+    )}
+  </div>
+
+  <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+    {row.profile?.actualName || row.userId}
+  </p>
 </div>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                      {row.profile?.actualName || row.userId}
-                    </p>
-                  </div>
-
                   <div className="text-right">
                     <div className="font-headline text-2xl font-black text-primary">
                       {row.score.total}
