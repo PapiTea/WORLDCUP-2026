@@ -7,11 +7,12 @@ import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Trophy, Users, Star, Calculator } from "lucide-react"
-import { getTeamById } from "@/lib/mock-data"
+import { getTeamById, MATCHES, KNOCKOUT_FIXTURES } from "@/lib/mock-data"
 import { TeamFlag } from "@/components/TeamFlag"
 import { useAuth } from "@/components/AuthGate"
 import {
   calculateScoreFromData,
+  scoreMatchPick,
   type SavedPick,
   type SavedResult,
 } from "@/lib/scoring"
@@ -177,6 +178,49 @@ const selectedRow = selectedRowBase
       winnerTeam: getTeamById(winnerPicksByUser[selectedRowBase.userId]),
     }
   : null
+ const selectedUserData = useMemo(() => {
+  const empty = {
+    matchPredictions: {} as Record<string, SavedPick>,
+    knockoutPredictions: {} as Record<string, SavedPick>,
+    groupPredictions: {} as Record<string, string[]>,
+  }
+
+  if (!selectedUserId) return empty
+
+  predictions.forEach((prediction: any) => {
+    if (prediction.userId !== selectedUserId) return
+
+    if (prediction.type === "group" && prediction.matchId) {
+      empty.matchPredictions[prediction.matchId] = {
+        home: prediction.home,
+        away: prediction.away,
+        confidence: prediction.confidence,
+      }
+    }
+
+    if (prediction.type === "knockout" && prediction.matchId) {
+      empty.knockoutPredictions[prediction.matchId] = {
+        home: prediction.home,
+        away: prediction.away,
+        confidence: prediction.confidence,
+      }
+    }
+
+    if (prediction.type === "qualifiers" && prediction.groupId) {
+      empty.groupPredictions[prediction.groupId] = prediction.picks || []
+    }
+  })
+
+  return empty
+}, [predictions, selectedUserId])
+
+const selectedGroupResults: Record<string, SavedResult> = {}
+const selectedKnockoutResults: Record<string, SavedResult> = {}
+
+Object.entries(results).forEach(([id, score]) => {
+  if (id.startsWith("ko_")) selectedKnockoutResults[id.replace("ko_", "")] = score
+  else selectedGroupResults[id] = score
+})
   return (
     <main className="min-h-screen pb-24 pt-6 px-4 md:pb-8 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -386,36 +430,116 @@ const rows = members
     ))}
   </div>
 
-  <div className="rounded-2xl bg-muted/40 p-4 text-sm font-bold text-muted-foreground">
-    {selectedSection === "picks" && "Match picks will show here."}
-    {selectedSection === "groups" && "Group picks will show here."}
-    {selectedSection === "knockout" && "Knockout picks will show here."}
-{selectedSection === "winner" && (
-  <div className="flex justify-center">
-    {selectedRow?.winnerTeam ? (
-      <div className="flex items-center gap-3 rounded-2xl bg-background/60 px-4 py-3">
-        <TeamFlag
-          team={selectedRow.winnerTeam}
-          className="h-10 w-16 rounded-lg object-cover"
-        />
+<div className="rounded-2xl bg-muted/40 p-4 text-sm font-bold text-muted-foreground">
+  {selectedSection === "picks" && (
+    <div className="space-y-2">
+      {MATCHES.map((match) => {
+        const pick = selectedUserData.matchPredictions[match.id] || null
+        const result = selectedGroupResults[match.id] || null
+        const points = scoreMatchPick(pick, result)
 
-        <div>
-          <div className="font-black">
-            {selectedRow.winnerTeam.name}
+        if (!pick && !result) return null
+
+        return (
+          <MiniPredictionLine
+            key={match.id}
+            title={`${match.homeTeam.name} v ${match.awayTeam.name}`}
+            homeTeam={match.homeTeam}
+            awayTeam={match.awayTeam}
+            pick={pick}
+            result={result}
+            points={points.total}
+            reason={points.reason}
+            confidence={Boolean(pick?.confidence)}
+          />
+        )
+      })}
+    </div>
+  )}
+
+  {selectedSection === "groups" && (
+    <div className="grid gap-2">
+      {Object.keys(selectedUserData.groupPredictions).length === 0 ? (
+        <div>No group picks saved.</div>
+      ) : (
+        Object.entries(selectedUserData.groupPredictions).map(([groupId, picks]) => (
+          <div key={groupId} className="rounded-2xl bg-background/60 p-3">
+            <div className="mb-2 font-black text-foreground">Group {groupId}</div>
+
+            <div className="flex flex-wrap gap-2">
+              {picks.map((teamId) => {
+                const team = getTeamById(teamId)
+                if (!team) return null
+
+                return (
+                  <div
+                    key={teamId}
+                    className="flex items-center gap-2 rounded-xl bg-muted/60 px-2 py-1"
+                  >
+                    <TeamFlag team={team} className="h-5 w-8 rounded object-cover" />
+                    <span className="text-xs font-black uppercase text-foreground">
+                      {team.code}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
+        ))
+      )}
+    </div>
+  )}
 
-          <div className="text-xs font-bold text-muted-foreground uppercase">
-            Tournament Winner Pick
+  {selectedSection === "knockout" && (
+    <div className="space-y-2">
+      {KNOCKOUT_FIXTURES.map((fixture) => {
+        const pick = selectedUserData.knockoutPredictions[fixture.id] || null
+        const result = selectedKnockoutResults[fixture.id] || null
+        const points = scoreMatchPick(pick, result)
+
+        if (!pick && !result) return null
+
+        return (
+          <MiniPredictionLine
+            key={fixture.id}
+            title={`${fixture.roundName} - M${fixture.matchNumber}`}
+            pick={pick}
+            result={result}
+            points={points.total}
+            reason={points.reason}
+            confidence={Boolean(pick?.confidence)}
+          />
+        )
+      })}
+    </div>
+  )}
+
+  {selectedSection === "winner" && (
+    <div className="flex justify-center">
+      {selectedRow?.winnerTeam ? (
+        <div className="flex items-center gap-3 rounded-2xl bg-background/60 px-4 py-3">
+          <TeamFlag
+            team={selectedRow.winnerTeam}
+            className="h-10 w-16 rounded-lg object-cover"
+          />
+
+          <div>
+            <div className="font-black text-foreground">
+              {selectedRow.winnerTeam.name}
+            </div>
+
+            <div className="text-xs font-bold uppercase text-muted-foreground">
+              Tournament winner pick
+            </div>
           </div>
         </div>
-      </div>
-    ) : (
-      <div className="text-center text-sm font-bold text-muted-foreground">
-        No winner selected.
-      </div>
-    )}
-  </div>
-)}
+      ) : (
+        <div>No winner selected.</div>
+      )}
+    </div>
+  )}
+</div>
+
   </div>
 </div>
     </div>
@@ -532,5 +656,63 @@ function EmptyState({ title, text }: { title: string; text: string }) {
       <h3 className="font-headline font-bold text-xl mb-2">{title}</h3>
       <p className="text-sm text-muted-foreground">{text}</p>
     </Card>
+  )
+}
+function MiniPredictionLine({
+  title,
+  homeTeam,
+  awayTeam,
+  pick,
+  result,
+  points,
+  reason,
+  confidence,
+}: {
+  title: string
+  homeTeam?: any
+  awayTeam?: any
+  pick: SavedPick | null
+  result: SavedResult | null
+  points: number
+  reason: string
+  confidence: boolean
+}) {
+  return (
+    <div className="rounded-2xl bg-background/60 p-3">
+      <div className="mb-2 flex items-center gap-2 font-black text-foreground">
+        {homeTeam && <TeamFlag team={homeTeam} className="h-5 w-8 rounded object-cover" />}
+        <span>{title}</span>
+        {awayTeam && <TeamFlag team={awayTeam} className="h-5 w-8 rounded object-cover" />}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-xl bg-muted/60 px-2 py-2">
+          <div className="text-[9px] uppercase">Pick</div>
+          <div className="font-black text-foreground">
+            {pick ? `${pick.home} - ${pick.away}` : "-"}
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-muted/60 px-2 py-2">
+          <div className="text-[9px] uppercase">Result</div>
+          <div className="font-black text-foreground">
+            {result ? `${result.home} - ${result.away}` : "-"}
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-primary px-2 py-2 text-primary-foreground">
+          <div className="text-[9px] uppercase">Points</div>
+          <div className="font-black">
+            {points > 0 ? "+" : ""}
+            {points}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 flex items-center justify-between gap-2 text-xs">
+        <span>{reason}</span>
+        {confidence && <span className="text-primary">⚡ Confidence</span>}
+      </div>
+    </div>
   )
 }
