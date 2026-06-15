@@ -15,6 +15,7 @@ import {
 } from "@/lib/scoring"
 import {
   getLeaderboardData,
+saveMatchPrediction,
   type LeagueMember,
   type League,
   type MatchPrediction,
@@ -259,6 +260,9 @@ if (!isAdmin) {
                           return (
 <PredictionLine
   key={match.id}
+  userId={row.userId}
+  matchId={match.id}
+  type="group"
   title={`${match.homeTeam.name} v ${match.awayTeam.name}`}
   homeTeam={match.homeTeam}
   awayTeam={match.awayTeam}
@@ -267,6 +271,7 @@ if (!isAdmin) {
   points={points.total}
   confidence={Boolean(pick?.confidence)}
   reason={points.reason}
+  onSaved={refreshPoints}
 />
                           )
                         })}
@@ -287,15 +292,18 @@ if (!isAdmin) {
 
                           return (
                             <PredictionLine
-                              key={fixture.id}
-                              title={`${fixture.roundName} - M${fixture.matchNumber}`}
-                              pick={pick}
-                              result={result}
-                              points={points.total}
-                              confidence={Boolean(pick?.confidence)}
-                              reason={points.reason}
-                            />
-                          )
+  key={fixture.id}
+  userId={row.userId}
+  matchId={fixture.id}
+  type="knockout"
+  title={`${fixture.roundName} - M${fixture.matchNumber}`}
+  pick={pick}
+  result={result}
+  points={points.total}
+  confidence={Boolean(pick?.confidence)}
+  reason={points.reason}
+  onSaved={refreshPoints}
+/>                          )
                         })}
                       </div>
                     </section>
@@ -404,6 +412,9 @@ function MiniStat({
   )
 }
 function PredictionLine({
+  userId,
+  matchId,
+  type,
   title,
   homeTeam,
   awayTeam,
@@ -412,7 +423,11 @@ function PredictionLine({
   points,
   confidence,
   reason,
+  onSaved,
 }: {
+  userId: string
+  matchId: string
+  type: "group" | "knockout"
   title: string
   homeTeam?: any
   awayTeam?: any
@@ -421,26 +436,47 @@ function PredictionLine({
   points: number
   confidence: boolean
   reason: string
+  onSaved: () => void
 }) {
+  const [saving, setSaving] = useState(false)
+
+  const toggleConfidence = async () => {
+    if (!pick) return
+
+    setSaving(true)
+
+    try {
+      await saveMatchPrediction(userId, matchId, type, {
+        home: pick.home,
+        away: pick.away,
+        confidence: !confidence,
+      })
+
+      await onSaved()
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="rounded-2xl bg-muted/35 p-3 text-sm">
       <div className="mb-2 flex items-center gap-2 font-black">
-  {homeTeam && (
-    <TeamFlag
-      team={homeTeam}
-      className="h-5 w-7 rounded object-cover"
-    />
-  )}
+        {homeTeam && (
+          <TeamFlag
+            team={homeTeam}
+            className="h-5 w-7 rounded object-cover"
+          />
+        )}
 
-  <span>{title}</span>
+        <span>{title}</span>
 
-  {awayTeam && (
-    <TeamFlag
-      team={awayTeam}
-      className="h-5 w-7 rounded object-cover"
-    />
-  )}
-</div>
+        {awayTeam && (
+          <TeamFlag
+            team={awayTeam}
+            className="h-5 w-7 rounded object-cover"
+          />
+        )}
+      </div>
 
       <div className="grid grid-cols-3 items-center gap-2 text-center">
         <div className="rounded-xl bg-background/60 px-3 py-2">
@@ -475,12 +511,24 @@ function PredictionLine({
       <div className="mt-2 flex items-center justify-between gap-2 text-xs font-bold text-muted-foreground">
         <span>{reason}</span>
 
-        {confidence && (
-          <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">
-            ⚡ Confidence
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={toggleConfidence}
+          disabled={!pick || saving}
+          className={`rounded-full px-2 py-1 font-black ${
+            confidence
+              ? "bg-primary/10 text-primary"
+              : "bg-background/60 text-muted-foreground"
+          } disabled:opacity-40`}
+        >
+          {saving
+            ? "Saving..."
+            : confidence
+              ? "⚡ Confidence ON"
+              : "Confidence OFF"}
+        </button>
       </div>
     </div>
   )
 }
+
