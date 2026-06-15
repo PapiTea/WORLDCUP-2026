@@ -34,6 +34,7 @@ const selectedLeagueId = searchParams.get("league")
   const [allMembers, setAllMembers] = useState<LeagueMember[]>([])
   const [myLeagueIds, setMyLeagueIds] = useState<string[]>([])
   const [leagueMap, setLeagueMap] = useState<Record<string, League>>({})
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
 
 const refreshLeaderboard = async () => {
@@ -152,7 +153,10 @@ useEffect(() => {
       .filter(([_, profile]) => profile?.actualName || profile?.displayName)
       .map(([userId, profile]) => {
         const scored = scores.find((score) => score.userId === userId)
-
+const selectedRow = selectedUserId
+  ? scores.find((score) => score.userId === selectedUserId) ||
+    overallRows.find((row) => row.userId === selectedUserId)
+  : null
         return (
           scored || {
             userId,
@@ -273,6 +277,7 @@ useEffect(() => {
                           score={row.score.total}
                           isYou={row.userId === user?.uid}
                           winnerTeam={getTeamById(winnerPicksByUser[row.userId])}
+                          onClick={() => setSelectedUserId(row.userId)}
                         />
                       ))
                     ) : (
@@ -299,6 +304,7 @@ useEffect(() => {
                 score={row.score.total}
                 isYou={row.userId === user?.uid}
                 winnerTeam={getTeamById(winnerPicksByUser[row.userId])}
+                onClick={() => setSelectedUserId(row.userId)}
               />
             ))
           ) : (
@@ -310,7 +316,46 @@ useEffect(() => {
         </TabsContent>
       )}
       </Tabs>
+{selectedRow && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">
+            Player details
+          </p>
 
+          <h2 className="mt-1 font-headline text-2xl font-black">
+            @{selectedRow.profile?.displayName || "player"}
+          </h2>
+
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            {selectedRow.profile?.actualName || selectedRow.userId}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setSelectedUserId(null)}
+          className="rounded-full bg-muted px-3 py-2 text-xs font-black"
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        <Stat label="Total" value={selectedRow.score.total} icon={<Trophy size={16} />} />
+        <Stat label="Match" value={selectedRow.score.matchPoints} icon={<Calculator size={16} />} />
+        <Stat label="Groups" value={selectedRow.score.groupPoints} icon={<Users size={16} />} />
+        <Stat label="Winner" value={selectedRow.score.winnerPoints || 0} icon={<Star size={16} />} />
+      </div>
+
+      <div className="mt-5 rounded-2xl bg-muted/40 p-4 text-sm font-bold text-muted-foreground">
+        Prediction details will go here next.
+      </div>
+    </div>
+  </div>
+)}
       <BottomNav />
     </main>
   )
@@ -345,6 +390,7 @@ function PlayerRow({
   isYou,
   userId,
   winnerTeam,
+  onClick,onClick?: () => void
 }: {
   rank: number
   profile?: UserDoc
@@ -357,7 +403,13 @@ function PlayerRow({
   const realName = profile?.actualName || `Player ${userId.slice(0, 4)}`
 
   return (
-    <Card className="bg-card/70 border-border p-4 flex items-center justify-between">
+    return (
+  <button
+    type="button"
+    onClick={onClick}
+    className="w-full text-left"
+  >
+    <Card className="bg-card/70 border-border p-4 flex items-center justify-between transition hover:bg-muted/40">
       <div className="flex items-center gap-4 min-w-0">
         <span className="text-sm font-bold font-headline w-6 text-center text-primary">
           {rank}
@@ -402,7 +454,8 @@ function PlayerRow({
         </span>
       </div>
     </Card>
-  )
+  </button>
+)
 }
 
 function EmptyState({ title, text }: { title: string; text: string }) {
