@@ -167,8 +167,15 @@ useEffect(() => {
       })
       .sort((a, b) => b.score.total - a.score.total)
   }, [users, scores])
-const selectedRow = selectedUserId
+const selectedRowBase = selectedUserId
   ? overallRows.find((row) => row.userId === selectedUserId)
+  : null
+
+const selectedRow = selectedRowBase
+  ? {
+      ...selectedRowBase,
+      winnerTeam: getTeamById(winnerPicksByUser[selectedRowBase.userId]),
+    }
   : null
   return (
     <main className="min-h-screen pb-24 pt-6 px-4 md:pb-8 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
@@ -241,8 +248,6 @@ const selectedRow = selectedUserId
                         matchPoints: 0,
                         groupPoints: 0,
                         winnerPoints: 0,
-                      },winnerTeam:
-  winnerTeamId ? getTeamById(winnerTeamId) : null,
                       profile: users[memberId],
                     }
                   )
