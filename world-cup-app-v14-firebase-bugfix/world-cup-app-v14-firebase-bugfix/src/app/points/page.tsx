@@ -57,7 +57,105 @@ useEffect(() => {
     refreshPoints()
   }
 }, [user, isAdmin])
+const exportCsv = () => {
+  if (!data) return
 
+  const rowsForExport: string[][] = [
+    [
+      "User",
+      "Actual Name",
+      "Type",
+      "Match / Group",
+      "Pick",
+      "Result",
+      "Confidence",
+      "Points",
+      "Reason",
+    ],
+  ]
+
+  rows.forEach((row) => {
+    MATCHES.forEach((match) => {
+      const pick = row.userData.matchPredictions[match.id] || null
+      const result = row.groupResults[match.id] || null
+      const points = scoreMatchPick(pick, result)
+
+      rowsForExport.push([
+        row.profile?.displayName || "player",
+        row.profile?.actualName || row.userId,
+        "Group Match",
+        `${match.homeTeam.name} v ${match.awayTeam.name}`,
+        pick ? `${pick.home}-${pick.away}` : "",
+        result ? `${result.home}-${result.away}` : "",
+        pick?.confidence ? "Yes" : "No",
+        String(points.total),
+        points.reason,
+      ])
+    })
+
+    KNOCKOUT_FIXTURES.forEach((fixture) => {
+      const pick = row.userData.knockoutPredictions[fixture.id] || null
+      const result = row.knockoutResults[fixture.id] || null
+      const points = scoreMatchPick(pick, result)
+
+      rowsForExport.push([
+        row.profile?.displayName || "player",
+        row.profile?.actualName || row.userId,
+        "Knockout Match",
+        `${fixture.roundName} - M${fixture.matchNumber}`,
+        pick ? `${pick.home}-${pick.away}` : "",
+        result ? `${result.home}-${result.away}` : "",
+        pick?.confidence ? "Yes" : "No",
+        String(points.total),
+        points.reason,
+      ])
+    })
+
+    Object.entries(row.userData.groupPredictions).forEach(([groupId, picks]) => {
+      rowsForExport.push([
+        row.profile?.displayName || "player",
+        row.profile?.actualName || row.userId,
+        "Group Qualifiers",
+        `Group ${groupId}`,
+        picks.join(" / "),
+        "",
+        "",
+        "",
+        "",
+      ])
+    })
+
+    rowsForExport.push([
+      row.profile?.displayName || "player",
+      row.profile?.actualName || row.userId,
+      "Tournament Winner",
+      "Winner",
+      row.winnerPick || "",
+      "",
+      "",
+      String(row.score.winnerPoints || 0),
+      "",
+    ])
+  })
+
+  const csv = rowsForExport
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell).replaceAll('"', '""')}"`)
+        .join(",")
+    )
+    .join("\n")
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+
+  link.href = url
+  link.download = "world-cup-predictions-export.csv"
+  link.click()
+
+  URL.revokeObjectURL(url)
+}
   const rows = useMemo(() => {
     if (!data) return []
 
@@ -185,6 +283,7 @@ if (!isAdmin) {
             </p>
           </div>
 
+          <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             onClick={refreshPoints}
             disabled={loading}
@@ -192,7 +291,17 @@ if (!isAdmin) {
           >
             {loading ? "Refreshing..." : "Refresh points"}
           </Button>
-        </header>
+        <Button
+    type="button"
+    variant="outline"
+    onClick={exportCsv}
+    disabled={!data}
+    className="h-11 rounded-2xl font-black"
+  >
+    Export CSV
+  </Button>
+            </div>
+          </header>
 
         <div className="space-y-4">
           {rows.map((row, index) => {
