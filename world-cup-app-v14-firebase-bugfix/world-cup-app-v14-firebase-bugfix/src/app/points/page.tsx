@@ -554,17 +554,20 @@ function PredictionLine({
 
     setSaving(true)
 
-    try {
-      await saveMatchPrediction(userId, matchId, type, {
-        home: pick.home,
-        away: pick.away,
-        confidence: !confidence,
-      })
+try {
+  await saveMatchPrediction(userId, matchId, type, {
+    home: pick.home,
+    away: pick.away,
+    confidence: !confidence,
+  })
 
-      await onSaved()
-    } finally {
-      setSaving(false)
-    }
+  await onSaved()
+} catch (error) {
+  console.error("CONFIDENCE ERROR:", error)
+  alert("Confidence update failed. Check console.")
+} finally {
+  setSaving(false)
+}
   }
 
   return (
