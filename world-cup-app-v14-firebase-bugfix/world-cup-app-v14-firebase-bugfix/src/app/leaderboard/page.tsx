@@ -250,7 +250,7 @@ const selectedRow = selectedRowBase
     winnerPoints: 0,
   },
   profile: users[memberId],
-})
+}
                 })
                 .filter((row) => row.profile?.actualName || row.profile?.displayName)
                 .sort((a, b) => b.score.total - a.score.total)
