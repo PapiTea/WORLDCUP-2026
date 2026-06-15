@@ -58,7 +58,9 @@ const refreshLeaderboard = async () => {
 }
 
 useEffect(() => {
-  refreshLeaderboard()
+  if (user) {
+    refreshLeaderboard()
+  }
 }, [user])
 
   const winnerPicksByUser = useMemo(() => {
@@ -153,10 +155,7 @@ useEffect(() => {
       .filter(([_, profile]) => profile?.actualName || profile?.displayName)
       .map(([userId, profile]) => {
         const scored = scores.find((score) => score.userId === userId)
-const selectedRow = selectedUserId
-  ? scores.find((score) => score.userId === selectedUserId) ||
-    overallRows.find((row) => row.userId === selectedUserId)
-  : null
+
         return (
           scored || {
             userId,
@@ -167,7 +166,9 @@ const selectedRow = selectedUserId
       })
       .sort((a, b) => b.score.total - a.score.total)
   }, [users, scores])
-
+const selectedRow = selectedUserId
+  ? overallRows.find((row) => row.userId === selectedUserId)
+  : null
   return (
     <main className="min-h-screen pb-24 pt-6 px-4 md:pb-8 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
