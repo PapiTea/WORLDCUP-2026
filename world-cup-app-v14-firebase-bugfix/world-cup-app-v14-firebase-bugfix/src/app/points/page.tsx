@@ -52,10 +52,10 @@ export default function PointsPage() {
   }
 
 useEffect(() => {
-  if (user) {
+  if (user && isAdmin) {
     refreshPoints()
   }
-}, [user])
+}, [user, isAdmin])
 
   const rows = useMemo(() => {
     if (!data) return []
@@ -122,15 +122,7 @@ useEffect(() => {
         groupResults[id] = score
       }
     })
-const visibleUserIds = isAdmin
-  ? null
-  : new Set(
-      data.allMembers
-        .filter((member) => data.myLeagueIds.includes(member.leagueId))
-        .map((member) => member.userId)
-    )
-   return Object.entries(data.users)
-  .filter(([userId]) => !visibleUserIds || visibleUserIds.has(userId))
+ return Object.entries(data.users)
       .map(([userId, profile]) => {
         const userData = byUser[userId] || {
           matchPredictions: {},
@@ -168,7 +160,15 @@ const visibleUserIds = isAdmin
     )
   }
 
-
+if (!isAdmin) {
+  return (
+    <main className="min-h-screen px-4 py-8">
+      <Card className="glass-card p-6">
+        You do not have access to this page.
+      </Card>
+    </main>
+  )
+}
 
   return (
     <main className="min-h-screen px-4 pb-28 pt-6 md:pl-28 md:pr-8 md:pb-10">
