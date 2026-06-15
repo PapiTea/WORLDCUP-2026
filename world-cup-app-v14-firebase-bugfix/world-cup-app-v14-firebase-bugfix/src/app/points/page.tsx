@@ -315,15 +315,30 @@ export default function PointsPage() {
                       </div>
                     </section>
 
-                    <section>
-                      <h3 className="mb-3 font-headline font-black">
-                        Tournament winner
-                      </h3>
+                   <section>
+  <h3 className="mb-3 font-headline font-black">
+    Tournament winner
+  </h3>
 
-                      <div className="rounded-2xl bg-muted/40 px-4 py-3 text-sm font-bold text-muted-foreground">
-                        {row.winnerPick || "No winner selected"}
-                      </div>
-                    </section>
+  <div className="rounded-2xl bg-muted/40 px-4 py-3">
+    {row.winnerPick && getTeamById(row.winnerPick) ? (
+      <div className="flex items-center gap-3">
+        <TeamFlag
+          team={getTeamById(row.winnerPick)!}
+          className="h-8 w-12 rounded-lg object-cover"
+        />
+
+        <span className="font-black">
+          {getTeamById(row.winnerPick)?.name}
+        </span>
+      </div>
+    ) : (
+      <span className="text-sm font-bold text-muted-foreground">
+        No winner selected
+      </span>
+    )}
+  </div>
+</section>
                   </div>
                 )}
               </Card>
