@@ -375,7 +375,7 @@ const rows = members
       </Tabs>
 {selectedRow && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-    <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl">
+    <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">
