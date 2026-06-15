@@ -433,6 +433,11 @@ const rows = members
 <div className="rounded-2xl bg-muted/40 p-4 text-sm font-bold text-muted-foreground">
   {selectedSection === "picks" && (
     <div className="space-y-2">
+      {!MATCHES.some((match) => selectedGroupResults[match.id]) && (
+  <div className="rounded-2xl bg-background/60 p-4 text-center text-sm font-bold text-muted-foreground">
+    Played match predictions will appear here once results are added.
+  </div>
+)}
       {MATCHES.map((match) => {
         const pick = selectedUserData.matchPredictions[match.id] || null
         const result = selectedGroupResults[match.id] || null
