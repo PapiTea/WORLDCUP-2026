@@ -281,7 +281,10 @@ export async function getLeaderboardData(userId: string) {
     if (d.id.startsWith("qualified_") && data.groupId) {
       qualifiers[data.groupId] = data.picks || []
     }
-  })
+  if (d.id.startsWith("slot_") && data.slotId && data.teamId) {
+    slots[data.slotId] = data.teamId
+  }
+})
 
   const allMembers: LeagueMember[] = []
   allMembersSnap.forEach((d) => {
@@ -304,8 +307,10 @@ export async function getLeaderboardData(userId: string) {
     predictions,
     results,
     qualifiers,
+    slots,
     allMembers,
     myLeagueIds,
     leagueMap,
+    
   }
 }
