@@ -315,3 +315,27 @@ export async function getLeaderboardData(userId: string) {
     
   }
 }
+export function saveLeaderboardSnapshot(snapshot: any) {
+  return setDoc(
+    doc(db, "appSettings", "leaderboardSnapshot"),
+    {
+      snapshot,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
+}
+
+export function subscribeLeaderboardSnapshot(
+  cb: (snapshot: any | null) => void
+): Unsubscribe {
+  return onSnapshot(doc(db, "appSettings", "leaderboardSnapshot"), (snap) => {
+    if (!snap.exists()) {
+      cb(null)
+      return
+    }
+
+    const data = snap.data() as any
+    cb(data.snapshot || null)
+  })
+}
