@@ -490,9 +490,7 @@ const rows = members
     </div>
   )}
 
-  {selectedSection === "knockout" && (
-    <div className="space-y-2">
-{selectedSection === "knockout" && (
+ {selectedSection === "knockout" && (
   <div className="space-y-2">
     {KNOCKOUT_FIXTURES.some(
       (fixture) =>
