@@ -236,24 +236,23 @@ const selectedRow = selectedRowBase
                 .filter((member) => member.leagueId === leagueId && member.userId)
                 .map((member) => member.userId)
 
-              const rows = members
-                .map((memberId) => {
-                  const scored = scores.find((score) => score.userId === memberId)
+const rows = members
+  .map((memberId) => {
+    const scored = scores.find((score) => score.userId === memberId)
 
-                return (
- return scored || {
-  userId: memberId,
-  score: {
-    total: 0,
-    matchPoints: 0,
-    groupPoints: 0,
-    winnerPoints: 0,
-  },
-  profile: users[memberId],
-}
-                })
-                .filter((row) => row.profile?.actualName || row.profile?.displayName)
-                .sort((a, b) => b.score.total - a.score.total)
+    return scored || {
+      userId: memberId,
+      score: {
+        total: 0,
+        matchPoints: 0,
+        groupPoints: 0,
+        winnerPoints: 0,
+      },
+      profile: users[memberId],
+    }
+  })
+  .filter((row) => row.profile?.actualName || row.profile?.displayName)
+  .sort((a, b) => b.score.total - a.score.total)
 
               const league = leagueMap[leagueId]
 
