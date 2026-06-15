@@ -331,9 +331,9 @@ export default function PointsPage() {
           className="h-5 w-8 rounded object-cover"
         />
 
-        <span className="text-xs font-bold">
-          {team.name}
-        </span>
+<span className="text-xs font-black uppercase">
+  {team.code}
+</span>
       </div>
     )
   })}
@@ -389,9 +389,9 @@ function MiniStat({
   value: number
 }) {
   return (
-    <div className="rounded-2xl bg-muted/40 px-2 py-3 text-center">
+    <div className="min-w-[72px] rounded-2xl bg-muted/40 px-2 py-3 text-center">
       <div className="text-lg font-black text-primary">
-        {String(value).padStart(3, "0")}
+        {value}
       </div>
 
       <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
