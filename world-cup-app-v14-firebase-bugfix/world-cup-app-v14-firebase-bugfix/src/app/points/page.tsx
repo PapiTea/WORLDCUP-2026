@@ -222,9 +222,6 @@ export default function PointsPage() {
     />
   )}
 </div>
-
-                    </div>
-
                     <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {row.profile?.actualName || row.userId}
                     </p>
