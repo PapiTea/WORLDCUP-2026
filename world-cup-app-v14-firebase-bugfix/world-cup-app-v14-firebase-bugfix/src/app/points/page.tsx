@@ -51,11 +51,11 @@ export default function PointsPage() {
     }
   }
 
-  useEffect(() => {
-    if (user && isAdmin) {
-      refreshPoints()
-    }
-  }, [user, isAdmin])
+useEffect(() => {
+  if (user) {
+    refreshPoints()
+  }
+}, [user])
 
   const rows = useMemo(() => {
     if (!data) return []
@@ -122,8 +122,15 @@ export default function PointsPage() {
         groupResults[id] = score
       }
     })
-
-    return Object.entries(data.users)
+const visibleUserIds = isAdmin
+  ? null
+  : new Set(
+      data.allMembers
+        .filter((member) => data.myLeagueIds.includes(member.leagueId))
+        .map((member) => member.userId)
+    )
+   return Object.entries(data.users)
+  .filter(([userId]) => !visibleUserIds || visibleUserIds.has(userId))
       .map(([userId, profile]) => {
         const userData = byUser[userId] || {
           matchPredictions: {},
@@ -161,15 +168,7 @@ export default function PointsPage() {
     )
   }
 
-  if (!isAdmin) {
-    return (
-      <main className="min-h-screen px-4 py-8">
-        <Card className="glass-card p-6">
-          You do not have access to this page.
-        </Card>
-      </main>
-    )
-  }
+
 
   return (
     <main className="min-h-screen px-4 pb-28 pt-6 md:pl-28 md:pr-8 md:pb-10">
@@ -177,11 +176,11 @@ export default function PointsPage() {
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="font-headline text-3xl font-black">
-              Admin Points
+              Points
             </h1>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Manual refresh only, so this page does not constantly read Firebase.
+              Refresh manually to view prediction points.
             </p>
           </div>
 
