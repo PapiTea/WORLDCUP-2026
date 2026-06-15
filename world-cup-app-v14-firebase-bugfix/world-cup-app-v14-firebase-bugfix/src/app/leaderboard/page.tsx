@@ -266,7 +266,7 @@ Object.entries(results).forEach(([id, score]) => {
     <main className="min-h-screen pb-24 pt-6 px-4 md:pb-8 md:pl-28 md:pr-8 max-w-lg mx-auto md:max-w-5xl">
      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
   <div>
-    <h1 className="text-3xl font-headline font-bold mb-2">Leaderboard</h1>
+    <h1 className="text-3xl font-headline font-bold mb-2">Leaderboards</h1>
     <p className="text-muted-foreground text-sm">
       Leaderboards update when refreshed.
     </p>
