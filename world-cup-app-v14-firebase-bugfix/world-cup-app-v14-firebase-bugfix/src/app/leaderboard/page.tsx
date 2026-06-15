@@ -57,6 +57,25 @@ const refreshLeaderboard = async () => {
     setAllMembers(data.allMembers)
     setMyLeagueIds(data.myLeagueIds)
     setLeagueMap(data.leagueMap)
+    if (isAdmin) {
+  await saveLeaderboardSnapshot({
+    users: data.users,
+    predictions: data.predictions,
+    results: data.results,
+    qualifiers: data.qualifiers,
+    slots: data.slots || {},
+    allMembers: data.allMembers,
+    leagueMap: data.leagueMap,
+    myLeagueIdsByUser: data.allMembers.reduce(
+      (acc: Record<string, string[]>, member: LeagueMember) => {
+        acc[member.userId] ||= []
+        acc[member.userId].push(member.leagueId)
+        return acc
+      },
+      {}
+    ),
+  })
+}
     setKnockoutSlots(data.slots || {})
   } finally {
     setLoadingLeaderboard(false)
@@ -64,10 +83,28 @@ const refreshLeaderboard = async () => {
 }
 
 useEffect(() => {
-  if (user) {
+  if (!user) return
+
+  if (isAdmin) {
     refreshLeaderboard()
+    return
   }
-}, [user])
+
+  const unsub = subscribeLeaderboardSnapshot((snapshot) => {
+    if (!snapshot) return
+
+    setUsers(snapshot.users || {})
+    setPredictions(snapshot.predictions || [])
+    setResults(snapshot.results || {})
+    setQualifiers(snapshot.qualifiers || {})
+    setAllMembers(snapshot.allMembers || [])
+    setMyLeagueIds(snapshot.myLeagueIdsByUser?.[user.uid] || [])
+    setLeagueMap(snapshot.leagueMap || {})
+    setKnockoutSlots(snapshot.slots || {})
+  })
+
+  return () => unsub()
+}, [user, isAdmin])
 
   const winnerPicksByUser = useMemo(() => {
     const out: Record<string, string> = {}
