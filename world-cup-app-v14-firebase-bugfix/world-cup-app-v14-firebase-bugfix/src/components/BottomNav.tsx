@@ -9,6 +9,7 @@ import {
   Users,
   Award,
   ShieldCheck,
+  BarChart3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/ThemeToggle"
@@ -19,6 +20,7 @@ const publicNavItems = [
   { name: "Picks", href: "/predictions", icon: Trophy },
   { name: "Groups", href: "/groups", icon: LayoutGrid },
   { name: "Social", href: "/pools", icon: Users },
+  { name: "Points", href: "/points", icon: BarChart3 },
   { name: "Leaderboard", href: "/leaderboard", icon: Award },
 ]
 
@@ -55,7 +57,7 @@ export function BottomNav() {
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-background/85 backdrop-blur-xl pb-safe md:hidden">
         <div className="flex h-16 items-center justify-around px-2">
-          {navItems.slice(0, 5).map((item) => (
+          {navItems.slice(0, 6).map((item) => (
             <NavLink
               key={item.name}
               item={item}
