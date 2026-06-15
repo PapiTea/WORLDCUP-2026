@@ -514,7 +514,14 @@ const rows = members
         return (
           <MiniPredictionLine
             key={fixture.id}
-            title={`${fixture.roundName} - M${fixture.matchNumber}`}
+            title={
+  getTeamById(knockoutSlots[fixture.homeSlot]) &&
+  getTeamById(knockoutSlots[fixture.awaySlot])
+    ? `${getTeamById(knockoutSlots[fixture.homeSlot])?.name} v ${getTeamById(knockoutSlots[fixture.awaySlot])?.name}`
+    : `${fixture.roundName} - M${fixture.matchNumber}`
+}
+homeTeam={getTeamById(knockoutSlots[fixture.homeSlot])}
+awayTeam={getTeamById(knockoutSlots[fixture.awaySlot])}
             pick={pick}
             result={result}
             points={points.total}
