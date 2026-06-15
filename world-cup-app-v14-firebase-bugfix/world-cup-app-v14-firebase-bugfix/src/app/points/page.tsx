@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/AuthGate"
-import { MATCHES, KNOCKOUT_FIXTURES } from "@/lib/mock-data"
+import { MATCHES, KNOCKOUT_FIXTURES, getTeamById } from "@/lib/mock-data"
 import {
   calculateScoreFromData,
   scoreMatchPick,
@@ -20,7 +20,7 @@ import {
   type MatchPrediction,
   type UserDoc,
 } from "@/lib/firebase-service"
-
+import { TeamFlag } from "@/components/TeamFlag"
 type PointsData = {
   users: Record<string, UserDoc>
   predictions: MatchPrediction[]
