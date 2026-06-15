@@ -35,6 +35,7 @@ const selectedLeagueId = searchParams.get("league")
   const [allMembers, setAllMembers] = useState<LeagueMember[]>([])
   const [myLeagueIds, setMyLeagueIds] = useState<string[]>([])
   const [leagueMap, setLeagueMap] = useState<Record<string, League>>({})
+  const [knockoutSlots, setKnockoutSlots] = useState<Record<string, string>>({})
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [selectedSection, setSelectedSection] = useState<"picks" | "groups" | "knockout" | "winner">("picks")
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
@@ -54,6 +55,7 @@ const refreshLeaderboard = async () => {
     setAllMembers(data.allMembers)
     setMyLeagueIds(data.myLeagueIds)
     setLeagueMap(data.leagueMap)
+    setKnockoutSlots(data.slots || {})
   } finally {
     setLoadingLeaderboard(false)
   }
