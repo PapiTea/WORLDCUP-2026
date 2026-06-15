@@ -390,7 +390,7 @@ function PlayerRow({
   isYou,
   userId,
   winnerTeam,
-  onClick,onClick?: () => void
+  onClick,
 }: {
   rank: number
   profile?: UserDoc
@@ -398,64 +398,64 @@ function PlayerRow({
   isYou: boolean
   userId: string
   winnerTeam?: any
+  onClick?: () => void
 }) {
   const username = profile?.displayName || "player"
   const realName = profile?.actualName || `Player ${userId.slice(0, 4)}`
 
   return (
-    return (
-  <button
-    type="button"
-    onClick={onClick}
-    className="w-full text-left"
-  >
-    <Card className="bg-card/70 border-border p-4 flex items-center justify-between transition hover:bg-muted/40">
-      <div className="flex items-center gap-4 min-w-0">
-        <span className="text-sm font-bold font-headline w-6 text-center text-primary">
-          {rank}
-        </span>
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left"
+    >
+      <Card className="bg-card/70 border-border p-4 flex items-center justify-between transition hover:bg-muted/40">
+        <div className="flex items-center gap-4 min-w-0">
+          <span className="text-sm font-bold font-headline w-6 text-center text-primary">
+            {rank}
+          </span>
 
-        <Avatar className="w-10 h-10 border border-border">
-          <AvatarFallback className="text-xl">
-            {profile?.avatar || "⚽"}
-          </AvatarFallback>
-        </Avatar>
+          <Avatar className="w-10 h-10 border border-border">
+            <AvatarFallback className="text-xl">
+              {profile?.avatar || "⚽"}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="min-w-0">
-          <h4 className="font-bold text-sm leading-tight flex items-center gap-2">
-            <span className="truncate">@{username}</span>
+          <div className="min-w-0">
+            <h4 className="font-bold text-sm leading-tight flex items-center gap-2">
+              <span className="truncate">@{username}</span>
 
-            {isYou && (
-              <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
-                You
-              </span>
-            )}
+              {isYou && (
+                <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                  You
+                </span>
+              )}
 
-            {winnerTeam && (
-              <span title={`Winner pick: ${winnerTeam.name}`}>
-                <TeamFlag
-                  team={winnerTeam}
-                  className="h-6 w-6 rounded-full object-cover"
-                />
-              </span>
-            )}
-          </h4>
+              {winnerTeam && (
+                <span title={`Winner pick: ${winnerTeam.name}`}>
+                  <TeamFlag
+                    team={winnerTeam}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                </span>
+              )}
+            </h4>
 
-          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1">
-            <Star size={8} fill="currentColor" /> {realName}
-          </p>
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1">
+              <Star size={8} fill="currentColor" /> {realName}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col items-end pl-3">
-        <span className="font-headline font-bold text-lg">{score}</span>
-        <span className="text-[10px] text-muted-foreground font-bold uppercase">
-          pts
-        </span>
-      </div>
-    </Card>
-  </button>
-)
+        <div className="flex flex-col items-end pl-3">
+          <span className="font-headline font-bold text-lg">{score}</span>
+          <span className="text-[10px] text-muted-foreground font-bold uppercase">
+            pts
+          </span>
+        </div>
+      </Card>
+    </button>
+  )
 }
 
 function EmptyState({ title, text }: { title: string; text: string }) {
