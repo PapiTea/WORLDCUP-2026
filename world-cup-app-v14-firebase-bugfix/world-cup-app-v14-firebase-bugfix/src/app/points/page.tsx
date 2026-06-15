@@ -223,13 +223,6 @@ export default function PointsPage() {
   )}
 </div>
 
-  {row.winnerPick && getTeamById(row.winnerPick) && (
-    <TeamFlag
-      team={getTeamById(row.winnerPick)!}
-      className="h-5 w-8 rounded object-cover"
-    />
-  )}
-</div>
                     </div>
 
                     <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
