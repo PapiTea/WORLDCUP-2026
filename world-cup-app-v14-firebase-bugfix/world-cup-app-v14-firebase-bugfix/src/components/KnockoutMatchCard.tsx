@@ -74,7 +74,7 @@ useEffect(() => {
     away: savedPrediction.away ?? "",
   })
 
-  setConfidencePicked(Boolean(savedPrediction.confidence))
+ setConfidencePicked(savedPrediction.confidence === true)
   setSaved(true)
 
   window.localStorage.setItem(
@@ -82,7 +82,7 @@ useEffect(() => {
     JSON.stringify({
       home: savedPrediction.home,
       away: savedPrediction.away,
-      confidence: Boolean(savedPrediction.confidence),
+    confidence: savedPrediction.confidence === true,
     })
   )
 }, [savedPrediction, fixture.id])
