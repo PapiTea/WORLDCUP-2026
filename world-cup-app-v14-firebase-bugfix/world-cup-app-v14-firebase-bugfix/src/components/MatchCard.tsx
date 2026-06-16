@@ -147,17 +147,7 @@ if (savedPick) {
       saved: true,
     })
 
-    if (
-      user &&
-      pick.home !== undefined &&
-      pick.away !== undefined
-    ) {
-      saveMatchPrediction(user.uid, match.id, "group", {
-        home: Number(pick.home),
-        away: Number(pick.away),
-        confidence: Boolean(pick.confidence),
-      })
-    }
+
   } catch {}
 } else {
       setScoreState({
