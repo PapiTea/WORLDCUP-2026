@@ -496,7 +496,7 @@ const rows = members
             result={result}
             points={points.total}
             reason={points.reason}
-            confidence={Boolean(pick?.confidence)}
+            confidence={pick?.confidence === true}
           />
         )
       })}
@@ -565,7 +565,7 @@ awayTeam={getTeamById(knockoutSlots[fixture.awaySlot])}
             result={result}
             points={points.total}
             reason={points.reason}
-            confidence={Boolean(pick?.confidence)}
+            confidence={pick?.confidence === true}
           />
         )
       })
