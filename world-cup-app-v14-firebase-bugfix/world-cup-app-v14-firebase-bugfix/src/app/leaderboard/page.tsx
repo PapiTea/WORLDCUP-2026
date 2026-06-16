@@ -145,7 +145,7 @@ useEffect(() => {
         byUser[prediction.userId].matchPredictions[prediction.matchId] = {
           home: prediction.home,
           away: prediction.away,
-          confidence: prediction.confidence,
+          confidence: prediction.confidence === true,
         }
       }
 
@@ -153,7 +153,7 @@ useEffect(() => {
         byUser[prediction.userId].knockoutPredictions[prediction.matchId] = {
           home: prediction.home,
           away: prediction.away,
-          confidence: prediction.confidence,
+          confidence: prediction.confidence === true,
         }
       }
 
