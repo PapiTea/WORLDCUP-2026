@@ -378,7 +378,7 @@ if (!isAdmin) {
   pick={pick}
   result={result}
   points={points.total}
-  confidence={Boolean(pick?.confidence)}
+  confidence={pick?.confidence === true}
   reason={points.reason}
   onSaved={refreshPoints}
 />
