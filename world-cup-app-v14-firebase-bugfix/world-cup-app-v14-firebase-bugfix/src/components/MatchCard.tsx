@@ -212,18 +212,20 @@ useEffect(() => {
           JSON.stringify({
             home: remote.home,
             away: remote.away,
-            confidence: Boolean(remote.confidence),
+            confidence: remote.confidence === true,
           })
         )
       }
 
-      if (remote.confidence) {
-        const ids = readConfidenceIds()
+const ids = readConfidenceIds()
 
-        if (!ids.includes(match.id)) {
-          writeConfidenceIds([...ids, match.id])
-        }
-      }
+if (remote.confidence === true) {
+  if (!ids.includes(match.id)) {
+    writeConfidenceIds([...ids, match.id])
+  }
+} else {
+  writeConfidenceIds(ids.filter((id) => id !== match.id))
+}
     })
 
     return () => unsub()
