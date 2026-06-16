@@ -193,7 +193,7 @@ const exportCsv = () => {
         byUser[prediction.userId].matchPredictions[prediction.matchId] = {
           home: prediction.home,
           away: prediction.away,
-          confidence: prediction.confidence,
+          confidence: prediction.confidence === true,
         }
       }
 
@@ -201,7 +201,7 @@ const exportCsv = () => {
         byUser[prediction.userId].knockoutPredictions[prediction.matchId] = {
           home: prediction.home,
           away: prediction.away,
-          confidence: prediction.confidence,
+          confidence: prediction.confidence === true,
         }
       }
 
@@ -409,7 +409,7 @@ if (!isAdmin) {
   pick={pick}
   result={result}
   points={points.total}
-  confidence={Boolean(pick?.confidence)}
+  confidence={pick?.confidence === true}
   reason={points.reason}
   onSaved={refreshPoints}
 />                          )
