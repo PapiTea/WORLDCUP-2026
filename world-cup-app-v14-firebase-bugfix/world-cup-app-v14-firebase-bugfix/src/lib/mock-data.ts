@@ -228,24 +228,66 @@ const makeKnockoutFixtures = (round: KnockoutRoundId, roundName: string, count: 
 
 export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
   ...makeKnockoutFixtures('R32', 'Round of 32', 16, 73,
-    ['Sun 28 Jun | 18:00', 'Sun 28 Jun | 21:00', 'Mon 29 Jun | 18:00', 'Mon 29 Jun | 21:00', 'Tue 30 Jun | 18:00', 'Tue 30 Jun | 21:00', 'Wed 1 Jul | 18:00', 'Wed 1 Jul | 21:00'],
-    ['BMO Field | Toronto, Canada | 🇨🇦', 'SoFi Stadium | Los Angeles, USA | 🇺🇸', 'Estadio Azteca | Mexico City, Mexico | 🇲🇽', 'Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸', 'BC Place | Vancouver, Canada | 🇨🇦', 'Hard Rock Stadium | Miami, USA | 🇺🇸', 'Estadio BBVA | Guadalupe, Mexico | 🇲🇽', 'AT&T Stadium | Arlington, USA | 🇺🇸']
+    [
+      'Sun 28 Jun', 'Mon 29 Jun', 'Mon 29 Jun', 'Mon 29 Jun', 
+      'Tue 30 Jun', 'Tue 30 Jun', 'Tue 30 Jun', 'Wed 1 Jul', 
+      'Wed 1 Jul', 'Wed 1 Jul', 'Thu 2 Jul', 'Thu 2 Jul', 
+      'Thu 2 Jul', 'Fri 3 Jul', 'Fri 3 Jul', 'Fri 3 Jul'
+    ],
+    [
+      'Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
+      'Houston Stadium | Houston, USA | 🇺🇸',
+      'Boston Stadium | Foxborough, USA | 🇺🇸',
+      'Monterrey Stadium | Guadalupe, Mexico | 🇲🇽',
+      'Dallas Stadium | Arlington, USA | 🇺🇸',
+      'New York New Jersey Stadium | East Rutherford, USA | 🇺🇸',
+      'Mexico City Stadium | Mexico City, Mexico | 🇲🇽',
+      'Atlanta Stadium | Atlanta, USA | 🇺🇸',
+      'Seattle Stadium | Seattle, USA | 🇺🇸',
+      'San Francisco Bay Area Stadium | Santa Clara, USA | 🇺🇸',
+      'Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
+      'Toronto Stadium | Toronto, Canada | 🇨🇦',
+      'BC Place Vancouver | Vancouver, Canada | 🇨🇦',
+      'Dallas Stadium | Arlington, USA | 🇺🇸',
+      'Miami Stadium | Miami Gardens, USA | 🇺🇸',
+      'Kansas City Stadium | Kansas City, USA | 🇺🇸'
+    ]
   ),
   ...makeKnockoutFixtures('R16', 'Round of 16', 8, 89,
-    ['Thu 2 Jul | 18:00', 'Thu 2 Jul | 21:00', 'Fri 3 Jul | 18:00', 'Fri 3 Jul | 21:00', 'Sat 4 Jul | 18:00', 'Sat 4 Jul | 21:00'],
-    ['MetLife Stadium | New Jersey, USA | 🇺🇸', 'NRG Stadium | Houston, USA | 🇺🇸', 'Estadio Azteca | Mexico City, Mexico | 🇲🇽', 'Lumen Field | Seattle, USA | 🇺🇸']
+    [
+      'Sat 4 Jul', 'Sun 5 Jul', 'Sun 5 Jul', 'Mon 6 Jul', 
+      'Mon 6 Jul', 'Tue 7 Jul', 'Tue 7 Jul', 'Tue 7 Jul'
+    ],
+    [
+      'Philadelphia Stadium | Philadelphia, USA | 🇺🇸',
+      'Houston Stadium | Houston, USA | 🇺🇸',
+      'New York New Jersey Stadium | East Rutherford, USA | 🇺🇸',
+      'Dallas Stadium | Arlington, USA | 🇺🇸',
+      'Mexico City Stadium | Mexico City, Mexico | 🇲🇽',
+      'Atlanta Stadium | Atlanta, USA | 🇺🇸',
+      'BC Place Vancouver | Vancouver, Canada | 🇨🇦',
+      'Seattle Stadium | Seattle, USA | 🇺🇸'
+    ]
   ),
   ...makeKnockoutFixtures('QF', 'Quarter-finals', 4, 97,
-    ['Thu 9 Jul | 20:00', 'Fri 10 Jul | 20:00', 'Sat 11 Jul | 20:00', 'Sun 12 Jul | 20:00'],
-    ['SoFi Stadium | Los Angeles, USA | 🇺🇸', 'Gillette Stadium | Foxborough, USA | 🇺🇸', 'Hard Rock Stadium | Miami, USA | 🇺🇸', 'GEHA Field at Arrowhead Stadium | Kansas City, USA | 🇺🇸']
+    ['Thu 9 Jul', 'Fri 10 Jul', 'Sat 11 Jul', 'Sat 11 Jul'],
+    [
+      'Boston Stadium | Foxborough, USA | 🇺🇸',
+      'Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
+      'Miami Stadium | Miami Gardens, USA | 🇺🇸',
+      'Kansas City Stadium | Kansas City, USA | 🇺🇸'
+    ]
   ),
   ...makeKnockoutFixtures('SF', 'Semi-finals', 2, 101,
-    ['Tue 14 Jul | 20:00', 'Wed 15 Jul | 20:00'],
-    ['AT&T Stadium | Arlington, USA | 🇺🇸', 'Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸']
+    ['Tue 14 Jul', 'Wed 15 Jul'],
+    [
+      'Dallas Stadium | Arlington, USA | 🇺🇸',
+      'Atlanta Stadium | Atlanta, USA | 🇺🇸'
+    ]
   ),
   ...makeKnockoutFixtures('FINAL', 'Final', 1, 104,
-    ['Sun 19 Jul | 20:00'],
-    ['MetLife Stadium | New Jersey, USA | 🇺🇸']
+    ['Sun 19 Jul'],
+    ['New York New Jersey Stadium | East Rutherford, USA | 🇺🇸']
   ),
 ]
 
