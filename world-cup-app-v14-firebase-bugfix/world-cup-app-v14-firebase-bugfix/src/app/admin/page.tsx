@@ -41,6 +41,8 @@ export default function AdminPage() {
 
   const [scores, setScores] = useState<ScoreMap>({})
   const [koScores, setKoScores] = useState<ScoreMap>({})
+  const [koDecidedBy, setKoDecidedBy] = useState<Record<string, "normal" | "extraTime" | "penalties">>({})
+const [koWinnerSide, setKoWinnerSide] = useState<Record<string, "home" | "away" | "">>({})
   const [qualifiers, setQualifiers] = useState<QualifierMap>({})
   const [slots, setSlots] = useState<SlotMap>({})
   const [saved, setSaved] = useState(false)
@@ -177,21 +179,37 @@ export default function AdminPage() {
     setSaved(true)
   }
 
-  const saveKoScore = async (matchId: string) => {
-    const score = koScores[matchId]
+const saveKoScore = async (matchId: string) => {
+  const score = koScores[matchId]
+  const decidedBy = koDecidedBy[matchId] || "normal"
+  const winnerSide = koWinnerSide[matchId] || ""
 
-    if (!score || score.home === "" || score.away === "") return
+  if (!score || score.home === "" || score.away === "") return
 
-    window.localStorage.setItem(`wc-ko-result-${matchId}`, JSON.stringify(score))
-    await saveMatchResult(`ko_${matchId}`, {
-      home: Number(score.home),
-      away: Number(score.away),
-    })
-
-    setSaved(true)
-    notifyKnockoutChange()
+  if (decidedBy === "penalties" && Number(score.home) !== Number(score.away)) {
+    window.alert("If the match was decided on penalties, the score after extra time should be a draw, e.g. 1-1.")
+    return
   }
 
+  if (decidedBy === "penalties" && !winnerSide) {
+    window.alert("Please select who won on penalties.")
+    return
+  }
+
+  const result = {
+    home: Number(score.home),
+    away: Number(score.away),
+    decidedBy,
+    winnerSide: decidedBy === "penalties" ? winnerSide : undefined,
+  }
+
+  window.localStorage.setItem(`wc-ko-result-${matchId}`, JSON.stringify(result))
+
+  await saveMatchResult(`ko_${matchId}`, result)
+
+  setSaved(true)
+  notifyKnockoutChange()
+}
   const clearScore = async (matchId: string) => {
     window.localStorage.removeItem(`wc-result-${matchId}`)
     await deleteMatchResult(matchId)
@@ -769,7 +787,45 @@ const clearAdminMessage = async () => {
                     score={score}
                     onChange={(side, value) => updateKoScore(fixture.id, side, value)}
                   />
+<div className="mt-4 grid gap-2 sm:grid-cols-2">
+  <label className="text-xs font-bold text-muted-foreground">
+    Result type
+    <select
+      value={koDecidedBy[fixture.id] || "normal"}
+      onChange={(event) =>
+        setKoDecidedBy((prev) => ({
+          ...prev,
+          [fixture.id]: event.target.value as "normal" | "extraTime" | "penalties",
+        }))
+      }
+      className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm font-bold text-foreground"
+    >
+      <option value="normal">Normal time</option>
+      <option value="extraTime">After extra time</option>
+      <option value="penalties">Penalties</option>
+    </select>
+  </label>
 
+  {(koDecidedBy[fixture.id] || "normal") === "penalties" && (
+    <label className="text-xs font-bold text-muted-foreground">
+      Penalty winner
+      <select
+        value={koWinnerSide[fixture.id] || ""}
+        onChange={(event) =>
+          setKoWinnerSide((prev) => ({
+            ...prev,
+            [fixture.id]: event.target.value as "home" | "away" | "",
+          }))
+        }
+        className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm font-bold text-foreground"
+      >
+        <option value="">Select winner</option>
+        <option value="home">{homeTeam?.name || fixture.homeSlot}</option>
+        <option value="away">{awayTeam?.name || fixture.awaySlot}</option>
+      </select>
+    </label>
+  )}
+</div>
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <Button
                       className="rounded-2xl font-black"
