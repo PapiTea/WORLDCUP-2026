@@ -196,12 +196,15 @@ const saveKoScore = async (matchId: string) => {
     return
   }
 
-  const result = {
-    home: Number(score.home),
-    away: Number(score.away),
-    decidedBy,
-    winnerSide: decidedBy === "penalties" ? winnerSide : undefined,
-  }
+ const result: any = {
+  home: Number(score.home),
+  away: Number(score.away),
+  decidedBy,
+}
+
+if (decidedBy === "penalties") {
+  result.winnerSide = winnerSide
+}
 
   window.localStorage.setItem(`wc-ko-result-${matchId}`, JSON.stringify(result))
 
