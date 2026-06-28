@@ -1,10 +1,23 @@
-import { GROUPS, KNOCKOUT_FIXTURES, MATCHES, TEAMS } from './mock-data'
+import { GROUPS, KNOCKOUT_FIXTURES, MATCHES } from './mock-data'
 
-export type SavedPick = { home: number; away: number; confidence?: boolean }
-export type SavedResult = { home: number; away: number }
+export type SavedPick = {
+  home: number
+  away: number
+  confidence?: boolean
+}
+
+export type SavedResult = {
+  home: number
+  away: number
+  decidedBy?: "normal" | "extraTime" | "penalties"
+  winnerSide?: "home" | "away"
+  winnerTeamId?: string
+}
+
 export type TournamentWinnerPick = {
   teamId: string
 }
+
 type StorageLike = Pick<Storage, 'getItem'>
 
 function readJson<T>(storage: StorageLike, key: string, fallback: T): T {
@@ -22,28 +35,60 @@ function outcome(home: number, away: number) {
   return 'D'
 }
 
-export function scoreMatchPick(pick: SavedPick | null, result: SavedResult | null) {
-  if (!pick || !result) return { base: 0, confidenceBonus: 0, total: 0, reason: 'Awaiting result' }
+function knockoutOutcome(result: SavedResult) {
+  if (
+    result.decidedBy === "penalties" &&
+    result.home === result.away &&
+    result.winnerSide
+  ) {
+    return result.winnerSide === "home" ? "H" : "A"
+  }
+
+  return outcome(result.home, result.away)
+}
+
+export function scoreMatchPick(
+  pick: SavedPick | null,
+  result: SavedResult | null
+) {
+  if (!pick || !result) {
+    return {
+      base: 0,
+      confidenceBonus: 0,
+      total: 0,
+      reason: 'Awaiting result',
+    }
+  }
 
   const pickOutcome = outcome(pick.home, pick.away)
-  const actualOutcome = outcome(result.home, result.away)
+  const actualOutcome = knockoutOutcome(result)
+
   const exact = pick.home === result.home && pick.away === result.away
   const correctResult = pickOutcome === actualOutcome
-  const correctGoalDifference = (pick.home - pick.away) === (result.home - result.away)
+  const correctGoalDifference =
+    result.decidedBy === "penalties"
+      ? false
+      : (pick.home - pick.away) === (result.home - result.away)
 
   let base = 0
   let reason = 'No points'
+
   if (exact) {
     base = 5
     reason = 'Exact score'
   } else if (correctResult) {
     base = 3 + (correctGoalDifference ? 1 : 0)
-    reason = correctGoalDifference ? 'Correct result + goal difference' : 'Correct result'
+    reason = correctGoalDifference
+      ? 'Correct result + goal difference'
+      : result.decidedBy === "penalties"
+        ? 'Correct winner after penalties'
+        : 'Correct result'
   }
 
   let total = base
   let confidenceBonus = 0
-  if (pick.confidence) {
+
+  if (pick.confidence === true) {
     if (correctResult) {
       confidenceBonus = base
       total = base * 2
@@ -61,6 +106,7 @@ export function scoreMatchPick(pick: SavedPick | null, result: SavedResult | nul
 export function calculateLocalScore(storage: StorageLike) {
   let matchPoints = 0
   let groupPoints = 0
+
   const matchBreakdown = MATCHES.map((match) => {
     const pick = readJson<SavedPick | null>(storage, `wc-match-${match.id}`, null)
     const result = readJson<SavedResult | null>(storage, `wc-result-${match.id}`, null)
@@ -88,7 +134,15 @@ export function calculateLocalScore(storage: StorageLike) {
   })
 
   const total = matchPoints + groupPoints
-  return { total, matchPoints, groupPoints, matchBreakdown, knockoutBreakdown, groupBreakdown }
+
+  return {
+    total,
+    matchPoints,
+    groupPoints,
+    matchBreakdown,
+    knockoutBreakdown,
+    groupBreakdown,
+  }
 }
 
 export function calculateScoreFromData(input: {
@@ -103,12 +157,21 @@ export function calculateScoreFromData(input: {
 }) {
   let matchPoints = 0
   let groupPoints = 0
+
   MATCHES.forEach((match) => {
-    matchPoints += scoreMatchPick(input.matchPredictions[match.id] || null, input.results[match.id] || null).total
+    matchPoints += scoreMatchPick(
+      input.matchPredictions[match.id] || null,
+      input.results[match.id] || null
+    ).total
   })
+
   KNOCKOUT_FIXTURES.forEach((fixture) => {
-    matchPoints += scoreMatchPick(input.knockoutPredictions[fixture.id] || null, input.knockoutResults[fixture.id] || null).total
+    matchPoints += scoreMatchPick(
+      input.knockoutPredictions[fixture.id] || null,
+      input.knockoutResults[fixture.id] || null
+    ).total
   })
+
   GROUPS.forEach((group) => {
     const picks = input.groupPredictions[group.id] || []
     const qualified = input.qualifiers[group.id] || []
@@ -116,20 +179,21 @@ export function calculateScoreFromData(input: {
     const correctPositions = picks.filter((id, index) => qualified[index] === id).length
     groupPoints += correctTeams * 2 + correctPositions * 3
   })
+
   let winnerPoints = 0
 
-if (
-  input.tournamentWinnerPick &&
-  input.actualTournamentWinner &&
-  input.tournamentWinnerPick === input.actualTournamentWinner
-) {
-  winnerPoints = 50
-}
+  if (
+    input.tournamentWinnerPick &&
+    input.actualTournamentWinner &&
+    input.tournamentWinnerPick === input.actualTournamentWinner
+  ) {
+    winnerPoints = 50
+  }
 
-return {
-  total: matchPoints + groupPoints + winnerPoints,
-  matchPoints,
-  groupPoints,
-  winnerPoints,
-}
+  return {
+    total: matchPoints + groupPoints + winnerPoints,
+    matchPoints,
+    groupPoints,
+    winnerPoints,
+  }
 }
