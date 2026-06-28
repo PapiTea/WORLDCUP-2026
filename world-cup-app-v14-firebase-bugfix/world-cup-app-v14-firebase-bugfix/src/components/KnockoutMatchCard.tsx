@@ -309,7 +309,6 @@ if (hasResult && ready && actualResult) {
         <KoTeam team={awayTeam} placeholder={fixture.awaySlot} />
       </div>
 
-    V
   )
 }
 
