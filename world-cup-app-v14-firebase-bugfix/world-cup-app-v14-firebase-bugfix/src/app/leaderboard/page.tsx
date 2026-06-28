@@ -563,7 +563,7 @@ const rows = members
             title={
               homeTeam && awayTeam
                 ? `${homeTeam.name} v ${awayTeam.name}`
-                : `${fixture.roundName} - M${fixture.matchNumber}`
+                : "teams not assigned yet"
             }
             homeTeam={homeTeam}
             awayTeam={awayTeam}
