@@ -290,8 +290,6 @@ export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
     ['New York New Jersey Stadium | East Rutherford, USA | 🇺🇸']
   ),
 ]
-
-
 export function getTeamById(teamId?: string | null): Team | null {
   if (!teamId) return null
   return Object.values(TEAMS).find((team) => team.id === teamId || team.code === teamId) || null
