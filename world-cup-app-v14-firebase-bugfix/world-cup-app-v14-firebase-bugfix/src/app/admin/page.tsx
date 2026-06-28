@@ -47,7 +47,7 @@ const [koWinnerSide, setKoWinnerSide] = useState<Record<string, "home" | "away" 
   const [slots, setSlots] = useState<SlotMap>({})
   const [saved, setSaved] = useState(false)
   const [adminMessage, setAdminMessage] = useState("")
-
+const [openAdminSection, setOpenAdminSection] = useState<"groups" | "qualifiers" | "overview" | "knockout">("knockout")
   useEffect(() => {
     if (!isAdmin) return
 
@@ -74,63 +74,6 @@ const [koWinnerSide, setKoWinnerSide] = useState<Record<string, "home" | "away" 
       unsubSetup()
     }
   }, [isAdmin])
-
-  useEffect(() => {
-    const nextScores: ScoreMap = {}
-
-    for (const match of MATCHES) {
-      const stored = window.localStorage.getItem(`wc-result-${match.id}`)
-
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored)
-          nextScores[match.id] = {
-            home: parsed.home ?? "",
-            away: parsed.away ?? "",
-          }
-        } catch {}
-      }
-    }
-    const nextKoScores: ScoreMap = {}
-
-    for (const fixture of KNOCKOUT_FIXTURES) {
-      const stored = window.localStorage.getItem(`wc-ko-result-${fixture.id}`)
-
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored)
-          nextKoScores[fixture.id] = {
-            home: parsed.home ?? "",
-            away: parsed.away ?? "",
-          }
-        } catch {}
-      }
-    }
-
-    const nextQualifiers: QualifierMap = {}
-
-    for (const group of GROUPS) {
-      const stored = window.localStorage.getItem(`wc-qualified-${group.id}`)
-
-      if (stored) {
-        try {
-          nextQualifiers[group.id] = JSON.parse(stored)
-        } catch {}
-      }
-    }
-
-    const nextSlots: SlotMap = {}
-
-    for (const slot of KNOCKOUT_SLOTS) {
-      const stored = window.localStorage.getItem(`wc-ko-slot-${slot.id}`)
-      if (stored) nextSlots[slot.id] = stored
-    }
-
-    setScores(nextScores)
-    setKoScores(nextKoScores)
-    setQualifiers(nextQualifiers)
-    setSlots(nextSlots)
-  }, [])
 
   const qualifiedTeamIds = useMemo(
     () => Array.from(new Set(Object.values(qualifiers).flat())),
@@ -187,7 +130,7 @@ const saveKoScore = async (matchId: string) => {
   if (!score || score.home === "" || score.away === "") return
 
   if (decidedBy === "penalties" && Number(score.home) !== Number(score.away)) {
-    window.alert("If the match was decided on penalties, the score after extra time should be a draw, e.g. 1-1.")
+    window.alert("If decided on penalties, the score after extra time should be a draw, e.g. 1-1.")
     return
   }
 
@@ -196,22 +139,27 @@ const saveKoScore = async (matchId: string) => {
     return
   }
 
- const result: any = {
-  home: Number(score.home),
-  away: Number(score.away),
-  decidedBy,
-}
+  const result: any = {
+    home: Number(score.home),
+    away: Number(score.away),
+    decidedBy,
+  }
 
-if (decidedBy === "penalties") {
-  result.winnerSide = winnerSide
-}
+  if (decidedBy === "penalties") {
+    result.winnerSide = winnerSide
+  }
 
-  window.localStorage.setItem(`wc-ko-result-${matchId}`, JSON.stringify(result))
+  try {
+    window.localStorage.setItem(`wc-ko-result-${matchId}`, JSON.stringify(result))
 
-  await saveMatchResult(`ko_${matchId}`, result)
+    await saveMatchResult(`ko_${matchId}`, result)
 
-  setSaved(true)
-  notifyKnockoutChange()
+    setSaved(true)
+    notifyKnockoutChange()
+  } catch (error) {
+    console.error("Knockout result save failed:", error)
+    window.alert("Knockout result failed to save online. Check console.")
+  }
 }
   const clearScore = async (matchId: string) => {
     window.localStorage.removeItem(`wc-result-${matchId}`)
@@ -507,15 +455,19 @@ const clearAdminMessage = async () => {
 
         <section className="space-y-4">
           <div>
-            <h2 className="font-headline text-2xl font-black">
-              1. Group-stage final scores
-            </h2>
+           <button
+  type="button"
+  onClick={() => setOpenAdminSection(openAdminSection === "groups" ? "knockout" : "groups")}
+  className="text-left font-headline text-2xl font-black"
+>
+  1. Group-stage final scores {openAdminSection === "groups" ? "▲" : "▼"}
+</button>
             <p className="text-sm text-muted-foreground">
               Enter scores here after each match finishes. These feed the fixture
               pages and live leaderboard scoring.
             </p>
           </div>
-
+{openAdminSection === "groups" && (
           <div className="grid gap-4 lg:grid-cols-2">
             {MATCHES.map((match) => {
               const score = scores[match.id] || { home: "", away: "" }
@@ -572,6 +524,7 @@ const clearAdminMessage = async () => {
               )
             })}
           </div>
+  )}
         </section>
 
         <section className="space-y-4">
