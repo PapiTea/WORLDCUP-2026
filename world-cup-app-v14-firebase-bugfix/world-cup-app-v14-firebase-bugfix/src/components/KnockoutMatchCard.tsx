@@ -52,12 +52,24 @@ const actualResult =
     : null
 
 const hasResult = Boolean(actualResult)
-const [showBreakdown, setShowBreakdown] = useState(false)
+  const kickoffTime = new Date(fixture.kickoff)
 
+const isLocked =
+  now >= kickoffTime ||
+  hasResult
+const [showBreakdown, setShowBreakdown] = useState(false)
+const [now, setNow] = useState(() => new Date())
 useEffect(() => {
   setHomeTeam(getTeamById(slots[fixture.homeSlot]) || readSlot(fixture.homeSlot))
   setAwayTeam(getTeamById(slots[fixture.awaySlot]) || readSlot(fixture.awaySlot))
 }, [slots, fixture.homeSlot, fixture.awaySlot])
+  useEffect(() => {
+  const timer = window.setInterval(() => {
+    setNow(new Date())
+  }, 30000)
+
+  return () => window.clearInterval(timer)
+}, [])
 
 useEffect(() => {
   const rawPick = window.localStorage.getItem(`wc-ko-pick-${fixture.id}`)
@@ -105,8 +117,10 @@ useEffect(() => {
 
 const matchScore = scoreMatchPick(userPick, actualResult)
 
-  const save = async () => {
-    if (!ready || score.home === "" || score.away === "") return
+ const save = async () => {
+  if (isLocked) return
+
+  if (!ready || score.home === "" || score.away === "") return
     const pick = {
   home: Number(score.home),
   away: Number(score.away),
@@ -288,9 +302,9 @@ if (hasResult && ready && actualResult) {
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-3">
         <KoTeam team={homeTeam} placeholder={fixture.homeSlot} />
         <div className="mt-5 flex shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-background/55 p-1.5 ring-1 ring-border sm:mt-6 sm:gap-2 sm:p-2">
-          <Input type="number" inputMode="numeric" placeholder="-" value={score.home} onChange={(e) => setScore(prev => ({ ...prev, home: e.target.value === "" ? "" : Number(e.target.value) }))} disabled={!ready} className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" />
+          <Input type="number" inputMode="numeric" placeholder="-" value={score.home} onChange={(e) => setScore(prev => ({ ...prev, home: e.target.value === "" ? "" : Number(e.target.value) }))} disabled={!ready || isLocked} className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" />
           <span className="font-black text-muted-foreground">:</span>
-          <Input type="number" inputMode="numeric" placeholder="-" value={score.away} onChange={(e) => setScore(prev => ({ ...prev, away: e.target.value === "" ? "" : Number(e.target.value) }))} disabled={!ready} className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" />
+          <Input type="number" inputMode="numeric" placeholder="-" value={score.away} onChange={(e) => setScore(prev => ({ ...prev, away: e.target.value === "" ? "" : Number(e.target.value) }))} disabled={!ready || isLocked} className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" />
         </div>
         <KoTeam team={awayTeam} placeholder={fixture.awaySlot} />
       </div>
@@ -308,7 +322,7 @@ if (hasResult && ready && actualResult) {
       variant={confidencePicked ? "default" : "outline"}
       className="h-11 rounded-2xl font-black"
       onClick={() => setConfidencePicked((current) => !current)}
-      disabled={hasResult}
+   disabled={isLocked}
     >
       ⚡ {confidencePicked ? "Confidence picked" : "Confidence x2"}
     </Button>
@@ -317,15 +331,22 @@ if (hasResult && ready && actualResult) {
       size="sm"
       className="h-11 rounded-2xl font-black"
       onClick={save}
-      disabled={score.home === "" || score.away === "" || hasResult}
+    disabled={
+  score.home === "" ||
+  score.away === "" ||
+  isLocked
+}
     >
       Save score
     </Button>
   </div>
 
-  <div className="flex items-center justify-center rounded-2xl bg-muted/50 px-2 py-2 text-center text-[11px] font-bold text-muted-foreground">
-    {hasResult ? "Final result added" : "Admin result pending"}
-  </div>
+<div className="flex items-center justify-center rounded-2xl bg-muted/50 px-2 py-2 text-center text-[11px] font-bold text-muted-foreground">
+  {hasResult
+    ? "Final result added"
+    : isLocked
+      ? "Predictions locked — kick-off has passed."
+      : "Admin result pending"}
 </div>
       )}
     </Card>
