@@ -42,7 +42,13 @@ const actualResult =
   liveResult &&
   typeof liveResult.home === "number" &&
   typeof liveResult.away === "number"
-    ? { home: liveResult.home, away: liveResult.away }
+    ? {
+        home: liveResult.home,
+        away: liveResult.away,
+        decidedBy: liveResult.decidedBy,
+        winnerSide: liveResult.winnerSide,
+        winnerTeamId: liveResult.winnerTeamId,
+      }
     : null
 
 const hasResult = Boolean(actualResult)
