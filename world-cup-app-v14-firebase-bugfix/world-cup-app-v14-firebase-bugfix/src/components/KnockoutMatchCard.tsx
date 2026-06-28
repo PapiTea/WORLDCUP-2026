@@ -338,27 +338,3 @@ function KoTeam({ team, placeholder }: { team: Team | null; placeholder: string 
   )
 }
 
-function KoTeam({ team, placeholder }: { team: Team | null; placeholder: string }) {
-  if (!team) {
-    return (
-      <div className="min-w-0 text-center">
-        <div className="mx-auto flex w-full min-w-0 flex-col items-center rounded-3xl bg-background/20 px-1.5 py-2 ring-1 ring-white/5 sm:px-2">
-          <div className="flex h-12 w-16 items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 text-[10px] font-black text-muted-foreground sm:h-14 sm:w-20">TBC</div>
-          <div className="mt-2 min-h-[2rem] text-[10px] font-black leading-tight text-muted-foreground sm:text-xs">{placeholder}</div>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-w-0 text-center">
-      <div className="mx-auto flex w-full min-w-0 flex-col items-center rounded-3xl bg-background/20 px-1.5 py-2 ring-1 ring-white/5 sm:px-2">
-        <TeamFlag team={team} className="h-12 w-16 rounded-2xl object-cover sm:h-14 sm:w-20" />
-        <div className="mt-2 w-full min-w-0">
-          <div className="mx-auto line-clamp-2 min-h-[2rem] max-w-full px-1 text-center text-[10px] font-black leading-tight text-foreground sm:text-xs" title={team.name}>{team.name}</div>
-          <div className="mt-1 truncate text-[9px] font-black uppercase tracking-wider text-muted-foreground sm:text-[10px]" title={team.code}>{team.code}</div>
-        </div>
-      </div>
-    </div>
-  )
-}
