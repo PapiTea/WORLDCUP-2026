@@ -551,16 +551,25 @@ const clearAdminMessage = async () => {
 
         <section className="space-y-4">
           <div>
-            <h2 className="font-headline text-2xl font-black">
-              2. Qualified teams + bracket placement
-            </h2>
+<button
+  type="button"
+  onClick={() =>
+    setOpenAdminSection(
+      openAdminSection === "qualifiers" ? "knockout" : "qualifiers"
+    )
+  }
+  className="text-left font-headline text-2xl font-black"
+>
+  2. Qualified teams + bracket placement{" "}
+  {openAdminSection === "qualifiers" ? "▲" : "▼"}
+</button>
             <p className="text-sm text-muted-foreground">
               Select official qualifiers from each group. You can select up to 3
               per group so the best third-place teams can be handled. Once
               selected, place each qualified team into a knockout slot.
             </p>
           </div>
-
+{openAdminSection === "qualifiers" && (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {GROUPS.map((group) => {
               const picked = qualifiers[group.id] || []
@@ -654,19 +663,29 @@ const clearAdminMessage = async () => {
               )
             })}
           </div>
+  )}
         </section>
 
         <section className="space-y-4">
           <div>
-            <h2 className="font-headline text-2xl font-black">
-              3. Knockout bracket overview
-            </h2>
+<button
+  type="button"
+  onClick={() =>
+    setOpenAdminSection(
+      openAdminSection === "overview" ? "knockout" : "overview"
+    )
+  }
+  className="text-left font-headline text-2xl font-black"
+>
+  3. Knockout bracket overview{" "}
+  {openAdminSection === "overview" ? "▲" : "▼"}
+</button>
             <p className="text-sm text-muted-foreground">
               This is a quick admin view of which teams are in each knockout slot.
               Empty slots stay as TBC for players.
             </p>
           </div>
-
+{openAdminSection === "overview" && (
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {KNOCKOUT_ROUNDS.map((round) => (
               <Card
@@ -714,8 +733,8 @@ const clearAdminMessage = async () => {
               </Card>
             ))}
           </div>
+  )}
         </section>
-
         <section className="space-y-4">
           <div>
             <h2 className="font-headline text-2xl font-black">
