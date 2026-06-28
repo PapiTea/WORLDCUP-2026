@@ -536,47 +536,48 @@ const rows = members
     </div>
   )}
 
- {selectedSection === "knockout" && (
+{selectedSection === "knockout" && (
   <div className="space-y-2">
-    {KNOCKOUT_FIXTURES.some(
-      (fixture) =>
-        selectedUserData.knockoutPredictions[fixture.id] ||
-        selectedKnockoutResults[fixture.id]
-    ) ? (
-      KNOCKOUT_FIXTURES.map((fixture) => {
+    {KNOCKOUT_FIXTURES.filter((fixture) => {
+      const result = selectedKnockoutResults[fixture.id] || null
+      return isAdmin || result
+    }).length === 0 ? (
+      <div className="rounded-2xl bg-background/60 p-4 text-center text-sm font-bold text-muted-foreground">
+        Knockout predictions will appear here once matches have been played and results are added.
+      </div>
+    ) : (
+      KNOCKOUT_FIXTURES.filter((fixture) => {
+        const result = selectedKnockoutResults[fixture.id] || null
+        return isAdmin || result
+      }).map((fixture) => {
         const pick = selectedUserData.knockoutPredictions[fixture.id] || null
         const result = selectedKnockoutResults[fixture.id] || null
         const points = scoreMatchPick(pick, result)
 
-        if (!pick && !result) return null
+        const homeTeam = getTeamById(knockoutSlots[fixture.homeSlot])
+        const awayTeam = getTeamById(knockoutSlots[fixture.awaySlot])
 
         return (
           <MiniPredictionLine
             key={fixture.id}
             title={
-  getTeamById(knockoutSlots[fixture.homeSlot]) &&
-  getTeamById(knockoutSlots[fixture.awaySlot])
-    ? `${getTeamById(knockoutSlots[fixture.homeSlot])?.name} v ${getTeamById(knockoutSlots[fixture.awaySlot])?.name}`
-    : `${fixture.roundName} - M${fixture.matchNumber}`
-}
-homeTeam={getTeamById(knockoutSlots[fixture.homeSlot])}
-awayTeam={getTeamById(knockoutSlots[fixture.awaySlot])}
+              homeTeam && awayTeam
+                ? `${homeTeam.name} v ${awayTeam.name}`
+                : `${fixture.roundName} - M${fixture.matchNumber}`
+            }
+            homeTeam={homeTeam}
+            awayTeam={awayTeam}
             pick={pick}
             result={result}
-            points={points.total}
-            reason={points.reason}
+            points={result ? points.total : 0}
+            reason={result ? points.reason : "Awaiting result"}
             confidence={pick?.confidence === true}
           />
         )
       })
-    ) : (
-      <div className="rounded-2xl bg-background/60 p-4 text-center text-sm font-bold text-muted-foreground">
-        Knockout predictions will appear here once the knockout fixtures are assigned and users start making picks.
-      </div>
     )}
   </div>
 )}
-
   {selectedSection === "winner" && (
     <div className="flex justify-center">
       {selectedRow?.winnerTeam ? (
