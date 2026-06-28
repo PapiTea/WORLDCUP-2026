@@ -309,47 +309,7 @@ if (hasResult && ready && actualResult) {
         <KoTeam team={awayTeam} placeholder={fixture.awaySlot} />
       </div>
 
-      {!ready ? (
-        <div className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-background/35 px-3 py-3 text-center text-xs font-bold text-muted-foreground">
-          <Lock size={14} /> Waiting for admin to assign teams to this tie.
-        </div>
-      ) : (
-<div className="mt-4 space-y-2.5">
-  <div className="grid grid-cols-2 gap-2">
-    <Button
-      type="button"
-      size="sm"
-      variant={confidencePicked ? "default" : "outline"}
-      className="h-11 rounded-2xl font-black"
-      onClick={() => setConfidencePicked((current) => !current)}
-   disabled={isLocked}
-    >
-      ⚡ {confidencePicked ? "Confidence picked" : "Confidence x2"}
-    </Button>
-
-    <Button
-      size="sm"
-      className="h-11 rounded-2xl font-black"
-      onClick={save}
-    disabled={
-  score.home === "" ||
-  score.away === "" ||
-  isLocked
-}
-    >
-      Save score
-    </Button>
-  </div>
-
-<div className="flex items-center justify-center rounded-2xl bg-muted/50 px-2 py-2 text-center text-[11px] font-bold text-muted-foreground">
-  {hasResult
-    ? "Final result added"
-    : isLocked
-      ? "Predictions locked — kick-off has passed."
-      : "Admin result pending"}
-</div>
-      )}
-    </Card>
+    V
   )
 }
 
