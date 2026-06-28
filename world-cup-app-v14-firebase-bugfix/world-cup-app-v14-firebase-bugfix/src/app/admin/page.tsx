@@ -51,19 +51,36 @@ const [openAdminSection, setOpenAdminSection] = useState<"groups" | "qualifiers"
   useEffect(() => {
     if (!isAdmin) return
 
-    const unsubResults = subscribeResults((items) => {
-      const groupScores: ScoreMap = {}
-      const knockoutScores: ScoreMap = {}
+const unsubResults = subscribeResults((items) => {
+  const groupScores: ScoreMap = {}
+  const knockoutScores: ScoreMap = {}
+  const knockoutDecidedBy: Record<string, "normal" | "extraTime" | "penalties"> = {}
+  const knockoutWinnerSide: Record<string, "home" | "away" | ""> = {}
 
-      Object.entries(items).forEach(([id, score]) => {
-        if (id.startsWith("ko_")) knockoutScores[id.replace("ko_", "")] = score
-        else groupScores[id] = score
-      })
+  Object.entries(items).forEach(([id, score]) => {
+    if (id.startsWith("ko_")) {
+      const cleanId = id.replace("ko_", "")
 
-      setScores(groupScores)
-      setKoScores(knockoutScores)
-    })
+      knockoutScores[cleanId] = {
+        home: score.home,
+        away: score.away,
+      }
 
+      knockoutDecidedBy[cleanId] = score.decidedBy || "normal"
+      knockoutWinnerSide[cleanId] = score.winnerSide || ""
+    } else {
+      groupScores[id] = {
+        home: score.home,
+        away: score.away,
+      }
+    }
+  })
+
+  setScores(groupScores)
+  setKoScores(knockoutScores)
+  setKoDecidedBy(knockoutDecidedBy)
+  setKoWinnerSide(knockoutWinnerSide)
+})
     const unsubSetup = subscribeKnockoutSetup(({ qualifiers, slots }) => {
       setQualifiers(qualifiers)
       setSlots(slots)
