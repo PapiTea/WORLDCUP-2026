@@ -38,251 +38,217 @@ export function KnockoutMatchCard({
   const [score, setScore] = useState<Score>({ home: "", away: "" })
   const [saved, setSaved] = useState(false)
   const [confidencePicked, setConfidencePicked] = useState(false)
-const actualResult =
-  liveResult &&
-  typeof liveResult.home === "number" &&
-  typeof liveResult.away === "number"
-    ? {
-        home: liveResult.home,
-        away: liveResult.away,
-        decidedBy: liveResult.decidedBy,
-        winnerSide: liveResult.winnerSide,
-        winnerTeamId: liveResult.winnerTeamId,
-      }
-    : null
+  const [showBreakdown, setShowBreakdown] = useState(false)
+  const [now, setNow] = useState(() => new Date())
 
-const hasResult = Boolean(actualResult)
+  const actualResult =
+    liveResult &&
+    typeof liveResult.home === "number" &&
+    typeof liveResult.away === "number"
+      ? {
+          home: liveResult.home,
+          away: liveResult.away,
+          decidedBy: liveResult.decidedBy,
+          winnerSide: liveResult.winnerSide,
+          winnerTeamId: liveResult.winnerTeamId,
+        }
+      : null
+
+  const hasResult = Boolean(actualResult)
   const kickoffTime = new Date(fixture.kickoff)
-
-const [now, setNow] = useState(() => new Date())
-    const isLocked =
-  now >= kickoffTime ||
-  hasResult
-const [showBreakdown, setShowBreakdown] = useState(false)
-
-useEffect(() => {
-  setHomeTeam(getTeamById(slots[fixture.homeSlot]) || readSlot(fixture.homeSlot))
-  setAwayTeam(getTeamById(slots[fixture.awaySlot]) || readSlot(fixture.awaySlot))
-}, [slots, fixture.homeSlot, fixture.awaySlot])
-  useEffect(() => {
-  const timer = window.setInterval(() => {
-    setNow(new Date())
-  }, 30000)
-
-  return () => window.clearInterval(timer)
-}, [])
-
-useEffect(() => {
-  const rawPick = window.localStorage.getItem(`wc-ko-pick-${fixture.id}`)
-
-  if (rawPick) {
-    try {
-      const parsed = JSON.parse(rawPick)
-      setScore({ home: parsed.home ?? "", away: parsed.away ?? "" })
-      setConfidencePicked(Boolean(parsed.confidence))
-      setSaved(true)
-    } catch {}
-  }
-}, [fixture.id])
-
-useEffect(() => {
-  if (!savedPrediction) return
-
-  setScore({
-    home: savedPrediction.home ?? "",
-    away: savedPrediction.away ?? "",
-  })
-
- setConfidencePicked(savedPrediction.confidence === true)
-  setSaved(true)
-
-  window.localStorage.setItem(
-    `wc-ko-pick-${fixture.id}`,
-    JSON.stringify({
-      home: savedPrediction.home,
-      away: savedPrediction.away,
-    confidence: savedPrediction.confidence === true,
-    })
-  )
-}, [savedPrediction, fixture.id])
-
+  const isLocked = now >= kickoffTime || hasResult
   const ready = Boolean(homeTeam && awayTeam)
+
+  useEffect(() => {
+    setHomeTeam(getTeamById(slots[fixture.homeSlot]) || readSlot(fixture.homeSlot))
+    setAwayTeam(getTeamById(slots[fixture.awaySlot]) || readSlot(fixture.awaySlot))
+  }, [slots, fixture.homeSlot, fixture.awaySlot])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(new Date())
+    }, 30000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const rawPick = window.localStorage.getItem(`wc-ko-pick-${fixture.id}`)
+    if (rawPick) {
+      try {
+        const parsed = JSON.parse(rawPick)
+        setScore({ home: parsed.home ?? "", away: parsed.away ?? "" })
+        setConfidencePicked(Boolean(parsed.confidence))
+        setSaved(true)
+      } catch {}
+    }
+  }, [fixture.id])
+
+  useEffect(() => {
+    if (!savedPrediction) return
+    setScore({
+      home: savedPrediction.home ?? "",
+      away: savedPrediction.away ?? "",
+    })
+    setConfidencePicked(savedPrediction.confidence === true)
+    setSaved(true)
+
+    window.localStorage.setItem(
+      `wc-ko-pick-${fixture.id}`,
+      JSON.stringify({
+        home: savedPrediction.home,
+        away: savedPrediction.away,
+        confidence: savedPrediction.confidence === true,
+      })
+    )
+  }, [savedPrediction, fixture.id])
+
   const userPick =
-  score.home !== "" && score.away !== ""
-    ? {
-        home: Number(score.home),
-        away: Number(score.away),
-      confidence: confidencePicked,
-      }
-    : null
+    score.home !== "" && score.away !== ""
+      ? {
+          home: Number(score.home),
+          away: Number(score.away),
+          confidence: confidencePicked,
+        }
+      : null
 
-const matchScore = scoreMatchPick(userPick, actualResult)
+  const matchScore = scoreMatchPick(userPick, actualResult)
 
- const save = async () => {
-  if (isLocked) return
-
-  if (!ready || score.home === "" || score.away === "") return
+  const save = async () => {
+    if (isLocked) return
+    if (!ready || score.home === "" || score.away === "") return
     const pick = {
-  home: Number(score.home),
-  away: Number(score.away),
-  confidence: confidencePicked,
-}
+      home: Number(score.home),
+      away: Number(score.away),
+      confidence: confidencePicked,
+    }
     window.localStorage.setItem(`wc-ko-pick-${fixture.id}`, JSON.stringify(pick))
     if (user) await saveMatchPrediction(user.uid, fixture.id, "knockout", pick)
     setSaved(true)
   }
-if (hasResult && ready && actualResult) {
-  return (
-    <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <Badge
-          variant="outline"
-          className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary"
-        >
-          {fixture.roundName}
-        </Badge>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-black uppercase text-primary">
-            Full Time
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setShowBreakdown(true)}
-            className="rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground shadow-lg shadow-primary/20"
+  if (hasResult && ready && actualResult && homeTeam && awayTeam) {
+    return (
+      <Card className="rounded-[1.5rem] border border-white/10 bg-card/75 p-4 shadow-lg">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <Badge
+            variant="outline"
+            className="rounded-full border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black text-primary"
           >
-            {matchScore.total > 0 ? "+" : ""}
-            {matchScore.total} pts
-          </button>
-        </div>
-      </div>
+            {fixture.roundName}
+          </Badge>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <div className="flex items-center gap-2">
-          <TeamFlag
-            team={homeTeam}
-            className="h-8 w-10 rounded-lg object-cover"
-          />
-
-          <div>
-            <div className="text-sm font-black">{homeTeam.name}</div>
-            <div className="text-[10px] font-black uppercase text-muted-foreground">
-              {homeTeam.code}
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <div className="text-2xl font-black">
-            {actualResult.home} - {actualResult.away}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-2">
-          <div className="text-right">
-            <div className="text-sm font-black">{awayTeam.name}</div>
-            <div className="text-[10px] font-black uppercase text-muted-foreground">
-              {awayTeam.code}
-            </div>
-          </div>
-
-          <TeamFlag
-            team={awayTeam}
-            className="h-8 w-10 rounded-lg object-cover"
-          />
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-xs font-bold text-muted-foreground">
-        <span>
-          🎯 Your pick: {score.home || "-"} - {score.away || "-"}
-        </span>
-        {confidencePicked && (
-  <span className="text-primary">
-    ⚡ Confidence used
-  </span>
-)}
-      </div>
-
-      {showBreakdown && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl">
-            <div className="mb-4">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">
-                Score breakdown
-              </p>
-
-              <h3 className="mt-1 font-headline text-2xl font-black">
-                {homeTeam.name} v {awayTeam.name}
-              </h3>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
-                <span className="font-bold text-muted-foreground">
-                  Your pick
-                </span>
-                <span className="font-black">
-                  {score.home || "-"} - {score.away || "-"}
-                </span>
-              </div>
-
-              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
-                <span className="font-bold text-muted-foreground">
-                  Actual result
-                </span>
-                <span className="font-black">
-                  {actualResult.home} - {actualResult.away}
-                </span>
-              </div>
-
-              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
-                <span className="font-bold text-muted-foreground">
-                  Base points
-                </span>
-                <span className="font-black">{matchScore.base}</span>
-              </div>
-
-              <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
-                <span className="font-bold text-muted-foreground">
-                  Confidence
-                </span>
-                <span className="font-black">
-  {confidencePicked
-    ? `${matchScore.confidenceBonus > 0 ? "+" : ""}${matchScore.confidenceBonus}`
-    : "Not used"}
-</span>
-              </div>
-
-              <div className="rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-center">
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-primary">
-                  Total
-                </div>
-                <div className="mt-1 text-4xl font-black text-primary">
-                  {matchScore.total > 0 ? "+" : ""}
-                  {matchScore.total}
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-muted/40 px-4 py-3 text-xs font-bold text-muted-foreground">
-                {matchScore.reason}
-              </div>
-            </div>
-
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase text-primary">
+              Full Time
+            </span>
             <button
               type="button"
-              onClick={() => setShowBreakdown(false)}
-              className="mt-5 h-11 w-full rounded-2xl bg-primary text-sm font-black text-primary-foreground"
+              onClick={() => setShowBreakdown(true)}
+              className="rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground shadow-lg shadow-primary/20"
             >
-              Close
+              {matchScore.total > 0 ? "+" : ""}
+              {matchScore.total} pts
             </button>
           </div>
         </div>
-      )}
-    </Card>
-  )
-}
+
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <div className="flex items-center gap-2">
+            <TeamFlag team={homeTeam} className="h-8 w-10 rounded-lg object-cover" />
+            <div>
+              <div className="text-sm font-black">{homeTeam.name}</div>
+              <div className="text-[10px] font-black uppercase text-muted-foreground">
+                {homeTeam.code}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-2xl font-black">
+              {actualResult.home} - {actualResult.away}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            <div className="text-right">
+              <div className="text-sm font-black">{awayTeam.name}</div>
+              <div className="text-[10px] font-black uppercase text-muted-foreground">
+                {awayTeam.code}
+              </div>
+            </div>
+            <TeamFlag team={awayTeam} className="h-8 w-10 rounded-lg object-cover" />
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-xs font-bold text-muted-foreground">
+          <span>
+            🎯 Your pick: {score.home || "-"} - {score.away || "-"}
+          </span>
+          {confidencePicked && (
+            <span className="text-primary">⚡ Confidence used</span>
+          )}
+        </div>
+
+        {showBreakdown && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-[2rem] border border-white/10 bg-background p-5 shadow-2xl">
+              <div className="mb-4">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">
+                  Score breakdown
+                </p>
+                <h3 className="mt-1 font-headline text-2xl font-black">
+                  {homeTeam.name} v {awayTeam.name}
+                </h3>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                  <span className="font-bold text-muted-foreground">Your pick</span>
+                  <span className="font-black">{score.home || "-"} - {score.away || "-"}</span>
+                </div>
+                <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                  <span className="font-bold text-muted-foreground">Actual result</span>
+                  <span className="font-black">{actualResult.home} - {actualResult.away}</span>
+                </div>
+                <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                  <span className="font-bold text-muted-foreground">Base points</span>
+                  <span className="font-black">{matchScore.base}</span>
+                </div>
+                <div className="flex justify-between rounded-2xl bg-muted/50 px-4 py-3">
+                  <span className="font-bold text-muted-foreground">Confidence</span>
+                  <span className="font-black">
+                    {confidencePicked
+                      ? `${matchScore.confidenceBonus > 0 ? "+" : ""}${matchScore.confidenceBonus}`
+                      : "Not used"}
+                  </span>
+                </div>
+
+                <div className="rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-center">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-primary">Total</div>
+                  <div className="mt-1 text-4xl font-black text-primary">
+                    {matchScore.total > 0 ? "+" : ""}{matchScore.total}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-muted/40 px-4 py-3 text-xs font-bold text-muted-foreground">
+                  {matchScore.reason}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowBreakdown(false)}
+                className="mt-5 h-11 w-full rounded-2xl bg-primary text-sm font-black text-primary-foreground"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </Card>
+    )
+  }
+
   return (
     <Card className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-card/75 p-4 shadow-xl backdrop-blur sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -292,6 +258,7 @@ if (hasResult && ready && actualResult) {
           </Badge>
           <span className="text-xs font-black text-muted-foreground">M{fixture.matchNumber}</span>
           {saved && <span className="flex items-center gap-1 text-xs font-bold text-primary"><CheckCircle2 size={13} /> Saved</span>}
+          {isLocked && <span className="flex items-center gap-1 text-xs font-bold text-destructive"><Lock size={13} /> Locked</span>}
         </div>
         <div className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-muted-foreground">
           <Timer size={14} /> {fixture.dateLabel} · {fixture.ukKickoff}
@@ -303,13 +270,53 @@ if (hasResult && ready && actualResult) {
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-3">
         <KoTeam team={homeTeam} placeholder={fixture.homeSlot} />
         <div className="mt-5 flex shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-background/55 p-1.5 ring-1 ring-border sm:mt-6 sm:gap-2 sm:p-2">
-          <Input type="number" inputMode="numeric" placeholder="-" value={score.home} onChange={(e) => setScore(prev => ({ ...prev, home: e.target.value === "" ? "" : Number(e.target.value) }))} disabled={!ready || isLocked} className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" />
+          <Input 
+            type="number" 
+            inputMode="numeric" 
+            placeholder="-" 
+            value={score.home} 
+            onChange={(e) => setScore(prev => ({ ...prev, home: e.target.value === "" ? "" : Number(e.target.value) }))} 
+            disabled={!ready || isLocked} 
+            className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" 
+          />
           <span className="font-black text-muted-foreground">:</span>
-          <Input type="number" inputMode="numeric" placeholder="-" value={score.away} onChange={(e) => setScore(prev => ({ ...prev, away: e.target.value === "" ? "" : Number(e.target.value) }))} disabled={!ready || isLocked} className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" />
+          <Input 
+            type="number" 
+            inputMode="numeric" 
+            placeholder="-" 
+            value={score.away} 
+            onChange={(e) => setScore(prev => ({ ...prev, away: e.target.value === "" ? "" : Number(e.target.value) }))} 
+            disabled={!ready || isLocked} 
+            className="h-10 w-10 rounded-xl border-border bg-card p-0 text-center text-base font-black sm:h-11 sm:w-12 sm:text-lg" 
+          />
         </div>
         <KoTeam team={awayTeam} placeholder={fixture.awaySlot} />
       </div>
 
+      {ready && !isLocked && (
+        <div className="mt-4 flex flex-col gap-2 border-t border-white/5 pt-4">
+          <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground cursor-pointer select-none">
+            <input 
+              type="checkbox" 
+              checked={confidencePicked} 
+              onChange={(e) => {
+                setConfidencePicked(e.target.checked)
+                setSaved(false)
+              }} 
+              className="rounded border-white/15 bg-card text-primary focus:ring-0" 
+            />
+            🔥 Use 2x Confidence Booster on this match
+          </label>
+          <Button 
+            onClick={save} 
+            disabled={score.home === "" || score.away === ""} 
+            className="w-full rounded-xl font-black text-xs uppercase tracking-wider"
+          >
+            Save Predictions
+          </Button>
+        </div>
+      )}
+    </Card>
   )
 }
 
@@ -337,4 +344,3 @@ function KoTeam({ team, placeholder }: { team: Team | null; placeholder: string 
     </div>
   )
 }
-
