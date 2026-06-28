@@ -1,4 +1,3 @@
-
 export interface Team {
   id: string;
   name: string;
@@ -170,7 +169,6 @@ export const MATCHES: Match[] = fixtures.map(([id, home, away, kickoff, group, u
   hostEmoji,
 }));
 
-
 export type KnockoutRoundId = 'R32' | 'R16' | 'QF' | 'SF' | 'FINAL'
 
 export interface KnockoutFixture {
@@ -206,6 +204,7 @@ export const KNOCKOUT_SLOTS: { id: string; label: string; round: KnockoutRoundId
 
 const makeKnockoutFixtures = (round: KnockoutRoundId, roundName: string, count: number, firstMatchNumber: number, ukDates: string[], venues: string[]): KnockoutFixture[] =>
   Array.from({ length: count }, (_, i) => {
+    // Correctly split both variables separated by " | " from the items inside ukDates array
     const [dateLabel, ukKickoff] = ukDates[i % ukDates.length].split(' | ')
     const [venue, location, hostEmoji] = venues[i % venues.length].split(' | ')
     const slotPrefix = round === 'FINAL' ? 'FINAL' : round
@@ -229,10 +228,10 @@ const makeKnockoutFixtures = (round: KnockoutRoundId, roundName: string, count: 
 export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
   ...makeKnockoutFixtures('R32', 'Round of 32', 16, 73,
     [
-      'Sun 28 Jun', 'Mon 29 Jun', 'Mon 29 Jun', 'Mon 29 Jun', 
-      'Tue 30 Jun', 'Tue 30 Jun', 'Tue 30 Jun', 'Wed 1 Jul', 
-      'Wed 1 Jul', 'Wed 1 Jul', 'Thu 2 Jul', 'Thu 2 Jul', 
-      'Thu 2 Jul', 'Fri 3 Jul', 'Fri 3 Jul', 'Fri 3 Jul'
+      'Sun 28 Jun | 20:00', 'Mon 29 Jun | 17:00', 'Mon 29 Jun | 20:00', 'Mon 29 Jun | 23:00', 
+      'Tue 30 Jun | 18:00', 'Tue 30 Jun | 21:00', 'Tue 30 Jun | 00:00', 'Wed 1 Jul | 17:00', 
+      'Wed 1 Jul | 20:00', 'Wed 1 Jul | 23:00', 'Thu 2 Jul | 18:00', 'Thu 2 Jul | 21:00', 
+      'Thu 2 Jul | 01:00', 'Fri 3 Jul | 19:00', 'Fri 3 Jul | 22:00', 'Fri 3 Jul | 01:00'
     ],
     [
       'Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
@@ -255,8 +254,8 @@ export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
   ),
   ...makeKnockoutFixtures('R16', 'Round of 16', 8, 89,
     [
-      'Sat 4 Jul', 'Sun 5 Jul', 'Sun 5 Jul', 'Mon 6 Jul', 
-      'Mon 6 Jul', 'Tue 7 Jul', 'Tue 7 Jul', 'Tue 7 Jul'
+      'Sat 4 Jul | 21:00', 'Sun 5 Jul | 18:00', 'Sun 5 Jul | 22:00', 'Mon 6 Jul | 19:00', 
+      'Mon 6 Jul | 23:00', 'Tue 7 Jul | 18:00', 'Tue 7 Jul | 22:00', 'Tue 7 Jul | 02:00'
     ],
     [
       'Philadelphia Stadium | Philadelphia, USA | 🇺🇸',
@@ -270,7 +269,7 @@ export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
     ]
   ),
   ...makeKnockoutFixtures('QF', 'Quarter-finals', 4, 97,
-    ['Thu 9 Jul', 'Fri 10 Jul', 'Sat 11 Jul', 'Sat 11 Jul'],
+    ['Thu 9 Jul | 21:00', 'Fri 10 Jul | 22:00', 'Sat 11 Jul | 18:00', 'Sat 11 Jul | 22:00'],
     [
       'Boston Stadium | Foxborough, USA | 🇺🇸',
       'Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
@@ -279,17 +278,18 @@ export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
     ]
   ),
   ...makeKnockoutFixtures('SF', 'Semi-finals', 2, 101,
-    ['Tue 14 Jul', 'Wed 15 Jul'],
+    ['Tue 14 Jul | 23:00', 'Wed 15 Jul | 23:00'],
     [
       'Dallas Stadium | Arlington, USA | 🇺🇸',
       'Atlanta Stadium | Atlanta, USA | 🇺🇸'
     ]
   ),
   ...makeKnockoutFixtures('FINAL', 'Final', 1, 104,
-    ['Sun 19 Jul'],
+    ['Sun 19 Jul | 21:00'],
     ['New York New Jersey Stadium | East Rutherford, USA | 🇺🇸']
   ),
 ]
+
 export function getTeamById(teamId?: string | null): Team | null {
   if (!teamId) return null
   return Object.values(TEAMS).find((team) => team.id === teamId || team.code === teamId) || null
