@@ -139,15 +139,20 @@ const saveKoScore = async (matchId: string) => {
     return
   }
 
-  const result: any = {
-    home: Number(score.home),
-    away: Number(score.away),
-    decidedBy,
-  }
+const fixture = KNOCKOUT_FIXTURES.find((item) => item.id === matchId)
+const homeTeam = fixture ? getTeamById(slots[fixture.homeSlot]) : null
+const awayTeam = fixture ? getTeamById(slots[fixture.awaySlot]) : null
 
-  if (decidedBy === "penalties") {
-    result.winnerSide = winnerSide
-  }
+const result: any = {
+  home: Number(score.home),
+  away: Number(score.away),
+  decidedBy,
+}
+
+if (decidedBy === "penalties") {
+  result.winnerSide = winnerSide
+  result.winnerTeamId = winnerSide === "home" ? homeTeam?.id : awayTeam?.id
+}
 
   try {
     window.localStorage.setItem(`wc-ko-result-${matchId}`, JSON.stringify(result))
