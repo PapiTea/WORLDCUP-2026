@@ -12,10 +12,6 @@ export type Score = {
   apiFixtureId?: number
   updatedAt?: unknown
 }
-  elapsed?: number | null
-  apiFixtureId?: number
-  updatedAt?: unknown
-}
 export type MatchPrediction = Score & { confidence?: boolean; userId: string; matchId: string; type: 'group' | 'knockout'; updatedAt?: unknown }
 export type GroupPrediction = { userId: string; groupId: string; picks: string[]; updatedAt?: unknown }
 export type League = { id: string; code: string; name: string; ownerId: string; createdAt?: unknown }
