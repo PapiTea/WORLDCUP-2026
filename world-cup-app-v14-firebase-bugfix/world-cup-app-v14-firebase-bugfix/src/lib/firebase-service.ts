@@ -7,6 +7,7 @@ export type Score = {
   away: number
   status?: "SCHEDULED" | "LIVE" | "FINISHED"
   decidedBy?: "normal" | "extraTime" | "penalties"
+  winnerSide?: "home" | "away"
   winnerTeamId?: string
   elapsed?: number | null
   apiFixtureId?: number
@@ -120,6 +121,7 @@ out[d.id] = {
   away: data.away,
   status: data.status,
   decidedBy: data.decidedBy,
+  winnerSide: data.winnerSide,
   winnerTeamId: data.winnerTeamId,
   elapsed: data.elapsed ?? null,
   apiFixtureId: data.apiFixtureId,
