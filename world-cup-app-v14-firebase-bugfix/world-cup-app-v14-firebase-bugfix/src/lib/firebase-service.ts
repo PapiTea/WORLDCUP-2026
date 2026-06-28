@@ -6,6 +6,12 @@ export type Score = {
   home: number
   away: number
   status?: "SCHEDULED" | "LIVE" | "FINISHED"
+  decidedBy?: "normal" | "extraTime" | "penalties"
+  winnerTeamId?: string
+  elapsed?: number | null
+  apiFixtureId?: number
+  updatedAt?: unknown
+}
   elapsed?: number | null
   apiFixtureId?: number
   updatedAt?: unknown
@@ -113,13 +119,15 @@ export function subscribeResults(
       const data = d.data() as Score
 
       if (typeof data.home === "number" && typeof data.away === "number") {
-        out[d.id] = {
-          home: data.home,
-          away: data.away,
-          status: data.status,
-          elapsed: data.elapsed ?? null,
-          apiFixtureId: data.apiFixtureId,
-        }
+out[d.id] = {
+  home: data.home,
+  away: data.away,
+  status: data.status,
+  decidedBy: data.decidedBy,
+  winnerTeamId: data.winnerTeamId,
+  elapsed: data.elapsed ?? null,
+  apiFixtureId: data.apiFixtureId,
+}
       }
     })
 
