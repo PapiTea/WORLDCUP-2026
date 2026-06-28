@@ -178,13 +178,13 @@ export interface KnockoutFixture {
   matchNumber: number;
   homeSlot: string;
   awaySlot: string;
+  kickoff: string;
   ukKickoff: string;
   dateLabel: string;
   venue: string;
   location: string;
   hostEmoji: string;
 }
-
 export const KNOCKOUT_ROUNDS: { id: KnockoutRoundId; name: string; helper: string }[] = [
   { id: 'R32', name: 'Round of 32', helper: 'Knockout fixtures will unlock once the tournament reaches this stage.' },
   { id: 'R16', name: 'Round of 16', helper: 'Predict who progresses once these fixtures are confirmed.' },
@@ -201,19 +201,21 @@ export const KNOCKOUT_SLOTS: { id: string; label: string; round: KnockoutRoundId
   { id: 'FINAL-1', label: 'Finalist 1', round: 'FINAL', note: 'First finalist' },
   { id: 'FINAL-2', label: 'Finalist 2', round: 'FINAL', note: 'Second finalist' },
 ]
-
 const makeKnockoutFixtures = (
-  round: KnockoutRoundId, 
-  roundName: string, 
-  count: number, 
-  firstMatchNumber: number, 
+  round: KnockoutRoundId,
+  roundName: string,
+  count: number,
+  firstMatchNumber: number,
   rawFixtures: string[]
 ): KnockoutFixture[] =>
   Array.from({ length: count }, (_, i) => {
-    const [dateLabel, ukKickoff, venue, location, hostEmoji] = rawFixtures[i].split(' | ')
+    const [dateLabel, ukKickoff, kickoff, venue, location, hostEmoji] =
+      rawFixtures[i].split(' | ')
+
     const slotPrefix = round === 'FINAL' ? 'FINAL' : round
     const homeSlot = round === 'FINAL' ? 'FINAL-1' : `${slotPrefix}-${i * 2 + 1}`
     const awaySlot = round === 'FINAL' ? 'FINAL-2' : `${slotPrefix}-${i * 2 + 2}`
+
     return {
       id: `ko-${round.toLowerCase()}-${i + 1}`,
       round,
@@ -221,55 +223,55 @@ const makeKnockoutFixtures = (
       matchNumber: firstMatchNumber + i,
       homeSlot,
       awaySlot,
+      kickoff,
       ukKickoff,
       dateLabel,
       venue,
       location,
       hostEmoji,
     }
-  })
-
+  });
 export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
   ...makeKnockoutFixtures('R32', 'Round of 32', 16, 73, [
-    'Sun 28 Jun | 20:00 | MetLife Stadium | East Rutherford, USA | 🇺🇸',
-    'Mon 29 Jun | 01:00 | SoFi Stadium | Los Angeles, USA | 🇺🇸',
-    'Mon 29 Jun | 17:00 | Gillette Stadium | Foxborough, USA | 🇺🇸',
-    'Mon 29 Jun | 21:30 | AT&T Stadium | Arlington, USA | 🇺🇸',
-    'Tue 30 Jun | 03:00 | Estadio BBVA | Guadalupe, Mexico | 🇲🇽',
-    'Tue 30 Jun | 18:00 | Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸',
-    'Tue 30 Jun | 21:30 | Central Stadium | Houston, USA | 🇺🇸',
-    'Wed 01 Jul | 03:00 | Estadio Azteca | Mexico City, Mexico | 🇲🇽',
-    'Wed 01 Jul | 18:00 | Lincoln Financial Field | Philadelphia, USA | 🇺🇸',
-    'Wed 01 Jul | 21:30 | Arrowhead Stadium | Kansas City, USA | 🇺🇸',
-    'Thu 02 Jul | 03:00 | Levi Stadium | Santa Clara, USA | 🇺🇸',
-    'Thu 02 Jul | 18:00 | BMO Field | Toronto, Canada | 🇨🇦',
-    'Thu 02 Jul | 21:30 | Lumen Field | Seattle, USA | 🇺🇸',
-    'Fri 03 Jul | 03:00 | BC Place | Vancouver, Canada | 🇨🇦',
-    'Fri 03 Jul | 18:00 | Hard Rock Stadium | Miami, USA | 🇺🇸',
-    'Fri 03 Jul | 21:30 | Estadio Akron | Zapopan, Mexico | 🇲🇽'
+    'Sun 28 Jun | 20:00 | 2026-06-28T19:00:00Z | Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
+    'Mon 29 Jun | 18:00 | 2026-06-29T17:00:00Z | Houston Stadium | Houston, USA | 🇺🇸',
+    'Mon 29 Jun | 21:30 | 2026-06-29T20:30:00Z | Boston Stadium | Foxborough, USA | 🇺🇸',
+    'Tue 30 Jun | 02:00 | 2026-06-30T01:00:00Z | Monterrey Stadium | Guadalupe, Mexico | 🇲🇽',
+    'Tue 30 Jun | 18:00 | 2026-06-30T17:00:00Z | Dallas Stadium | Arlington, USA | 🇺🇸',
+    'Tue 30 Jun | 22:00 | 2026-06-30T21:00:00Z | New York New Jersey Stadium | East Rutherford, USA | 🇺🇸',
+    'Wed 01 Jul | 02:00 | 2026-07-01T01:00:00Z | Mexico City Stadium | Mexico City, Mexico | 🇲🇽',
+    'Wed 01 Jul | 17:00 | 2026-07-01T16:00:00Z | Atlanta Stadium | Atlanta, USA | 🇺🇸',
+    'Wed 01 Jul | 21:00 | 2026-07-01T20:00:00Z | Seattle Stadium | Seattle, USA | 🇺🇸',
+    'Thu 02 Jul | 01:00 | 2026-07-02T00:00:00Z | San Francisco Bay Area Stadium | Santa Clara, USA | 🇺🇸',
+    'Thu 02 Jul | 20:00 | 2026-07-02T19:00:00Z | Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
+    'Fri 03 Jul | 00:00 | 2026-07-02T23:00:00Z | Toronto Stadium | Toronto, Canada | 🇨🇦',
+    'Fri 03 Jul | 04:00 | 2026-07-03T03:00:00Z | Vancouver Stadium | Vancouver, Canada | 🇨🇦',
+    'Fri 03 Jul | 19:00 | 2026-07-03T18:00:00Z | Dallas Stadium | Arlington, USA | 🇺🇸',
+    'Fri 03 Jul | 23:00 | 2026-07-03T22:00:00Z | Miami Stadium | Miami Gardens, USA | 🇺🇸',
+    'Sat 04 Jul | 02:30 | 2026-07-04T01:30:00Z | Kansas City Stadium | Kansas City, USA | 🇺🇸',
   ]),
   ...makeKnockoutFixtures('R16', 'Round of 16', 8, 89, [
-    'Sat 04 Jul | 21:30 | Hard Rock Stadium | Miami, USA | 🇺🇸',
-    'Sun 05 Jul | 03:00 | Control Stadium | Houston, USA | 🇺🇸',
-    'Sun 05 Jul | 21:30 | MetLife Stadium | East Rutherford, USA | 🇺🇸',
-    'Mon 06 Jul | 03:00 | Lincoln Financial Field | Philadelphia, USA | 🇺🇸',
-    'Mon 06 Jul | 21:30 | AT&T Stadium | Arlington, USA | 🇺🇸',
-    'Tue 07 Jul | 03:00 | Seattle Stadium | Seattle, USA | 🇺🇸',
-    'Tue 07 Jul | 21:30 | Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸',
-    'Wed 08 Jul | 03:00 | BC Place | Vancouver, Canada | 🇨🇦'
+    'Sat 04 Jul | 18:00 | 2026-07-04T17:00:00Z | Philadelphia Stadium | Philadelphia, USA | 🇺🇸',
+    'Sat 04 Jul | 22:00 | 2026-07-04T21:00:00Z | Houston Stadium | Houston, USA | 🇺🇸',
+    'Sun 05 Jul | 21:00 | 2026-07-05T20:00:00Z | New York New Jersey Stadium | East Rutherford, USA | 🇺🇸',
+    'Mon 06 Jul | 01:00 | 2026-07-06T00:00:00Z | Dallas Stadium | Arlington, USA | 🇺🇸',
+    'Mon 06 Jul | 20:00 | 2026-07-06T19:00:00Z | Mexico City Stadium | Mexico City, Mexico | 🇲🇽',
+    'Tue 07 Jul | 01:00 | 2026-07-07T00:00:00Z | Seattle Stadium | Seattle, USA | 🇺🇸',
+    'Tue 07 Jul | 17:00 | 2026-07-07T16:00:00Z | Atlanta Stadium | Atlanta, USA | 🇺🇸',
+    'Tue 07 Jul | 21:00 | 2026-07-07T20:00:00Z | Vancouver Stadium | Vancouver, Canada | 🇨🇦',
   ]),
   ...makeKnockoutFixtures('QF', 'Quarter-finals', 4, 97, [
-    'Thu 09 Jul | 21:30 | Gillette Stadium | Foxborough, USA | 🇺🇸',
-    'Fri 10 Jul | 03:00 | SoFi Stadium | Los Angeles, USA | 🇺🇸',
-    'Sat 11 Jul | 21:30 | Hard Rock Stadium | Miami, USA | 🇺🇸',
-    'Sun 12 Jul | 03:00 | Arrowhead Stadium | Kansas City, USA | 🇺🇸'
+    'Thu 09 Jul | 21:00 | 2026-07-09T20:00:00Z | Boston Stadium | Foxborough, USA | 🇺🇸',
+    'Fri 10 Jul | 20:00 | 2026-07-10T19:00:00Z | Los Angeles Stadium | Los Angeles, USA | 🇺🇸',
+    'Sat 11 Jul | 22:00 | 2026-07-11T21:00:00Z | Miami Stadium | Miami Gardens, USA | 🇺🇸',
+    'Sun 12 Jul | 02:00 | 2026-07-12T01:00:00Z | Kansas City Stadium | Kansas City, USA | 🇺🇸',
   ]),
   ...makeKnockoutFixtures('SF', 'Semi-finals', 2, 101, [
-    'Tue 14 Jul | 23:00 | AT&T Stadium | Arlington, USA | 🇺🇸',
-    'Wed 15 Jul | 23:00 | Mercedes-Benz Stadium | Atlanta, USA | 🇺🇸'
+    'Tue 14 Jul | 20:00 | 2026-07-14T19:00:00Z | Dallas Stadium | Arlington, USA | 🇺🇸',
+    'Wed 15 Jul | 20:00 | 2026-07-15T19:00:00Z | Atlanta Stadium | Atlanta, USA | 🇺🇸',
   ]),
   ...makeKnockoutFixtures('FINAL', 'Final', 1, 104, [
-    'Sun 19 Jul | 21:30 | MetLife Stadium | East Rutherford, USA | 🇺🇸'
+    'Sun 19 Jul | 20:00 | 2026-07-19T19:00:00Z | New York New Jersey Stadium | East Rutherford, USA | 🇺🇸',
   ]),
 ]
 
