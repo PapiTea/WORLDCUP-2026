@@ -209,12 +209,8 @@ useEffect(() => {
 
 const ids = readConfidenceIds()
 
-if (remote.confidence === true) {
-  if (!ids.includes(match.id)) {
-    writeConfidenceIds([...ids, match.id])
-  }
-} else {
-  writeConfidenceIds(ids.filter((id) => id !== match.id))
+if (remote.confidence === true && !ids.includes(match.id)) {
+  writeConfidenceIds([...ids, match.id])
 }
     })
 
