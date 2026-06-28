@@ -20,12 +20,12 @@ import {
   getLeaderboardData,
   saveLeaderboardSnapshot,
   subscribeLeaderboardSnapshot,
+  subscribeKnockoutSetup,
   type League,
   type MatchPrediction,
   type UserDoc,
   type LeagueMember,
 } from "@/lib/firebase-service"
-
 export default function LeaderboardPage() {
   const { user, isAdmin } = useAuth()
 const searchParams = useSearchParams()
@@ -91,6 +91,7 @@ useEffect(() => {
   }
 
   const unsub = subscribeLeaderboardSnapshot((snapshot) => {
+
     if (!snapshot) return
 
     setUsers(snapshot.users || {})
@@ -105,7 +106,13 @@ useEffect(() => {
 
   return () => unsub()
 }, [user, isAdmin])
+    useEffect(() => {
+  const unsub = subscribeKnockoutSetup(({ slots }) => {
+    setKnockoutSlots(slots || {})
+  })
 
+  return () => unsub()
+}, [])
   const winnerPicksByUser = useMemo(() => {
     const out: Record<string, string> = {}
 
