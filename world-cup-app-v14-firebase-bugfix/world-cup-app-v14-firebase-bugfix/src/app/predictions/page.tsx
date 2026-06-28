@@ -150,7 +150,7 @@ const searchableText = [
           </p>
         </div>
 
-        <Tabs defaultValue="group" className="space-y-6">
+        <Tabs defaultValue="knockouts" className="space-y-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <TabsList className="h-12 rounded-2xl bg-muted/70 p-1">
               <TabsTrigger
