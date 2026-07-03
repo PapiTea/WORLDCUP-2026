@@ -631,27 +631,46 @@ const clearAdminMessage = async () => {
                                 className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm font-bold text-foreground"
                               >
                                 <option value="">Not placed yet</option>
+                                <option disabled>────────── Select the correct round below ──────────</option>
 
-                                {KNOCKOUT_SLOTS.map((slot) => {
-                                  const selectedBy = slots[slot.id]
-                                  const disabled = Boolean(
-                                    selectedBy && selectedBy !== team.id
-                                  )
-                                  const selectedTeam = getTeamById(selectedBy)
+{KNOCKOUT_ROUNDS.map((round) => (
+  <optgroup key={round.id} label={round.name}>
+    {KNOCKOUT_SLOTS
+      .filter((slot) => slot.round === round.id)
+      .map((slot) => {
+        const selectedBy = slots[slot.id]
+        const selectedTeam = getTeamById(selectedBy)
 
-                                  return (
-                                    <option
-                                      key={slot.id}
-                                      value={slot.id}
-                                      disabled={disabled}
-                                    >
-                                      {slot.label}
-                                      {selectedTeam && selectedTeam.id !== team.id
-                                        ? ` — used by ${selectedTeam.name}`
-                                        : ""}
-                                    </option>
-                                  )
-                                })}
+        const roundHasResults =
+          round.id === "R32"
+            ? Object.keys(koScores).some((id) => id.startsWith("ko-r32"))
+            : round.id === "R16"
+              ? Object.keys(koScores).some((id) => id.startsWith("ko-r16"))
+              : round.id === "QF"
+                ? Object.keys(koScores).some((id) => id.startsWith("ko-qf"))
+                : round.id === "SF"
+                  ? Object.keys(koScores).some((id) => id.startsWith("ko-sf"))
+                  : round.id === "FINAL"
+                    ? Object.keys(koScores).some((id) => id.startsWith("ko-final"))
+                    : false
+
+        const disabled = Boolean(
+          (selectedBy && selectedBy !== team.id) || roundHasResults
+        )
+
+        return (
+          <option key={slot.id} value={slot.id} disabled={disabled}>
+            {slot.label}
+            {selectedTeam && selectedTeam.id !== team.id
+              ? ` — used by ${selectedTeam.name}`
+              : roundHasResults
+                ? " — locked, result exists"
+                : ""}
+          </option>
+        )
+      })}
+  </optgroup>
+))}
                               </select>
                             </label>
                           )}
