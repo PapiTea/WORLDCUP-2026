@@ -252,21 +252,24 @@ if (decidedBy === "penalties") {
     notifyKnockoutChange()
   }
 
-  const clearSlotForTeam = (teamId: string) => {
-    for (const [slotId, selectedTeamId] of Object.entries(slots)) {
-      if (selectedTeamId === teamId) {
-        window.localStorage.removeItem(`wc-ko-slot-${slotId}`)
-      }
-    }
+const clearSlotForTeam = async (teamId: string) => {
+  const slotsToClear = Object.entries(slots)
+    .filter(([, selectedTeamId]) => selectedTeamId === teamId)
+    .map(([slotId]) => slotId)
 
-    setSlots((prev) =>
-      Object.fromEntries(
-        Object.entries(prev).filter(([, selectedTeamId]) => selectedTeamId !== teamId)
-      )
-    )
-
-    notifyKnockoutChange()
+  for (const slotId of slotsToClear) {
+    window.localStorage.removeItem(`wc-ko-slot-${slotId}`)
+    await clearKnockoutSlot(slotId)
   }
+
+  setSlots((prev) =>
+    Object.fromEntries(
+      Object.entries(prev).filter(([, selectedTeamId]) => selectedTeamId !== teamId)
+    )
+  )
+
+  notifyKnockoutChange()
+}
 
   const resetAdminData = () => {
     if (
@@ -608,7 +611,7 @@ const clearAdminMessage = async () => {
                           <button
                             onClick={() => {
                               toggleQualifier(group.id, team.id)
-                              if (active) clearSlotForTeam(team.id)
+                           if (active) clearSlotForTeam(team.id)
                             }}
                             className="flex w-full items-center gap-3 text-left"
                           >
@@ -640,32 +643,14 @@ const clearAdminMessage = async () => {
       .map((slot) => {
         const selectedBy = slots[slot.id]
         const selectedTeam = getTeamById(selectedBy)
-
-        const roundHasResults =
-          round.id === "R32"
-            ? Object.keys(koScores).some((id) => id.startsWith("ko-r32"))
-            : round.id === "R16"
-              ? Object.keys(koScores).some((id) => id.startsWith("ko-r16"))
-              : round.id === "QF"
-                ? Object.keys(koScores).some((id) => id.startsWith("ko-qf"))
-                : round.id === "SF"
-                  ? Object.keys(koScores).some((id) => id.startsWith("ko-sf"))
-                  : round.id === "FINAL"
-                    ? Object.keys(koScores).some((id) => id.startsWith("ko-final"))
-                    : false
-
-        const disabled = Boolean(
-          (selectedBy && selectedBy !== team.id) || roundHasResults
-        )
+        const disabled = Boolean(selectedBy && selectedBy !== team.id)
 
         return (
           <option key={slot.id} value={slot.id} disabled={disabled}>
             {slot.label}
             {selectedTeam && selectedTeam.id !== team.id
               ? ` — used by ${selectedTeam.name}`
-              : roundHasResults
-                ? " — locked, result exists"
-                : ""}
+              : ""}
           </option>
         )
       })}
@@ -754,6 +739,55 @@ const clearAdminMessage = async () => {
           </div>
   )}
         </section>
+       <section className="space-y-4">
+  <div>
+    <h2 className="font-headline text-2xl font-black">
+      3B. Emergency knockout slot repair
+    </h2>
+    <p className="text-sm text-muted-foreground">
+      Use this if a team was accidentally moved from an old round. This lets you directly restore any R32, R16, QF, SF or Final slot without touching scores.
+    </p>
+  </div>
+
+  <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+    {KNOCKOUT_ROUNDS.map((round) => (
+      <Card
+        key={round.id}
+        className="rounded-3xl border border-white/10 bg-card/70 p-4 shadow-xl backdrop-blur"
+      >
+        <h3 className="mb-3 font-headline text-lg font-black">
+          {round.name}
+        </h3>
+
+        <div className="space-y-3">
+          {KNOCKOUT_SLOTS.filter((slot) => slot.round === round.id).map((slot) => {
+            const currentTeam = getTeamById(slots[slot.id])
+
+            return (
+              <label key={slot.id} className="block text-xs font-bold text-muted-foreground">
+                {slot.label}
+                <select
+                  value={slots[slot.id] || ""}
+                  onChange={(event) => setSlot(slot.id, event.target.value)}
+                  className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm font-bold text-foreground"
+                >
+                  <option value="">Empty / TBC</option>
+                  {Object.values(GROUPS)
+                    .flatMap((group) => group.teams)
+                    .map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name} {currentTeam?.id === team.id ? "✓" : ""}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            )
+          })}
+        </div>
+      </Card>
+    ))}
+  </div>
+</section>
         <section className="space-y-4">
           <div>
             <h2 className="font-headline text-2xl font-black">
