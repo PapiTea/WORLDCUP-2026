@@ -169,7 +169,7 @@ export const MATCHES: Match[] = fixtures.map(([id, home, away, kickoff, group, u
   hostEmoji,
 }));
 
-export type KnockoutRoundId = 'R32' | 'R16' | 'QF' | 'SF' | 'FINAL'
+export type KnockoutRoundId = 'R32' | 'R16' | 'QF' | 'SF' | 'THIRD' | 'FINAL'
 
 export interface KnockoutFixture {
   id: string;
@@ -190,6 +190,11 @@ export const KNOCKOUT_ROUNDS: { id: KnockoutRoundId; name: string; helper: strin
   { id: 'R16', name: 'Round of 16', helper: 'Predict who progresses once these fixtures are confirmed.' },
   { id: 'QF', name: 'Quarter-finals', helper: 'Quarter-final fixtures will appear once teams progress.' },
   { id: 'SF', name: 'Semi-finals', helper: 'Semi-final fixtures will appear once teams progress.' },
+  {
+  id: 'THIRD',
+  name: 'Third Place Play-off',
+  helper: 'The losing semi-finalists meet to decide third place.',
+},
   { id: 'FINAL', name: 'Final', helper: 'Predict the final once the two finalists are confirmed.' },
 ]
 
@@ -198,6 +203,18 @@ export const KNOCKOUT_SLOTS: { id: string; label: string; round: KnockoutRoundId
   ...Array.from({ length: 16 }, (_, i) => ({ id: `R16-${i + 1}`, label: `R16 slot ${i + 1}`, round: 'R16' as KnockoutRoundId, note: 'Winner slot for the Round of 16' })),
   ...Array.from({ length: 8 }, (_, i) => ({ id: `QF-${i + 1}`, label: `QF slot ${i + 1}`, round: 'QF' as KnockoutRoundId, note: 'Quarter-final slot' })),
   ...Array.from({ length: 4 }, (_, i) => ({ id: `SF-${i + 1}`, label: `SF slot ${i + 1}`, round: 'SF' as KnockoutRoundId, note: 'Semi-final slot' })),
+ {
+  id: 'THIRD-1',
+  label: 'Third Place 1',
+  round: 'THIRD',
+  note: 'Losing semi-finalist'
+},
+{
+  id: 'THIRD-2',
+  label: 'Third Place 2',
+  round: 'THIRD',
+  note: 'Losing semi-finalist'
+},
   { id: 'FINAL-1', label: 'Finalist 1', round: 'FINAL', note: 'First finalist' },
   { id: 'FINAL-2', label: 'Finalist 2', round: 'FINAL', note: 'Second finalist' },
 ]
@@ -270,6 +287,9 @@ export const KNOCKOUT_FIXTURES: KnockoutFixture[] = [
     'Tue 14 Jul | 20:00 | 2026-07-14T19:00:00Z | Dallas Stadium | Arlington, USA | 🇺🇸',
     'Wed 15 Jul | 20:00 | 2026-07-15T19:00:00Z | Atlanta Stadium | Atlanta, USA | 🇺🇸',
   ]),
+  ...makeKnockoutFixtures('THIRD', 'Third Place Play-off', 1, 103, [
+  'Sat 18 Jul | 20:00 | 2026-07-18T19:00:00Z | Miami Stadium | Miami Gardens, USA | 🇺🇸',
+]),
   ...makeKnockoutFixtures('FINAL', 'Final', 1, 104, [
     'Sun 19 Jul | 20:00 | 2026-07-19T19:00:00Z | New York New Jersey Stadium | East Rutherford, USA | 🇺🇸',
   ]),
