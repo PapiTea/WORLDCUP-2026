@@ -19,13 +19,14 @@ import { useAuth } from "@/components/AuthGate"
 import {
   clearGlobalMessage,
   clearKnockoutSlot,
-  deleteMatchResult,
+  deleteMatchResult, 
   saveGlobalMessage,
   saveKnockoutSlot,
   saveMatchResult,
-  saveQualifier,
-  subscribeKnockoutSetup,
-  subscribeResults,
+saveQualifier,
+saveTournamentWinner,
+subscribeKnockoutSetup,
+subscribeResults,
 } from "@/lib/firebase-service"
 import { CheckCircle2, RotateCcw, ShieldCheck, Trophy, Lock } from "lucide-react"
 
@@ -903,8 +904,43 @@ const clearAdminMessage = async () => {
             })}
           </div>
         </section>
+         </section>
       </section>
+<section className="space-y-4">
+  <div>
+    <h2 className="font-headline text-2xl font-black">
+      5. Tournament Winner
+    </h2>
 
+    <p className="text-sm text-muted-foreground">
+      Select the World Cup winner. Players who predicted correctly receive 50 points.
+    </p>
+  </div>
+
+  <Card className="rounded-3xl border border-white/10 bg-card/70 p-4 shadow-xl">
+    <select
+      value={tournamentWinner}
+      onChange={(e) => setTournamentWinner(e.target.value)}
+      className="h-11 w-full rounded-xl border border-border bg-background px-3"
+    >
+      <option value="">Select winner...</option>
+
+      {GROUPS.flatMap(group => group.teams).map(team => (
+        <option key={team.id} value={team.id}>
+          {team.name}
+        </option>
+      ))}
+    </select>
+
+    <Button
+      className="mt-4 rounded-2xl font-black"
+      onClick={() => saveTournamentWinner(tournamentWinner)}
+      disabled={!tournamentWinner}
+    >
+      Save Winner
+    </Button>
+  </Card>
+</section>
       <BottomNav />
     </main>
   )
@@ -996,3 +1032,10 @@ function TeamMini({
     </div>
   )
 }
+<h2 className="font-headline text-2xl font-black">
+5. Tournament Winner
+</h2>
+
+<p className="text-sm text-muted-foreground">
+Select the World Cup winner. Players who predicted correctly receive 50 points.
+</p>
