@@ -1033,10 +1033,4 @@ function TeamMini({
     </div>
   )
 }
-<h2 className="font-headline text-2xl font-black">
-5. Tournament Winner
-</h2>
 
-<p className="text-sm text-muted-foreground">
-Select the World Cup winner. Players who predicted correctly receive 50 points.
-</p>
