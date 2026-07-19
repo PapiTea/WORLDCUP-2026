@@ -903,10 +903,10 @@ const clearAdminMessage = async () => {
               )
             })}
           </div>
-        </section>
-         </section>
+                </section>
       </section>
-<section className="space-y-4">
+
+      <section className="space-y-4">
   <div>
     <h2 className="font-headline text-2xl font-black">
       5. Tournament Winner
@@ -941,6 +941,7 @@ const clearAdminMessage = async () => {
     </Button>
   </Card>
 </section>
+      
       <BottomNav />
     </main>
   )
