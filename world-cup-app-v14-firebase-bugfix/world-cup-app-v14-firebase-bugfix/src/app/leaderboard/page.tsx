@@ -43,7 +43,6 @@ const selectedLeagueId = searchParams.get("league")
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [selectedSection, setSelectedSection] = useState<"picks" | "groups" | "knockout" | "winner">("picks")
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
-const [actualTournamentWinner, setActualTournamentWinner] = useState("")
   
 const refreshLeaderboard = async () => {
   if (!user) return
