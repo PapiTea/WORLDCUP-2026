@@ -939,8 +939,6 @@ const clearAdminMessage = async () => {
 >
   Save Winner
 </Button>
-      Save Winner
-    </Button>
   </Card>
 </section>
       
