@@ -152,7 +152,7 @@ export function subscribeKnockoutSetup(cb: (setup: { qualifiers: Record<string, 
     cb({ qualifiers, slots })
   })
 }
-export async function saveTournamentWinner(teamId: string) {
+export async function saveActualTournamentWinner(teamId: string) {
   await setDoc(
     doc(db, "appSettings", "tournament"),
     {
