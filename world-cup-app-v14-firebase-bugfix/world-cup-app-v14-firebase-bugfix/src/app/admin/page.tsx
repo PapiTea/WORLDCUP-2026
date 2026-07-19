@@ -24,7 +24,7 @@ import {
   saveKnockoutSlot,
   saveMatchResult,
 saveQualifier,
-saveTournamentWinner,
+saveActualTournamentWinner,
 subscribeKnockoutSetup,
 subscribeResults,
 } from "@/lib/firebase-service"
@@ -934,7 +934,7 @@ const clearAdminMessage = async () => {
 
     <Button
       className="mt-4 rounded-2xl font-black"
-      onClick={() => saveTournamentWinner(tournamentWinner)}
+     nClick={() => saveTournamentWinner(tournament
       disabled={!tournamentWinner}
     >
       Save Winner
