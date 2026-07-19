@@ -932,11 +932,13 @@ const clearAdminMessage = async () => {
       ))}
     </select>
 
-    <Button
-      className="mt-4 rounded-2xl font-black"
-     nClick={() => saveTournamentWinner(tournament
-      disabled={!tournamentWinner}
-    >
+<Button
+  className="mt-4 rounded-2xl font-black"
+  onClick={() => saveActualTournamentWinner(tournamentWinner)}
+  disabled={!tournamentWinner}
+>
+  Save Winner
+</Button>
       Save Winner
     </Button>
   </Card>
