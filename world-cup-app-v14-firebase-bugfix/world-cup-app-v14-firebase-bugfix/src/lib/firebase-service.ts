@@ -25,7 +25,22 @@ export function subscribeUserSingleMatchPrediction(
   cb: (prediction: MatchPrediction | null) => void
 ): Unsubscribe {
   const id = `${userId}_${type}_${matchId}`
+export function subscribeActualTournamentWinner(
+  cb: (teamId: string) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, "appSettings", "tournament"),
+    (snap) => {
+      if (!snap.exists()) {
+        cb("")
+        return
+      }
 
+      const data = snap.data() as any
+      cb(data.actualTournamentWinner || "")
+    }
+  )
+}
   return onSnapshot(doc(db, 'predictions', id), (snap) => {
     if (!snap.exists()) {
       cb(null)
@@ -71,6 +86,22 @@ export function subscribeTournamentWinner(
       if (!snap.exists()) return
       const data = snap.data() as any
       cb(data.teamId || "")
+    }
+  )
+}
+export function subscribeActualTournamentWinner(
+  cb: (teamId: string) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, "appSettings", "tournament"),
+    (snap) => {
+      if (!snap.exists()) {
+        cb("")
+        return
+      }
+
+      const data = snap.data() as any
+      cb(data.actualTournamentWinner || "")
     }
   )
 }
