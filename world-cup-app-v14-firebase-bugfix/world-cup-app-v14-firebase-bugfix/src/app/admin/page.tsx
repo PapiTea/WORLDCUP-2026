@@ -48,6 +48,7 @@ const [koWinnerSide, setKoWinnerSide] = useState<Record<string, "home" | "away" 
   const [slots, setSlots] = useState<SlotMap>({})
   const [saved, setSaved] = useState(false)
   const [adminMessage, setAdminMessage] = useState("")
+  const [tournamentWinner, setTournamentWinner] = useState("")
 const [openAdminSection, setOpenAdminSection] = useState<"groups" | "qualifiers" | "overview" | "knockout">("knockout")
   useEffect(() => {
     if (!isAdmin) return
