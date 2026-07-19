@@ -21,6 +21,7 @@ import {
   saveLeaderboardSnapshot,
   subscribeLeaderboardSnapshot,
   subscribeKnockoutSetup,
+  subscribeActualTournamentWinner,
   type League,
   type MatchPrediction,
   type UserDoc,
@@ -38,6 +39,7 @@ const selectedLeagueId = searchParams.get("league")
   const [myLeagueIds, setMyLeagueIds] = useState<string[]>([])
   const [leagueMap, setLeagueMap] = useState<Record<string, League>>({})
   const [knockoutSlots, setKnockoutSlots] = useState<Record<string, string>>({})
+  const [actualTournamentWinner, setActualTournamentWinner] = useState("")
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [selectedSection, setSelectedSection] = useState<"picks" | "groups" | "knockout" | "winner">("picks")
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
@@ -114,6 +116,13 @@ useEffect(() => {
 
   return () => unsub()
 }, [])
+  useEffect(() => {
+  const unsub = subscribeActualTournamentWinner((teamId) => {
+    setActualTournamentWinner(teamId)
+  })
+
+  return () => unsub()
+}, [])
   const winnerPicksByUser = useMemo(() => {
     const out: Record<string, string> = {}
 
@@ -182,13 +191,14 @@ useEffect(() => {
     return Object.entries(byUser)
       .map(([userId, data]) => ({
         userId,
-        score: calculateScoreFromData({
-          ...data,
-          results: groupResults,
-          knockoutResults,
-          qualifiers,
-          tournamentWinnerPick: winnerPicksByUser[userId],
-        }),
+score: calculateScoreFromData({
+  ...data,
+  results: groupResults,
+  knockoutResults,
+  qualifiers,
+  tournamentWinnerPick: winnerPicksByUser[userId],
+  actualTournamentWinner,
+}),
         profile: users[userId],
       }))
       .sort((a, b) => b.score.total - a.score.total)
