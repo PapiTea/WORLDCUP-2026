@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, setDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, where, type Unsubscribe } from 'firebase/firestore'
+import { collection, deleteDoc, doc, setDoc, getDocs, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
 import { db } from './firebase'
 import type { UserProfile } from './profile'
 
