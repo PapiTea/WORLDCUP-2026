@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs, onSnapshot, query, serverTimestamp, setDoc, where, type Unsubscribe } from 'firebase/firestore'
+import { collection, deleteDoc, doc, setDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, where, type Unsubscribe } from 'firebase/firestore'
 import { db } from './firebase'
 import type { UserProfile } from './profile'
 
@@ -152,7 +152,15 @@ export function subscribeKnockoutSetup(cb: (setup: { qualifiers: Record<string, 
     cb({ qualifiers, slots })
   })
 }
-
+export async function saveTournamentWinner(teamId: string) {
+  await setDoc(
+    doc(db, "appSettings", "tournament"),
+    {
+      actualTournamentWinner: teamId,
+    },
+    { merge: true }
+  )
+}
 export async function createLeague(name: string, ownerId: string) {
   const code = Math.random().toString(36).slice(2, 8).toUpperCase()
   const league: League = { id: code, code, name, ownerId, createdAt: serverTimestamp() }
